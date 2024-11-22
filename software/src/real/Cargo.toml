@@ -1,0 +1,22 @@
+[package]
+name = "blink"
+version = "0.1.0"
+authors = ["Dylan McKay <me@dylanmckay.io>"]
+edition = '2021'
+
+[dependencies]
+abstract-app = { path = "../abstract" }
+
+[profile.dev]
+panic ="abort"
+lto = true
+
+[profile.release]
+panic ="abort"
+lto = true
+
+[profile.test]
+panic ="abort"
+opt-level = 'z'
+lto = true
+strip = true

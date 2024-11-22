@@ -1,0 +1,4 @@
+{
+  "mesonbuild.configureOnOpen": false,
+  "rust-analyzer.linkedProjects": ["./src/abstract/Cargo.toml"]
+}

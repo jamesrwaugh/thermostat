@@ -349,32 +349,32 @@
 					(type background)
 				)
 			)
-			(text "B"
-				(at 3.302 -7.62 0)
+			(text "B Heat Valve Heat"
+				(at 10.922 -7.62 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(text "C\n"
-				(at 3.302 -10.16 0)
+			(text "C Common\n"
+				(at 7.112 -10.16 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(text "G"
-				(at 2.54 2.54 0)
+			(text "G (Green) Fan"
+				(at 8.636 2.286 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(text "O"
-				(at 3.302 -5.08 0)
+			(text "O Heat Valve Cool"
+				(at 10.922 -5.08 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -397,8 +397,8 @@
 					)
 				)
 			)
-			(text "W1/E"
-				(at 4.318 0 0)
+			(text "W1/E (White) Heat"
+				(at 10.922 0 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -413,8 +413,8 @@
 					)
 				)
 			)
-			(text "Y1"
-				(at 3.048 5.08 0)
+			(text "Y1 (Yellow) Compressor"
+				(at 13.462 4.826 0)
 				(effects
 					(font
 						(size 1.27 1.27)

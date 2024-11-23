@@ -1,4 +1,7 @@
 {
   "mesonbuild.configureOnOpen": false,
-  "rust-analyzer.linkedProjects": ["./src/abstract/Cargo.toml"]
+  "rust-analyzer.linkedProjects": [
+    "./src/thermo-app-avr/Cargo.toml",
+    "./src/thermo-app/Cargo.toml"
+  ]
 }

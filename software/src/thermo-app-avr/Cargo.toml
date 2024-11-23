@@ -1,22 +1,24 @@
 [package]
-name = "blink"
+name = "thermo-app-avr"
 version = "0.1.0"
 authors = ["Dylan McKay <me@dylanmckay.io>"]
 edition = '2021'
 
+[lib]
+name = "thermoapp"
+crate-type = ["staticlib"]
+
 [dependencies]
-abstract-app = { path = "../abstract" }
+thermo-app = { path = "../thermo-app" }
 
 [profile.dev]
-panic ="abort"
 lto = true
+panic = "abort"
 
 [profile.release]
-panic ="abort"
 lto = true
+panic = "abort"
 
 [profile.test]
-panic ="abort"
-opt-level = 'z'
 lto = true
-strip = true
+panic = "abort"

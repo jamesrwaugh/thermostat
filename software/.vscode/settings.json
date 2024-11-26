@@ -3,5 +3,7 @@
   "rust-analyzer.linkedProjects": [
     "./src/thermo-app-avr/Cargo.toml",
     "./src/thermo-app/Cargo.toml"
-  ]
+  ],
+  "clangd.arguments": ["--compile-commands-dir=builddir"],
+  "testMate.cpp.test.executables": "builddir/**/test-*"
 }

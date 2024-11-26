@@ -5,7 +5,7 @@ James' interest in making a thermostat
 # Start
 
 ```
-meson setup --pkg-config-path /usr/local/lib/pkgconfig --wipe --cross-file avr-cross-compile.txt builddir
+meson setup --build.pkg-config-path /usr/local/lib/pkgconfig --wipe --cross-file avr-cross-compile.txt builddir
 ```
 
 ## Parts

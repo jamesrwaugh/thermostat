@@ -1,3 +1,4 @@
+#include <avr/interrupt.h>
 #include <stdint.h>
 
 extern "C" uint32_t RustAdd2(uint32_t a, uint32_t b);

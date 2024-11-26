@@ -1,3 +1,3 @@
 pub trait IHardware {
-    fn read_temperatore() -> u16;
+    fn read_temperature() -> u16;
 }

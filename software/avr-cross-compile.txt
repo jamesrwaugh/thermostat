@@ -7,14 +7,14 @@ cmake = 'cmake'
 
 [built-in options]
 cpp_args = [
-  '-I/home/james/local/avr/avr/include/',
+  '-I/usr/local/avr/avr/include/',
   '--param=min-pagesize=0',
   '-fno-exceptions',
   '-ffunction-sections',
   '-fdata-sections',
   ]
 c_args = [
-  '-I/home/james/local/avr/avr/include/',
+  '-I/usr/local/avr/avr/include/',
   '--param=min-pagesize=0',
   '-fno-exceptions',
   '-ffunction-sections',

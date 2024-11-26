@@ -1,9 +1,22 @@
 project(
-    'cpp_rust_integration',
-    [
-        'cpp',
+    'thermostat',
+    'cpp',
+    'c',
+    version: '0.5',
+    default_options: [
+        'cpp_std=c++20',
+        'warning_level=1',
+        'buildtype=minsize',
+        'optimization=s',
     ],
 )
 
-# Subdirectories
+add_project_arguments(['-Wno-c++20-compat'], language: ['cpp'])
+
+assert(
+    meson.is_cross_build(),
+    'AVR projects can only be built in a cross build environment.',
+)
+
 subdir('src/main')
+subdir('src/simulation')

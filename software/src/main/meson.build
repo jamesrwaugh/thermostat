@@ -1,4 +1,4 @@
-src = files(
+main_src = files(
     'main.cpp',
 )
 
@@ -11,16 +11,16 @@ thermo_app_dep = declare_dependency(
     ],
 )
 
-# /home/james/Desktop/Git/squaredel/thermostat/software/src/thermo-app-avr/target/avr-atmega88/release/libthermo_app_avr.rlib
-# /home/james/Desktop/Git/squaredel/thermostat/software/src/thermo-app-avr/target/avr-atmega88/release/libthermo_app_avr.rlib
-
 executable(
     'thermo-firmware',
-    src,
+    main_src,
     pie: false,
     dependencies: [thermo_app_dep],
     include_directories: [],
-    cpp_args: ['-DETL_NO_STL'],
+    cpp_args: [
+        '-DETL_NO_STL',
+        '-mmcu=atmega88p',
+    ],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
         '-mmcu=atmega88p',

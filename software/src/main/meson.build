@@ -11,9 +11,23 @@ thermo_app_dep = declare_dependency(
     ],
 )
 
+gen_thermo_h = custom_target(
+    'gen-thermo-c-bindings',
+    output: ['thermo.h'],
+    command: [
+        cbindgen,
+        meson.project_source_root() + '/src/thermo-app',
+        '--lang', 'c',
+        '-o', '@OUTPUT0@',
+    ],
+    depends: [build_thermo_rs],
+    build_always_stale: true,
+)
+
 executable(
     'thermo-firmware',
     main_src,
+    gen_thermo_h,
     pie: false,
     dependencies: [thermo_app_dep],
     include_directories: [],

@@ -1,9 +1,14 @@
 #include <avr/interrupt.h>
 #include <stdint.h>
 
-extern "C" uint32_t RustAdd2(uint32_t a, uint32_t b);
+extern "C" {
+#include "thermo.h"
+}
 
 int main() {
-  // Hello
-  return RustAdd2(1, 2);
+  State s;
+  ThermoInit(&s);
+  uint8_t set = ThermoGetSetPoint(&s);
+  ThermoSetSetPoint(&s, 87);
+  return set;
 }

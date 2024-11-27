@@ -18,5 +18,9 @@ assert(
     'AVR projects can only be built in a cross build environment.',
 )
 
+cbindgen = find_program('cbindgen')
+cargo = find_program('cargo')
+
+subdir('src/thermo-app-avr')
 subdir('src/main')
 subdir('src/simulation')

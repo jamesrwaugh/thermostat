@@ -6,9 +6,13 @@ extern "C" {
 }
 
 int main() {
-  State s;
-  ThermoInit(&s);
+  CHardwareDrivers d;
+  d.read_temp_c_function = nullptr;
+
+  CState s;
+  ThermoInit(&s, &d);
   uint8_t set = ThermoGetSetPoint(&s);
   ThermoSetSetPoint(&s, 87);
+
   return set;
 }

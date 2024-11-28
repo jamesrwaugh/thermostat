@@ -16,8 +16,9 @@ gen_thermo_h = custom_target(
     output: ['thermo.h'],
     command: [
         cbindgen,
-        meson.project_source_root() + '/src/thermo-app',
+        meson.project_source_root() + '/src/thermo-app-avr',
         '--lang', 'c',
+        '--parse-dependencies',
         '-o', '@OUTPUT0@',
     ],
     depends: [build_thermo_rs],

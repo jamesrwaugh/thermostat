@@ -480,7 +480,7 @@
         "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.3,
+        "track_width": 0.4,
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
@@ -490,7 +490,12 @@
       "version": 3
     },
     "net_colors": null,
-    "netclass_assignments": null,
+    "netclass_assignments": {
+      "Net-(J1-Pin_3)": "Power",
+      "Net-(J1-Pin_4)": "Power",
+      "Net-(J1-Pin_5)": "Power",
+      "Net-(J1-Pin_7)": "Power"
+    },
     "netclass_patterns": [
       {
         "netclass": "Power",
@@ -507,6 +512,10 @@
       {
         "netclass": "Power",
         "pattern": "24VDC"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/Compressor"
       }
     ]
   },

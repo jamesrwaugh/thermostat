@@ -4,47 +4,38 @@ use statig::{
     Response::{self, Super, Transition},
 };
 
+use crate::hardware::IHardware;
+
 #[derive(Default)]
-pub struct Blinky;
+pub struct Blinky {}
 
 pub enum Event {
+    SecondPassed,
     TimerElapsed,
     ButtonPressed,
 }
 
-#[state_machine(initial = "State::led_on()")]
-impl Blinky {
-    #[state(superstate = "blinking")]
-    fn led_on(event: &Event) -> Response<State> {
-        match event {
-            Event::TimerElapsed => Transition(State::led_off()),
-            _ => Super,
-        }
-    }
+struct BlinkyContext<'hw> {
+    hw: &'hw dyn IHardware,
+}
 
-    #[state(superstate = "blinking", entry_action = "enter_led_on")]
-    fn led_off(event: &Event) -> Response<State> {
-        match event {
-            Event::TimerElapsed => Transition(State::led_on()),
-            _ => Super,
-        }
-    }
-
+#[state_machine(initial = "State::idle()")]
+impl<'hw> Blinky {
     #[action]
-    fn enter_led_on() {
+    fn enter_idle() {
         // Hey
     }
 
-    #[superstate]
-    fn blinking(event: &Event) -> Response<State> {
+    #[state(entry_action = "enter_idle")]
+    fn idle(&self, context: &BlinkyContext, event: &Event) -> Response<State> {
         match event {
-            Event::ButtonPressed => Transition(State::not_blinking()),
+            Event::ButtonPressed => Transition(State::led_on()),
             _ => Super,
         }
     }
 
     #[state]
-    fn not_blinking(event: &Event) -> Response<State> {
+    fn active(event: &Event) -> Response<State> {
         match event {
             Event::ButtonPressed => Transition(State::led_on()),
             _ => Super,

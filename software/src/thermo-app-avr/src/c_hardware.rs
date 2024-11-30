@@ -23,4 +23,12 @@ impl<'a> IHardware for CHardware<'a> {
     fn screen_write_temperature(&self, temp: u8) {
         todo!()
     }
+
+    fn relay_on(&self, e: thermo_app::hardware::Relay) {
+        todo!()
+    }
+
+    fn relay_off(&self, e: thermo_app::hardware::Relay) {
+        todo!()
+    }
 }

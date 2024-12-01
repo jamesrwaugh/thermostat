@@ -21,14 +21,16 @@ pub struct ThermoContext {
 #[repr(C)]
 pub struct Thermostat {
     pub set_point: u8,
+    pub hw: *const dyn IHardware,
     pub mode: HeatSetting,
     pub last_reported_temp: u8,
 }
 
 impl Thermostat {
-    pub fn new() -> Self {
+    pub fn new(hw2: &(impl IHardware + 'static)) -> Self {
         Self {
             set_point: 80,
+            hw: core::ptr::from_ref(hw2),
             mode: HeatSetting::Cooling,
             last_reported_temp: 0,
         }

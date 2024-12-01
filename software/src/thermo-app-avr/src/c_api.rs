@@ -24,14 +24,14 @@ impl<'a> CState<'a> {
 }
 
 #[no_mangle]
-pub extern "C" fn ThermoInit(state: *mut CState, drivers: *mut CHardwareDrivers) {
-    unsafe { MACHINE = Some(Thermostat::new().state_machine()) };
-    // unsafe {
-    //     if let Some(drivers) = drivers.as_mut() {
-    //         let obj = state.as_mut().unwrap();
-    //         *obj = CState::new(drivers);
-    //     }
-    // }
+pub extern "C" fn ThermoInit(state: *mut CState, drivers: &CHardwareDrivers) {
+    unsafe { MACHINE = Some(Thermostat::new(drivers).state_machine()) };
+    unsafe {
+        if let Some(drivers) = drivers.as_mut() {
+            let obj = state.as_mut().unwrap();
+            *obj = CState::new(drivers);
+        }
+    }
 }
 
 #[no_mangle]
@@ -56,7 +56,7 @@ pub extern "C" fn ThermoSecondPassed(obj: *mut CState) {
         let board = unsafe { &mut MACHINE };
 
         if let Some(ref mut e) = board {
-            e.handle(&Event::SecondPassed);
+            e.handle_with_context(&Event::SecondPassed, hw);
         }
     }
 }

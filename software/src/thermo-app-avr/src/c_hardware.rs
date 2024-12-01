@@ -31,4 +31,24 @@ impl<'a> IHardware for CHardware<'a> {
     fn relay_off(&self, e: thermo_app::hardware::Relay) {
         todo!()
     }
+
+    fn screen_write_setpoint(&self, set_point: u8) {
+        todo!()
+    }
+
+    fn report_idle(&self) {
+        todo!()
+    }
+
+    fn report_cooling(&self) {
+        todo!()
+    }
+
+    fn report_heating(&self) {
+        todo!()
+    }
+
+    fn report_temperature(&self, new_temp: u8) {
+        todo!()
+    }
 }

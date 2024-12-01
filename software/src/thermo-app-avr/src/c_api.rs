@@ -1,17 +1,19 @@
-use thermo_app::engine::State;
+use thermo_app::engine::Thermostat;
 
 use crate::c_hardware::{CHardware, CHardwareDrivers};
 
 #[repr(C)] // Ensure the struct has a C-compatible layout.
 pub struct CState<'a> {
-    pub state: State,
+    pub state: u8,
+    pub thermostat: Thermostat,
     pub driver: &'a CHardwareDrivers,
 }
 
 impl<'a> CState<'a> {
     pub fn new(drivers: &'a CHardwareDrivers) -> Self {
         Self {
-            state: State::new(),
+            state: 0,
+            thermostat: Thermostat::new(),
             driver: drivers,
         }
     }
@@ -30,7 +32,7 @@ pub extern "C" fn ThermoInit(state: *mut CState, drivers: *mut CHardwareDrivers)
 #[no_mangle]
 pub extern "C" fn ThermoGetSetPoint(obj: *mut CState) -> u8 {
     if let Some(obj) = unsafe { obj.as_mut() } {
-        obj.state.set_point
+        0
     } else {
         0
     }
@@ -38,9 +40,7 @@ pub extern "C" fn ThermoGetSetPoint(obj: *mut CState) -> u8 {
 
 #[no_mangle]
 pub extern "C" fn ThermoSetSetPoint(obj: *mut CState, set_point: u8) {
-    if let Some(obj) = unsafe { obj.as_mut() } {
-        obj.state.set_point = set_point;
-    }
+    if let Some(obj) = unsafe { obj.as_mut() } {}
 }
 
 #[no_mangle]

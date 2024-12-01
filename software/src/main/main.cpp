@@ -12,7 +12,7 @@ int main() {
   CState s;
   ThermoInit(&s, &d);
   uint8_t set = ThermoGetSetPoint(&s);
-  ThermoSetSetPoint(&s, 87);
+  ThermoSecondPassed(&s);
 
   return set;
 }

@@ -1,3 +1,5 @@
+use core::ptr;
+
 use crate::hardware::{IHardware, Relay};
 
 use statig::{
@@ -12,10 +14,13 @@ pub enum HeatSetting {
     Cooling,
 }
 
+pub struct ThermoContext {
+    pub hw: *mut dyn IHardware,
+}
+
 #[repr(C)]
 pub struct Thermostat {
     pub set_point: u8,
-    pub hw: *mut dyn IHardware,
     pub mode: HeatSetting,
     pub last_reported_temp: u8,
 }
@@ -25,7 +30,6 @@ impl Thermostat {
         Self {
             set_point: 80,
             mode: HeatSetting::Cooling,
-            hw: core::ptr::null_mut(),
             last_reported_temp: 0,
         }
     }
@@ -56,7 +60,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; //self.get_hw().read_temperature();
                 if temp > self.set_point && self.mode == HeatSetting::Heating {
                     Transition(State::heating(0))
                 } else {
@@ -65,7 +69,7 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(true);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 if temp < self.set_point && self.mode == HeatSetting::Cooling {
                     Transition(State::cooling(0))
                 } else {
@@ -73,7 +77,7 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp > self.set_point && self.mode == HeatSetting::Cooling {
                     *ambient_change_count += 1;
@@ -103,13 +107,13 @@ impl Thermostat {
             self.set_point - 1
         };
 
-        self.get_hw().screen_write_setpoint(self.set_point);
+        // self.get_hw().screen_write_setpoint(self.set_point);
     }
 
     #[action]
     fn idle_enter(&self) {
         self.relays_off();
-        self.get_hw().report_idle();
+        // self.get_hw().report_idle();
     }
 
     #[state(entry_action = "cooling_enter", exit_action = "cooling_exit")]
@@ -117,7 +121,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; //self.get_hw().read_temperature();
                 if temp >= self.set_point {
                     Transition(State::idle(0))
                 } else {
@@ -126,7 +130,7 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(false);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 if temp <= self.set_point {
                     Handled
                 } else {
@@ -134,7 +138,7 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp == self.set_point {
                     *equal_count += 1;
@@ -158,10 +162,10 @@ impl Thermostat {
 
     #[action]
     fn cooling_enter(&self) {
-        let hw = self.get_hw();
-        hw.relay_on(Relay::Compressor);
-        hw.relay_on(Relay::Fan);
-        hw.report_cooling();
+        // let hw = self.get_hw();
+        // hw.relay_on(Relay::Compressor);
+        // hw.relay_on(Relay::Fan);
+        // hw.report_cooling();
     }
 
     #[action]
@@ -174,7 +178,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 if temp >= self.set_point {
                     Handled
                 } else {
@@ -183,7 +187,7 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(false);
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 if temp <= self.set_point {
                     Transition(State::idle(0))
                 } else {
@@ -191,7 +195,7 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = self.get_hw().read_temperature();
+                let temp = 0; // self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp == self.set_point {
                     *equal_count += 1;
@@ -216,35 +220,40 @@ impl Thermostat {
     #[action]
     fn heating_enter(&self) {
         self.relays_off();
-        self.get_hw().report_heating();
+        // self.get_hw().report_heating();
     }
 
     #[action]
     fn heating_exit(&self) {}
 
     fn relays_off(&self) {
-        let hw = self.get_hw();
-        hw.relay_off(Relay::Compressor);
-        hw.relay_off(Relay::Heat);
-        hw.relay_off(Relay::ReversingValve);
-        hw.relay_off(Relay::Fan);
+        // let hw = self.get_hw();
+        // hw.relay_off(Relay::Compressor);
+        // hw.relay_off(Relay::Heat);
+        // hw.relay_off(Relay::ReversingValve);
+        // hw.relay_off(Relay::Fan);
     }
 
     fn check_report_temp(&mut self, new_temp: u8) {
         if new_temp != self.last_reported_temp {
-            self.get_hw().report_temperature(new_temp);
+            // self.get_hw().report_temperature(new_temp);
             self.last_reported_temp = new_temp;
         }
     }
 
-    fn get_hw(&self) -> &dyn IHardware {
-        let a = 0;
-        return unsafe { self.hw.as_ref() }.unwrap();
-    }
+    // fn get_hw(&self) -> &dyn IHardware {
+    //     let a = 0;
+    //     return unsafe { self.hw.as_ref() }.unwrap();
+    // }
 }
 
-#[derive(Default)]
-struct FakeHw;
+pub struct FakeHw;
+
+impl FakeHw {
+    pub const fn new() -> Self {
+        Self {}
+    }
+}
 
 impl IHardware for FakeHw {
     fn read_temperature(&self) -> u8 {

@@ -11,6 +11,7 @@ test = false
 bench = false
 
 [dependencies]
+statig = "0.3.0"
 thermo-app = { path = "../thermo-app" }
 
 [profile.dev]

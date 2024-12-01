@@ -1,19 +1,23 @@
-use thermo_app::engine::Thermostat;
+use statig::prelude::{IntoStateMachineExt, StateMachine};
+use thermo_app::{
+    engine::{Event, FakeHw, Thermostat},
+    hardware::IHardware,
+};
 
 use crate::c_hardware::{CHardware, CHardwareDrivers};
 
 #[repr(C)] // Ensure the struct has a C-compatible layout.
 pub struct CState<'a> {
     pub state: u8,
-    pub thermostat: Thermostat,
     pub driver: &'a CHardwareDrivers,
 }
+
+static mut MACHINE: Option<StateMachine<Thermostat>> = None;
 
 impl<'a> CState<'a> {
     pub fn new(drivers: &'a CHardwareDrivers) -> Self {
         Self {
             state: 0,
-            thermostat: Thermostat::new(),
             driver: drivers,
         }
     }
@@ -21,12 +25,13 @@ impl<'a> CState<'a> {
 
 #[no_mangle]
 pub extern "C" fn ThermoInit(state: *mut CState, drivers: *mut CHardwareDrivers) {
-    unsafe {
-        if let Some(drivers) = drivers.as_mut() {
-            let obj = state.as_mut().unwrap();
-            *obj = CState::new(drivers);
-        }
-    }
+    unsafe { MACHINE = Some(Thermostat::new().state_machine()) };
+    // unsafe {
+    //     if let Some(drivers) = drivers.as_mut() {
+    //         let obj = state.as_mut().unwrap();
+    //         *obj = CState::new(drivers);
+    //     }
+    // }
 }
 
 #[no_mangle]
@@ -39,7 +44,7 @@ pub extern "C" fn ThermoGetSetPoint(obj: *mut CState) -> u8 {
 }
 
 #[no_mangle]
-pub extern "C" fn ThermoSetSetPoint(obj: *mut CState, set_point: u8) {
+pub extern "C" fn ThermoUpButtonPressed(obj: *mut CState) {
     if let Some(obj) = unsafe { obj.as_mut() } {}
 }
 
@@ -47,6 +52,11 @@ pub extern "C" fn ThermoSetSetPoint(obj: *mut CState, set_point: u8) {
 pub extern "C" fn ThermoSecondPassed(obj: *mut CState) {
     if let Some(obj) = unsafe { obj.as_mut() } {
         let hw = CHardware::new(&obj.driver);
-        obj.state.on_second_passed(&hw)
+
+        let board = unsafe { &mut MACHINE };
+
+        if let Some(ref mut e) = board {
+            e.handle(&Event::SecondPassed);
+        }
     }
 }

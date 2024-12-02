@@ -5,19 +5,23 @@ pub struct CHardwareDrivers {
     pub read_temp_c_function: extern "C" fn() -> u8,
 }
 
-pub struct CHardware<'a> {
-    pub c: &'a CHardwareDrivers,
+pub struct CHardware {
+    pub c: *const CHardwareDrivers,
 }
 
-impl<'a> CHardware<'a> {
-    pub fn new(hw: &'a CHardwareDrivers) -> Self {
+impl CHardware {
+    pub fn new(hw: *const CHardwareDrivers) -> Self {
         Self { c: hw }
+    }
+
+    fn get_hw(&self) -> &CHardwareDrivers {
+        return unsafe { self.c.as_ref() }.unwrap();
     }
 }
 
-impl<'a> IHardware for CHardware<'a> {
+impl IHardware for CHardware {
     fn read_temperature(&self) -> u8 {
-        (self.c.read_temp_c_function)()
+        (self.get_hw().read_temp_c_function)()
     }
 
     fn screen_write_temperature(&self, temp: u8) {

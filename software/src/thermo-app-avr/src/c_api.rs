@@ -1,62 +1,38 @@
 use statig::prelude::{IntoStateMachineExt, StateMachine};
-use thermo_app::{
-    engine::{Event, FakeHw, Thermostat},
-    hardware::IHardware,
-};
+use thermo_app::engine::{Event, Thermostat};
 
 use crate::c_hardware::{CHardware, CHardwareDrivers};
 
-#[repr(C)] // Ensure the struct has a C-compatible layout.
-pub struct CState<'a> {
-    pub state: u8,
-    pub driver: &'a CHardwareDrivers,
-}
-
 static mut MACHINE: Option<StateMachine<Thermostat>> = None;
-
-impl<'a> CState<'a> {
-    pub fn new(drivers: &'a CHardwareDrivers) -> Self {
-        Self {
-            state: 0,
-            driver: drivers,
-        }
-    }
-}
+static mut DRIVERS: Option<CHardware> = None;
 
 #[no_mangle]
-pub extern "C" fn ThermoInit(state: *mut CState, drivers: &CHardwareDrivers) {
-    unsafe { MACHINE = Some(Thermostat::new(drivers).state_machine()) };
+pub extern "C" fn ThermoInit(drivers: *const CHardwareDrivers) {
     unsafe {
-        if let Some(drivers) = drivers.as_mut() {
-            let obj = state.as_mut().unwrap();
-            *obj = CState::new(drivers);
-        }
+        DRIVERS = Some(CHardware::new(drivers));
     }
+    unsafe { MACHINE = Some(Thermostat::new(DRIVERS.as_ref().unwrap()).state_machine()) };
 }
 
 #[no_mangle]
-pub extern "C" fn ThermoGetSetPoint(obj: *mut CState) -> u8 {
-    if let Some(obj) = unsafe { obj.as_mut() } {
-        0
+pub extern "C" fn ThermoGetSetPoint() -> u8 {
+    if let Some(o) = unsafe { MACHINE.as_mut() } {
+        o.set_point
     } else {
         0
     }
 }
 
 #[no_mangle]
-pub extern "C" fn ThermoUpButtonPressed(obj: *mut CState) {
-    if let Some(obj) = unsafe { obj.as_mut() } {}
+pub extern "C" fn ThermoUpButtonPressed() {
+    if let Some(o) = unsafe { MACHINE.as_mut() } {
+        o.handle(&Event::UpButtonPressed)
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn ThermoSecondPassed(obj: *mut CState) {
-    if let Some(obj) = unsafe { obj.as_mut() } {
-        let hw = CHardware::new(&obj.driver);
-
-        let board = unsafe { &mut MACHINE };
-
-        if let Some(ref mut e) = board {
-            e.handle_with_context(&Event::SecondPassed, hw);
-        }
+pub extern "C" fn ThermoSecondPassed() {
+    if let Some(o) = unsafe { MACHINE.as_mut() } {
+        o.handle(&Event::SecondPassed);
     }
 }

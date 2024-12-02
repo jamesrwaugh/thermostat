@@ -44,16 +44,16 @@ pub enum Event {
     SecondPassed,
 }
 
-// Idle:
-// - If cooling and too hot for some time, go to active
-// - If hot and too cold  for some time, go to active
-// Active:
-// - Turn on fan
-// - Activate proper relays and go to setpoint
-// - If close to setpoint for some time,
-//   - Wait for a bit, then go to idle.
-// - If changed to opposite mode:
-//   - Do nothing... we should get out of Active in a little bit
+//  Idle:
+//  - If cooling and too hot for some time, go to active
+//  - If hot and too cold  for some time, go to active
+//  Active:
+//  - Turn on fan
+//  - Activate proper relays and go to setpoint
+//  - If close to setpoint for some time,
+//    - Wait for a bit, then go to idle.
+//  - If changed to opposite mode:
+//    - Do nothing... we should get out of Active in a little bit
 
 #[state_machine(initial = "State::idle(0)")]
 impl Thermostat {
@@ -62,7 +62,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = 0; //self.get_hw().read_temperature();
+                let temp = self.get_hw().read_temperature();
                 if temp > self.set_point && self.mode == HeatSetting::Heating {
                     Transition(State::heating(0))
                 } else {
@@ -71,7 +71,7 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(true);
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = self.get_hw().read_temperature();
                 if temp < self.set_point && self.mode == HeatSetting::Cooling {
                     Transition(State::cooling(0))
                 } else {
@@ -79,7 +79,7 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp > self.set_point && self.mode == HeatSetting::Cooling {
                     *ambient_change_count += 1;
@@ -109,13 +109,13 @@ impl Thermostat {
             self.set_point - 1
         };
 
-        // self.get_hw().screen_write_setpoint(self.set_point);
+        self.get_hw().screen_write_setpoint(self.set_point);
     }
 
     #[action]
     fn idle_enter(&self) {
         self.relays_off();
-        // self.get_hw().report_idle();
+        self.get_hw().report_idle();
     }
 
     #[state(entry_action = "cooling_enter", exit_action = "cooling_exit")]
@@ -123,7 +123,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = 0; //self.get_hw().read_temperature();
+                let temp = self.get_hw().read_temperature();
                 if temp >= self.set_point {
                     Transition(State::idle(0))
                 } else {
@@ -132,7 +132,8 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(false);
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = 0;
+                self.get_hw().read_temperature();
                 if temp <= self.set_point {
                     Handled
                 } else {
@@ -140,7 +141,8 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = 0;
+                self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp == self.set_point {
                     *equal_count += 1;
@@ -164,10 +166,10 @@ impl Thermostat {
 
     #[action]
     fn cooling_enter(&self) {
-        // let hw = self.get_hw();
-        // hw.relay_on(Relay::Compressor);
-        // hw.relay_on(Relay::Fan);
-        // hw.report_cooling();
+        let hw = self.get_hw();
+        hw.relay_on(Relay::Compressor);
+        hw.relay_on(Relay::Fan);
+        hw.report_cooling();
     }
 
     #[action]
@@ -180,7 +182,7 @@ impl Thermostat {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = self.get_hw().read_temperature();
                 if temp >= self.set_point {
                     Handled
                 } else {
@@ -189,7 +191,8 @@ impl Thermostat {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(false);
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = 0;
+                self.get_hw().read_temperature();
                 if temp <= self.set_point {
                     Transition(State::idle(0))
                 } else {
@@ -197,7 +200,8 @@ impl Thermostat {
                 }
             }
             Event::SecondPassed => {
-                let temp = 0; // self.get_hw().read_temperature();
+                let temp = 0;
+                self.get_hw().read_temperature();
                 self.check_report_temp(temp);
                 if temp == self.set_point {
                     *equal_count += 1;
@@ -222,31 +226,30 @@ impl Thermostat {
     #[action]
     fn heating_enter(&self) {
         self.relays_off();
-        // self.get_hw().report_heating();
+        self.get_hw().report_heating();
     }
 
     #[action]
     fn heating_exit(&self) {}
 
     fn relays_off(&self) {
-        // let hw = self.get_hw();
-        // hw.relay_off(Relay::Compressor);
-        // hw.relay_off(Relay::Heat);
-        // hw.relay_off(Relay::ReversingValve);
-        // hw.relay_off(Relay::Fan);
+        let hw = self.get_hw();
+        hw.relay_off(Relay::Compressor);
+        hw.relay_off(Relay::Heat);
+        hw.relay_off(Relay::ReversingValve);
+        hw.relay_off(Relay::Fan);
     }
 
     fn check_report_temp(&mut self, new_temp: u8) {
         if new_temp != self.last_reported_temp {
-            // self.get_hw().report_temperature(new_temp);
+            self.get_hw().report_temperature(new_temp);
             self.last_reported_temp = new_temp;
         }
     }
 
-    // fn get_hw(&self) -> &dyn IHardware {
-    //     let a = 0;
-    //     return unsafe { self.hw.as_ref() }.unwrap();
-    // }
+    fn get_hw(&self) -> &dyn IHardware {
+        return unsafe { self.hw.as_ref() }.unwrap();
+    }
 }
 
 pub struct FakeHw;
@@ -295,8 +298,4 @@ impl IHardware for FakeHw {
     }
 }
 
-fn main() {
-    // let h = FakeHw::default();
-    // let raw_ptr: *const dyn IHardware = &h;
-    // let mut state_machine = Blinky { hw: raw_ptr }.state_machine();
-}
+fn main() {}

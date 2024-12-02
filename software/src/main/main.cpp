@@ -9,10 +9,10 @@ int main() {
   CHardwareDrivers d;
   d.read_temp_c_function = nullptr;
 
-  CState s;
-  ThermoInit(&s, &d);
-  uint8_t set = ThermoGetSetPoint(&s);
-  ThermoSecondPassed(&s);
+  ThermoInit(&d);
+  uint8_t set = ThermoGetSetPoint();
+  ThermoUpButtonPressed();
+  ThermoSecondPassed();
 
   return set;
 }

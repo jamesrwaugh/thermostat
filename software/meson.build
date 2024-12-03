@@ -11,6 +11,15 @@ project(
     ],
 )
 
+add_project_arguments(
+    [
+        '-mmcu=atmega88p',
+        '-DF_CPU=7372800',
+        '-Wimplicit-fallthrough',
+    ],
+    language: ['cpp', 'c'],
+)
+
 add_project_arguments(['-Wno-c++20-compat'], language: ['cpp'])
 
 assert(

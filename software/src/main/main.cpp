@@ -66,7 +66,7 @@ void setup() {
   ds3231_handle_t ds;
   memset(&ds, 0, sizeof(ds));
   ds.iic_init = iic_init_dummy;
-  ds.iic_deinit = iic_init;
+  ds.iic_deinit = iic_init_dummy;
   ds.iic_write = iic_write;
   ds.iic_read = iic_read;
   ds.debug_print = debug_print;
@@ -84,6 +84,7 @@ void setup() {
   vfd.GU7000_init();
 
   tmp116_init();
+  tmp116_read_temp();
 }
 
 int main() {

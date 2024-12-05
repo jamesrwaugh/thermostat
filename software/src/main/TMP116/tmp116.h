@@ -4,4 +4,4 @@
 
 void tmp116_init();
 
-uint16_t temp116_read_temp();
+uint16_t tmp116_read_temp();

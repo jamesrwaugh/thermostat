@@ -7,6 +7,8 @@ constexpr uint8_t TMP_IIC_ADDR = 0x90;
 constexpr uint8_t TMP_IIC_PTR_TEMP = 0x00;
 constexpr uint8_t TMP_IIC_PTR_CFG = 0x01;
 constexpr uint32_t TEMP_RESOLUTION_INT = 78125; // 0.0078125×10^7
+constexpr uint64_t START = 10'000'000;
+constexpr uint64_t END = 100'000'000'000'000;
 
 void tmp116_init() {
   uint8_t start_data[] = {TMP_IIC_ADDR, TMP_IIC_PTR_CFG};
@@ -19,7 +21,7 @@ void tmp116_init() {
   tw_master_transmit(TMP_IIC_ADDR, cfg_data, sizeof(cfg_data), false);
 }
 
-uint16_t temp116_read_temp() {
+uint16_t tmp116_read_temp() {
   uint8_t start_data[] = {TMP_IIC_ADDR, TMP_IIC_PTR_TEMP};
   tw_master_transmit(TMP_IIC_ADDR, start_data, sizeof(start_data), true);
 
@@ -32,9 +34,9 @@ uint16_t temp116_read_temp() {
     return 0;
   }
 
-  temp *= 10e7;
+  temp *= START;
   temp *= TEMP_RESOLUTION_INT;
-  temp /= 10e14;
+  temp /= END;
 
   return temp;
 }

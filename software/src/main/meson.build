@@ -1,5 +1,7 @@
 main_src = files(
     'main.cpp',
+    'rtc_interface.cpp',
+    'screen_interface.cpp',
 )
 
 thermo_app_dep = declare_dependency(
@@ -39,19 +41,13 @@ drivers_include = include_directories(
     'TMP116',
 )
 
-etl_dep = dependency(
-    'etl',
-    method: 'cmake',
-    modules: ['etl::etl'],
-)
-
 executable(
     'thermo-firmware',
     main_src,
     drivers_src,
     gen_thermo_h,
     pie: false,
-    dependencies: [thermo_app_dep, etl_dep],
+    dependencies: [thermo_app_dep],
     include_directories: [drivers_include],
     cpp_args: ['-DETL_NO_STL'],
     link_args: [

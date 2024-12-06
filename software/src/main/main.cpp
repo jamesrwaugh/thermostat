@@ -1,8 +1,7 @@
-#include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <driver_ds3231.h>
-#include <etl/optional.h>
+#include <rtc_interface.hpp>
+#include <screen_interface.hpp>
 #include <stdint.h>
 #include <tmp116.h>
 #include <twi_master.h>
@@ -11,42 +10,6 @@
 extern "C" {
 #include "thermo.h"
 }
-
-uint8_t dummy() {
-  // We init IIC elsewhere, just pass this to the DS3231 to do nothing.
-  return 0;
-}
-
-uint8_t iic_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
-  uint8_t err = 0;
-  err |= tw_master_transmit_one(addr, reg, true);
-  err |= tw_master_transmit(addr, buf, len, false);
-  return !(err == SUCCESS);
-}
-
-uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
-  uint8_t err = 0;
-  err |= tw_master_transmit_one(addr, reg, true);
-  err |= tw_master_receive(addr, buf, len);
-  return !(err == SUCCESS);
-}
-
-void debug_print(const char *const fmt, ...) {}
-
-void receive_callback(uint8_t type) {}
-
-void delay_ms(uint32_t ms) {}
-
-void initPort() {}
-
-void writePort(const uint8_t data, const uint8_t busyPin) {
-  while (PINB & _BV(PINB1)) {
-    ;
-  }
-  tw_write(data);
-}
-
-void hardReset() {}
 
 void setup_i2c() {
   // set no pullups for SDA / SCL
@@ -80,44 +43,39 @@ void setup_pins() {
   // -> Input
   DDRB &= ~_BV(DDB1);
   PORTB &= ~_BV(PORTB1);
+
+  // Relays
+  DDRB |= _BV(DDB2);
+  PORTB &= ~_BV(PORTB2);
+  DDRC |= _BV(DDC0) | _BV(DDC1) | _BV(DDC2);
+  PORTC &= ~_BV(PORTC0);
+  PORTC &= ~_BV(PORTC1);
+  PORTC &= ~_BV(PORTC2);
 }
 
 void setup_interrupts() {
   // 11: rtc int
   PCMSK1 |= _BV(PCINT11);
 
+  // 23/22: fan
+  // 21/20: cooling
   // 19: up, 18: down,
-  PCMSK2 |= _BV(PCINT19) | _BV(PCINT18);
-
-  // cooling on / mid / off
-  // heating on / mid/ off
-  // TODO
+  PCMSK2 |= _BV(PCINT23) | _BV(PCINT22) | _BV(PCINT21) | _BV(PCINT20) |
+            _BV(PCINT19) | _BV(PCINT18);
 
   PCICR |= _BV(PCIE1) | _BV(PCIE2);
+
+  sei();
 }
 
-void setup_screen(Noritake_VFD_GU7000 &s) {
-  //
-  s.GU7000_init();
-}
+enum class NewHeatingModeE : uint8_t {
+  None = 0,
+  Cooling,
+  Heating,
+};
 
-uint8_t setup_rtc(ds3231_handle_t &ds) {
-  memset(&ds, 0, sizeof(ds));
-  ds.iic_init = dummy;
-  ds.iic_deinit = dummy;
-  ds.iic_write = iic_write;
-  ds.iic_read = iic_read;
-  ds.debug_print = debug_print;
-  ds.receive_callback = receive_callback;
-  ds.delay_ms = delay_ms;
-
-  int res = ds3231_init(&ds);
-  res |= ds3231_set_square_wave(&ds, ds3231_bool_t::DS3231_BOOL_TRUE);
-
-  return res;
-}
-
-enum class FanStateE : uint8_t {
+enum class NewFanStateE : uint8_t {
+  None = 0,
   Off,
   On,
 };
@@ -126,9 +84,8 @@ enum class FanStateE : uint8_t {
 volatile bool UpButtonPressedFlag = false;
 volatile bool DownButtonPressedFlag = false;
 volatile bool RtcSecondPassed = false;
-volatile bool CoolingSelected = false;
-volatile bool HeatingSelected = false;
-volatile etl::optional<FanStateE> FanStateChangedFlag = etl::nullopt;
+volatile NewHeatingModeE NewHeatingModeFlag = NewHeatingModeE::None;
+volatile NewFanStateE FanStateChangedFlag = NewFanStateE::None;
 
 int main() {
   Noritake_VFD_GU7000 vfd(13);
@@ -185,6 +142,22 @@ ISR(PCINT2_vect) {
 
   if (FallingEdge(gLastPinD, pin, PIND3)) {
     UpButtonPressedFlag = true;
+  }
+
+  if (FallingEdge(gLastPinD, pin, PIND4)) {
+    NewHeatingModeFlag = NewHeatingModeE::Cooling;
+  }
+
+  if (FallingEdge(gLastPinD, pin, PIND5)) {
+    NewHeatingModeFlag = NewHeatingModeE::Heating;
+  }
+
+  if (FallingEdge(gLastPinD, pin, PIND6)) {
+    FanStateChangedFlag = NewFanStateE::Off;
+  }
+
+  if (FallingEdge(gLastPinD, pin, PIND7)) {
+    FanStateChangedFlag = NewFanStateE::On;
   }
 
   gLastPinD = pin;

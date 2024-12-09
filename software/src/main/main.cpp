@@ -1,11 +1,9 @@
+#include "Serial/HardwareSerial.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <rtc_interface.hpp>
 #include <screen_interface.hpp>
-#include <stdint.h>
 #include <tmp116.h>
-#include <twi_master.h>
-#include <util/delay.h>
 
 extern "C" {
 #include "thermo.h"
@@ -87,6 +85,13 @@ volatile bool RtcSecondPassed = false;
 volatile NewHeatingModeE NewHeatingModeFlag = NewHeatingModeE::None;
 volatile NewFanStateE FanStateChangedFlag = NewFanStateE::None;
 
+static uint8_t rs_read_temp() {
+  //
+  return tmp116_read_temp();
+}
+
+void setup_timer() { TCCR1A = 2; }
+
 int main() {
   Noritake_VFD_GU7000 vfd(13);
   ds3231_handle_t ds;
@@ -99,13 +104,28 @@ int main() {
 
   tmp116_read_temp();
 
-  CHardwareDrivers d;
-  d.read_temp_c_function = nullptr;
+  CHardwareDrivers rs;
+  memset(&rs, 0, sizeof(rs));
+  rs.read_temp_c_function = rs_read_temp;
 
-  ThermoInit(&d);
+  ThermoInit(&rs);
+
+  Serial.begin(9600);
+  Serial.println("Hello world");
+
+  while (1) {
+    if (RtcSecondPassed) {
+      RtcSecondPassed = 0;
+      ThermoSecondPassed();
+    }
+
+    if (NewHeatingModeFlag != NewHeatingModeE::None) {
+      NewHeatingModeFlag = NewHeatingModeE::None;
+    }
+  }
+
   uint8_t set = ThermoGetSetPoint();
   ThermoUpButtonPressed();
-  ThermoSecondPassed();
 
   return set;
 }

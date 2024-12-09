@@ -13,7 +13,11 @@ executable(
     'thermo-simulation',
     simulation_src,
     native: true,
-    dependencies: [simavr_dep, ftxui_dep],
+    dependencies: [
+        simavr_dep,
+        ftxui_dep,
+        simavr_toolbox_dep,
+    ],
     include_directories: [],
     override_options: [
         'buildtype=debug',

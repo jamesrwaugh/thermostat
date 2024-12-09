@@ -1,4 +1,7 @@
 main_src = files(
+    'Serial/HardwareSerial.cpp',
+    'Serial/HardwareSerial0.cpp',
+    'Serial/Print.cpp',
     'main.cpp',
     'rtc_interface.cpp',
     'screen_interface.cpp',
@@ -49,7 +52,9 @@ executable(
     pie: false,
     dependencies: [thermo_app_dep],
     include_directories: [drivers_include],
-    cpp_args: ['-DETL_NO_STL'],
+    cpp_args: [
+        '-DETL_NO_STL',
+    ],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
         '-mmcu=atmega88p',

@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <simavr-toolbox/sim_base.hpp>
 #include <simavr/avr_uart.h>
 #include <simavr/sim_avr.h>
 #include <simavr/sim_elf.h>
@@ -8,14 +9,12 @@
 #include <string>
 #include <string_view>
 
-void debug_log(const char *fmt, ...) {
-  va_list args1;
-  va_start(args1, fmt);
+void sim_debug_log(const char *fmt, va_list args) {
   va_list args2;
-  va_copy(args2, args1);
+  va_copy(args2, args);
 
-  int len = 1 + vsnprintf(NULL, 0, fmt, args1);
-  va_end(args1);
+  int len = 1 + vsnprintf(NULL, 0, fmt, args);
+  va_end(args);
 
   std::string message(len, 0);
   vsnprintf(message.data(), message.length(), fmt, args2);
@@ -28,16 +27,16 @@ avr_t *LoadFirmware(std::string_view filename, bool gdb) {
   elf_firmware_t f;
   memset(&f, 0, sizeof(f));
 
-  debug_log("Firmware pathname is %s\n", filename.data());
+  sim_debug_log("Firmware pathname is %s\n", filename.data());
   elf_read_firmware(filename.data(), &f);
 
-  debug_log("firmware %s f=%d mmcu=%s\n", filename.data(), (int)f.frequency,
-            f.mmcu);
+  sim_debug_log("firmware %s f=%d mmcu=%s\n", filename.data(), (int)f.frequency,
+                f.mmcu);
 
   avr = avr_make_mcu_by_name(f.mmcu);
 
   if (!avr) {
-    debug_log("AVR '%s' not known\n", f.mmcu);
+    sim_debug_log("AVR '%s' not known\n", f.mmcu);
     std::abort();
   }
 
@@ -60,4 +59,7 @@ avr_t *LoadFirmware(std::string_view filename, bool gdb) {
   return avr;
 }
 
-int main() { return 0; }
+int main() {
+  set_sim_debug_log(sim_debug_log);
+  return 0;
+}

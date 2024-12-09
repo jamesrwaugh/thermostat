@@ -25,7 +25,10 @@ void debug_print(const char *const fmt, ...) {}
 
 void receive_callback(uint8_t type) {}
 
-void delay_ms(uint32_t ms) {}
+void delay_ms(uint32_t ms) {
+  // Only used for reading temp, which we do not do, so get out of jail free
+  // card.
+}
 
 uint8_t setup_rtc(ds3231_handle_t &ds) {
   memset(&ds, 0, sizeof(ds));

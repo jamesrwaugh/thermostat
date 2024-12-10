@@ -44,13 +44,19 @@ drivers_include = include_directories(
     'TMP116',
 )
 
+etl_dep = dependency(
+    'etl',
+    method: 'cmake',
+    modules: ['etl::etl'],
+)
+
 executable(
     'thermo-firmware',
     main_src,
     drivers_src,
     gen_thermo_h,
     pie: false,
-    dependencies: [thermo_app_dep],
+    dependencies: [thermo_app_dep, etl_dep],
     include_directories: [drivers_include],
     cpp_args: [
         '-DETL_NO_STL',

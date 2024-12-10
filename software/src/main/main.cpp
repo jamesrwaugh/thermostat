@@ -1,6 +1,7 @@
 #include "Serial/HardwareSerial.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <etl/debounce.h>
 #include <rtc_interface.hpp>
 #include <screen_interface.hpp>
 #include <tmp116.h>
@@ -32,11 +33,6 @@ void setup_pins() {
   DDRD &= ~_BV(DDD7);
   PORTD |= _BV(PORTD2) | _BV(PORTD3) | _BV(PORTD6) | _BV(PORTD7);
 
-  // RTC INT
-  // -> Input (no pullup, there is an external one)
-  DDRC &= ~_BV(DDC3);
-  PORTC &= ~_BV(PORTC3);
-
   // Screen Busy
   // -> Input
   DDRB &= ~_BV(DDB1);
@@ -52,38 +48,12 @@ void setup_pins() {
 }
 
 void setup_interrupts() {
-  // 11: rtc int
-  PCMSK1 |= _BV(PCINT11);
-
-  // 23/22: fan
-  // 21/20: cooling
-  // 19: up, 18: down,
-  PCMSK2 |= _BV(PCINT23) | _BV(PCINT22) | _BV(PCINT21) | _BV(PCINT20) |
-            _BV(PCINT19) | _BV(PCINT18);
-
-  PCICR |= _BV(PCIE1) | _BV(PCIE2);
-
+  // For approx-second-timer for temp conversion
   sei();
 }
 
-enum class NewHeatingModeE : uint8_t {
-  None = 0,
-  Cooling,
-  Heating,
-};
-
-enum class NewFanStateE : uint8_t {
-  None = 0,
-  Off,
-  On,
-};
-
-// Remember to read initial conditions of these
-volatile bool UpButtonPressedFlag = false;
-volatile bool DownButtonPressedFlag = false;
 volatile bool RtcSecondPassed = false;
-volatile NewHeatingModeE NewHeatingModeFlag = NewHeatingModeE::None;
-volatile NewFanStateE FanStateChangedFlag = NewFanStateE::None;
+volatile bool RtcHalfSecondPassed = false;
 
 static uint8_t rs_read_temp() {
   //
@@ -91,6 +61,59 @@ static uint8_t rs_read_temp() {
 }
 
 void setup_timer() { TCCR1A = 2; }
+
+void read_input() {
+  // https://www.etlcpp.com/debounce.html
+  const int BTN_DEBOUNCE_COUNT = 50;
+  const int BTN_HOLD_COUNT = 1000;
+  const int BTN_REPEAT_COUNT = 200;
+  typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
+      BtnDebounce;
+
+  const int TEMP_DEBOUNCE_COUNT = 50;
+  const int TEMP_HOLD_COUNT = 1000;
+  const int TEMP_REPEAT_COUNT = 200;
+  typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
+      TmpDebounce;
+
+  static BtnDebounce upButton;
+  static BtnDebounce downButton;
+  static BtnDebounce fanOnOff;
+  static TmpDebounce tempCoolOn;
+  static TmpDebounce tempHeatOn;
+  static TmpDebounce tempNone;
+
+  uint8_t pind = PIND;
+
+  if (upButton.add(pind & PIND3) && upButton.is_set()) {
+    ThermoUpButtonPressed();
+  }
+
+  if (downButton.add(pind & PIND2) && downButton.is_set()) {
+    // ThermoDownButtonPressed();
+  }
+
+  if (fanOnOff.add(pind & PIND6)) {
+    if (fanOnOff.is_set()) {
+      // Fan on
+    } else {
+      // Fan off
+    }
+  }
+
+  if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_set()) {
+    // Heat on
+  }
+
+  if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_set()) {
+    // Cooling on
+  }
+
+  if (tempNone.add(!tempCoolOn.is_set() && !tempHeatOn.is_set() &&
+                   tempNone.is_held())) {
+    // Neither heat nor cooling on
+  }
+}
 
 int main() {
   Noritake_VFD_GU7000 vfd(13);
@@ -119,66 +142,10 @@ int main() {
       ThermoSecondPassed();
     }
 
-    if (NewHeatingModeFlag != NewHeatingModeE::None) {
-      NewHeatingModeFlag = NewHeatingModeE::None;
+    if (RtcHalfSecondPassed) {
+      read_input();
     }
   }
 
-  uint8_t set = ThermoGetSetPoint();
-  ThermoUpButtonPressed();
-
-  return set;
-}
-
-// PD2 PCINT18: Down
-// PD3 PCINT19: UP
-volatile uint8_t gLastPinD = 0;
-volatile uint8_t gLastPinC = 0;
-
-inline bool FallingEdge(uint8_t oldPin, uint8_t newPinReg, uint8_t pinIndex) {
-  return ((oldPin & _BV(pinIndex)) != 0) && ((newPinReg & _BV(pinIndex)) == 0);
-}
-
-inline bool RisingEdge(uint8_t oldPin, uint8_t newPin, uint8_t pin) {
-  return ((oldPin & _BV(pin)) == 0) && ((newPin & _BV(pin)) != 0);
-}
-
-ISR(PCINT1_vect) {
-  uint8_t pin = PINC;
-
-  if (FallingEdge(gLastPinC, pin, PINC3)) {
-    RtcSecondPassed = true;
-  }
-
-  gLastPinC = pin;
-}
-
-ISR(PCINT2_vect) {
-  uint8_t pin = PIND;
-
-  if (FallingEdge(gLastPinD, pin, PIND2)) {
-    DownButtonPressedFlag = true;
-  }
-
-  if (FallingEdge(gLastPinD, pin, PIND3)) {
-    UpButtonPressedFlag = true;
-  }
-
-  if (FallingEdge(gLastPinD, pin, PIND4)) {
-    NewHeatingModeFlag = NewHeatingModeE::Cooling;
-  }
-
-  if (FallingEdge(gLastPinD, pin, PIND5)) {
-    NewHeatingModeFlag = NewHeatingModeE::Heating;
-  }
-
-  if (FallingEdge(gLastPinD, pin, PIND6)) {
-    FanStateChangedFlag = NewFanStateE::Off;
-  }
-
-  if (FallingEdge(gLastPinD, pin, PIND7)) {
-    FanStateChangedFlag = NewFanStateE::On;
-  }
-
-  gLastPinD = pin;
+  return 0;
 }

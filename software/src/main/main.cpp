@@ -1,6 +1,7 @@
 #include "Serial/HardwareSerial.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <avr/sleep.h>
 #include <etl/debounce.h>
 #include <rtc_interface.hpp>
 #include <screen_interface.hpp>
@@ -38,7 +39,7 @@ void setup_pins() {
   DDRB &= ~_BV(DDB1);
   PORTB &= ~_BV(PORTB1);
 
-  // Relays
+  // Relay putput pins, outputs
   DDRB |= _BV(DDB2);
   PORTB &= ~_BV(PORTB2);
   DDRC |= _BV(DDC0) | _BV(DDC1) | _BV(DDC2);
@@ -47,35 +48,46 @@ void setup_pins() {
   PORTC &= ~_BV(PORTC2);
 }
 
-void setup_interrupts() {
-  // For approx-second-timer for temp conversion
-  sei();
-}
-
-volatile bool RtcSecondPassed = false;
-volatile bool RtcHalfSecondPassed = false;
-
 static uint8_t rs_read_temp() {
   //
   return tmp116_read_temp();
 }
 
-void setup_timer() { TCCR1A = 2; }
+void setup_timer() {
+  // prescaler clk / 1024
+  TCCR1A |= _BV(CS12);
+  TCCR1A &= ~_BV(CS11);
+  TCCR1A |= _BV(CS10);
+
+  // CTC mode on OCR1, to stop at that value
+  // WGM1[3:0] = 0100 = 4
+  TCCR1B &= ~_BV(WGM13);
+  TCCR1B |= _BV(WGM12);
+  TCCR1A &= ~_BV(WGM11);
+  TCCR1A &= ~_BV(WGM10);
+
+  // Set OCR1, approx ~10ms per overflow
+  constexpr uint16_t top = 72;
+  OCR1A = top;
+
+  // Interrupt on compare A match
+  TIMSK1 |= _BV(OCIE1A);
+}
+
+// https://www.etlcpp.com/debounce.html
+const int BTN_DEBOUNCE_COUNT = 5;
+const int BTN_HOLD_COUNT = 50;
+const int BTN_REPEAT_COUNT = 200;
+typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
+    BtnDebounce;
+
+const int TEMP_DEBOUNCE_COUNT = 200;
+const int TEMP_HOLD_COUNT = 1000;
+const int TEMP_REPEAT_COUNT = 2000;
+typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
+    TmpDebounce;
 
 void read_input() {
-  // https://www.etlcpp.com/debounce.html
-  const int BTN_DEBOUNCE_COUNT = 50;
-  const int BTN_HOLD_COUNT = 1000;
-  const int BTN_REPEAT_COUNT = 200;
-  typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
-      BtnDebounce;
-
-  const int TEMP_DEBOUNCE_COUNT = 50;
-  const int TEMP_HOLD_COUNT = 1000;
-  const int TEMP_REPEAT_COUNT = 200;
-  typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
-      TmpDebounce;
-
   static BtnDebounce upButton;
   static BtnDebounce downButton;
   static BtnDebounce fanOnOff;
@@ -115,15 +127,18 @@ void read_input() {
   }
 }
 
+volatile bool TimerWakeUp = false;
+
 int main() {
   Noritake_VFD_GU7000 vfd(13);
   ds3231_handle_t ds;
 
-  setup_interrupts();
+  setup_timer();
   setup_i2c();
   tmp116_init();
   setup_screen(vfd);
   setup_rtc(ds);
+  sei();
 
   tmp116_read_temp();
 
@@ -136,16 +151,27 @@ int main() {
   Serial.begin(9600);
   Serial.println("Hello world");
 
+  uint8_t tenMsCount = 0;
+
   while (1) {
-    if (RtcSecondPassed) {
-      RtcSecondPassed = 0;
-      ThermoSecondPassed();
+    if (TimerWakeUp) {
+      TimerWakeUp = false;
+      tenMsCount += 1;
+      read_input();
+
+      if (tenMsCount >= 100) {
+        tenMsCount = 0;
+        ThermoSecondPassed();
+      }
     }
 
-    if (RtcHalfSecondPassed) {
-      read_input();
-    }
+    sleep_cpu();
   }
 
   return 0;
+}
+
+ISR(TIMER1_COMPA_vect) {
+  //
+  TimerWakeUp = true;
 }

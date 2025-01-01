@@ -1,0 +1,83 @@
+/*
+
+Idle:
+Up pressed
+=> Update setpoint and display
+=> If tmp > setpoint, move to heating if set on heating
+Down pressed
+=> Update setpoint and display
+=> If tmp < setpoint, move to cooling if set on cooling
+Second passed
+=> If tmp > setpoint and cooling, check for 5 sec, then cool
+=> Ditto for heating
+
+Cooling
+On second passed
+=> If setpoint equal for 5 sec, back to idle
+Mode changed
+=> If other mode, bac to idle
+Down button
+=> Update setpoint, if temp < setpoint, nothing. If >=, back to idle
+Up button
+=> Update setpoint, if temp > setpoint, idle
+
+Heating
+On second passed
+=> If setpoint equal for 5 sec, back to idle
+Mode changed
+=> If other mode, bac to idle
+Dow button button
+=> Update setpoint, if temp <= setpoint, back to idle
+Up button pressed
+=> Update setpoint, if temp <= setpoint, back to idle
+
+
+*/
+
+#include <etl/fsm.h>
+
+namespace State {
+enum : etl::fsm_state_id_t { Idle, Cooling, Heating };
+}
+
+namespace Event {
+enum Type : etl::fsm_state_id_t {
+  EUpButtonPressed,
+  DownButtonPressed,
+  SecondPassed,
+  CoolingSelected,
+  HeatingSelected,
+};
+
+class UpButtonPressed : public etl::message<Event::Type::EUpButtonPressed> {};
+
+} // namespace Event
+
+struct IHardware {
+public:
+  virtual uint8_t GetCurrentTemperature() = 0;
+};
+
+class ThermostatFsm : public etl::fsm {
+public:
+  ThermostatFsm(IHardware &hw) : fsm(0), Hardware_(hw) {}
+  uint8_t SetPoint_{0};
+  IHardware &Hardware_;
+};
+
+class Idle
+    : etl::fsm_state<ThermostatFsm, Idle, State::Idle, Event::UpButtonPressed> {
+public:
+  etl::fsm_state_id_t on_enter_state() override { return No_State_Change; }
+
+  void on_exit_state() override {}
+
+  etl::fsm_state_id_t on_event(const Event::UpButtonPressed &event) {
+    auto &b = get_fsm_context();
+    b.SetPoint_ += 1;
+  }
+
+  etl::fsm_state_id_t on_event_unknown(const etl::imessage &event) {
+    return No_State_Change;
+  }
+};

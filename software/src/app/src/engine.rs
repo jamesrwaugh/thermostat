@@ -1,6 +1,6 @@
 use core::ptr;
 
-use crate::hardware::{IHardware, Relay};
+use crate::hardware::{IHardware, IHardware2, Relay};
 
 use statig::{
     state_machine,
@@ -14,23 +14,19 @@ pub enum HeatSetting {
     Cooling,
 }
 
-pub struct ThermoContext {
-    pub hw: *mut dyn IHardware,
-}
-
 #[repr(C)]
-pub struct Thermostat {
+pub struct Thermostat<'a> {
     pub set_point: u8,
-    pub hw: *const dyn IHardware,
+    pub hw: &'a IHardware2,
     pub mode: HeatSetting,
     pub last_reported_temp: u8,
 }
 
-impl Thermostat {
-    pub fn new(hw2: &(impl IHardware + 'static)) -> Self {
+impl<'a> Thermostat<'a> {
+    pub fn new(hw2: &'a IHardware2) -> Self {
         Self {
             set_point: 80,
-            hw: core::ptr::from_ref(hw2),
+            hw: hw2,
             mode: HeatSetting::Cooling,
             last_reported_temp: 0,
         }
@@ -56,7 +52,7 @@ pub enum Event {
 //    - Do nothing... we should get out of Active in a little bit
 
 #[state_machine(initial = "State::idle(0)")]
-impl Thermostat {
+impl<'a> Thermostat<'a> {
     #[state(entry_action = "idle_enter")]
     fn idle(&mut self, ambient_change_count: &mut u8, event: &Event) -> Response<State> {
         match event {
@@ -142,7 +138,7 @@ impl Thermostat {
             }
             Event::SecondPassed => {
                 let temp = 0;
-                self.get_hw().read_temperature();
+                (self.get_hw().read_temperature)();
                 self.check_report_temp(temp);
                 if temp == self.set_point {
                     *equal_count += 1;
@@ -179,48 +175,7 @@ impl Thermostat {
 
     #[state(entry_action = "heating_enter", exit_action = "heating_exit")]
     fn heating(&mut self, equal_count: &mut u8, event: &Event) -> Response<State> {
-        match event {
-            Event::UpButtonPressed => {
-                self.update_setpoint(true);
-                let temp = self.get_hw().read_temperature();
-                if temp >= self.set_point {
-                    Handled
-                } else {
-                    Transition(State::idle(0))
-                }
-            }
-            Event::DownButtonPressed => {
-                self.update_setpoint(false);
-                let temp = 0;
-                self.get_hw().read_temperature();
-                if temp <= self.set_point {
-                    Transition(State::idle(0))
-                } else {
-                    Handled
-                }
-            }
-            Event::SecondPassed => {
-                let temp = 0;
-                self.get_hw().read_temperature();
-                self.check_report_temp(temp);
-                if temp == self.set_point {
-                    *equal_count += 1;
-                    if *equal_count >= 5 {
-                        return Transition(State::idle(0));
-                    }
-                }
-                Handled
-            }
-            Event::CoolingModeChanged(e) => {
-                self.mode = e.clone();
-                if self.mode == HeatSetting::Cooling {
-                    Transition(State::idle(0))
-                } else {
-                    Handled
-                }
-            }
-            _ => Super,
-        }
+        self.handle_event_heating(event)
     }
 
     #[action]
@@ -247,54 +202,8 @@ impl Thermostat {
         }
     }
 
-    fn get_hw(&self) -> &dyn IHardware {
-        return unsafe { self.hw.as_ref() }.unwrap();
-    }
-}
-
-pub struct FakeHw;
-
-impl FakeHw {
-    pub const fn new() -> Self {
-        Self {}
-    }
-}
-
-impl IHardware for FakeHw {
-    fn read_temperature(&self) -> u8 {
-        todo!()
-    }
-
-    fn screen_write_temperature(&self, temp: u8) {
-        todo!()
-    }
-
-    fn relay_on(&self, e: crate::hardware::Relay) {
-        todo!()
-    }
-
-    fn relay_off(&self, e: crate::hardware::Relay) {
-        todo!()
-    }
-
-    fn screen_write_setpoint(&self, set_point: u8) {
-        todo!()
-    }
-
-    fn report_cooling(&self) {
-        todo!()
-    }
-
-    fn report_heating(&self) {
-        todo!()
-    }
-
-    fn report_idle(&self) {
-        todo!()
-    }
-
-    fn report_temperature(&self, new_temp: u8) {
-        todo!()
+    fn get_hw(&self) -> &IHardware2 {
+        return &self.hw;
     }
 }
 

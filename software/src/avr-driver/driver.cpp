@@ -1,17 +1,21 @@
+#include "driver.hpp"
 #include "Serial/HardwareSerial.h"
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <avr/sleep.h>
+#include "driver_rs_wrapper.hpp"
 #include <etl/debounce.h>
-#include <rtc_interface.hpp>
-#include <screen_interface.hpp>
-#include <tmp116.h>
+#include <twi_master.h>
 
-extern "C" {
-#include "thermo.h"
+AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks)
+    : Screen(19), Serial_(Serial), Callbacks_(callbacks) {}
+
+void AvrDrivers::Setup() {
+  SetupPins();
+  SetupI2C();
+  SetupTimer();
+  SetupRTC();
+  SetupScreen();
 }
 
-void setup_i2c() {
+void AvrDrivers::SetupI2C() {
   // set no pullups for SDA / SCL
   DDRC &= ~_BV(PC1);
   DDRC &= ~_BV(PC0);
@@ -25,7 +29,7 @@ void setup_i2c() {
   TWBR = ((F_CPU / 50000) - 16) / 2;
 }
 
-void setup_pins() {
+void AvrDrivers::SetupPins() {
   // Up button, down button, cooling, heating
   // -> Input pullup
   DDRD &= ~_BV(DDD2);
@@ -48,12 +52,23 @@ void setup_pins() {
   PORTC &= ~_BV(PORTC2);
 }
 
-static uint8_t rs_read_temp() {
-  //
-  return tmp116_read_temp();
+void initPort() {}
+
+void writePort(const uint8_t data, const uint8_t busyPin) {
+  while (PINB & _BV(PINB1)) {
+    ;
+  }
+  tw_write(data);
 }
 
-void setup_timer() {
+void hardReset() {}
+
+void AvrDrivers::SetupScreen() {
+  //
+  Screen.GU7000_init();
+}
+
+void AvrDrivers::SetupTimer() {
   // prescaler clk / 1024
   TCCR1A |= _BV(CS12);
   TCCR1A &= ~_BV(CS11);
@@ -74,6 +89,50 @@ void setup_timer() {
   TIMSK1 |= _BV(OCIE1A);
 }
 
+uint8_t dummy() {
+  // We init IIC elsewhere, just pass this to the DS3231 to do nothing.
+  return 0;
+}
+
+uint8_t iic_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+  uint8_t err = 0;
+  err |= tw_master_transmit_one(addr, reg, true);
+  err |= tw_master_transmit(addr, buf, len, false);
+  return !(err == SUCCESS);
+}
+
+uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+  uint8_t err = 0;
+  err |= tw_master_transmit_one(addr, reg, true);
+  err |= tw_master_receive(addr, buf, len);
+  return !(err == SUCCESS);
+}
+
+void debug_print(const char *const fmt, ...) {}
+
+void receive_callback(uint8_t type) {}
+
+void delay_ms(uint32_t ms) {
+  // Only used for reading temp, which we do not do, so get out of jail free
+  // card.
+}
+
+uint8_t AvrDrivers::SetupRTC() {
+  memset(&Rtc, 0, sizeof(Rtc));
+  Rtc.iic_init = dummy;
+  Rtc.iic_deinit = dummy;
+  Rtc.iic_write = iic_write;
+  Rtc.iic_read = iic_read;
+  Rtc.debug_print = debug_print;
+  Rtc.receive_callback = receive_callback;
+  Rtc.delay_ms = delay_ms;
+
+  int res = ds3231_init(&Rtc);
+  res |= ds3231_set_square_wave(&Rtc, ds3231_bool_t::DS3231_BOOL_TRUE);
+
+  return res;
+}
+
 // https://www.etlcpp.com/debounce.html
 const int BTN_DEBOUNCE_COUNT = 5;
 const int BTN_HOLD_COUNT = 50;
@@ -87,7 +146,7 @@ const int TEMP_REPEAT_COUNT = 2000;
 typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
     TmpDebounce;
 
-void read_input() {
+void AvrDrivers::ReadInput() {
   static BtnDebounce upButton;
   static BtnDebounce downButton;
   static BtnDebounce fanOnOff;
@@ -98,7 +157,7 @@ void read_input() {
   uint8_t pind = PIND;
 
   if (upButton.add(pind & PIND3) && upButton.is_set()) {
-    ThermoUpButtonPressed();
+    // ThermoUpButtonPressed();
   }
 
   if (downButton.add(pind & PIND2) && downButton.is_set()) {
@@ -115,6 +174,7 @@ void read_input() {
 
   if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_set()) {
     // Heat on
+    Callbacks_.OnButtonPressed(Button::TempHeat);
   }
 
   if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_set()) {
@@ -125,53 +185,4 @@ void read_input() {
                    tempNone.is_held())) {
     // Neither heat nor cooling on
   }
-}
-
-volatile bool TimerWakeUp = false;
-
-int main() {
-  Noritake_VFD_GU7000 vfd(13);
-  ds3231_handle_t ds;
-
-  setup_timer();
-  setup_i2c();
-  tmp116_init();
-  setup_screen(vfd);
-  setup_rtc(ds);
-  sei();
-
-  tmp116_read_temp();
-
-  CHardwareDrivers rs;
-  memset(&rs, 0, sizeof(rs));
-  rs.read_temp_c_function = rs_read_temp;
-
-  ThermoInit(&rs);
-
-  Serial.begin(9600);
-  Serial.println("Hello world");
-
-  uint8_t tenMsCount = 0;
-
-  while (1) {
-    if (TimerWakeUp) {
-      TimerWakeUp = false;
-      tenMsCount += 1;
-      read_input();
-
-      if (tenMsCount >= 100) {
-        tenMsCount = 0;
-        ThermoSecondPassed();
-      }
-    }
-
-    sleep_cpu();
-  }
-
-  return 0;
-}
-
-ISR(TIMER1_COMPA_vect) {
-  //
-  TimerWakeUp = true;
 }

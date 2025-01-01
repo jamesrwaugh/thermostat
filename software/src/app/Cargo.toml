@@ -1,18 +1,10 @@
 [package]
-name = "thermo-app-avr"
+name = "thermo-app"
 version = "0.1.0"
-authors = ["Dylan McKay <me@dylanmckay.io>"]
 edition = '2021'
-
-[lib]
-name = "thermoapp"
-crate-type = ["staticlib"]
-test = false
-bench = false
 
 [dependencies]
 statig = "0.3.0"
-thermo-app = { path = "../thermo-app" }
 
 [profile.dev]
 lto = true

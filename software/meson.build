@@ -27,12 +27,8 @@ assert(
     'AVR projects can only be built in a cross build environment.',
 )
 
-cbindgen = find_program('cbindgen')
-cargo = find_program('cargo')
-
 toolkit = subproject('simavr-toolbox')
 simavr_toolbox_dep = toolkit.get_variable('simavr_toolbox_dep')
 
-subdir('src/thermo-app-avr')
-subdir('src/main')
+subdir('src/avr-driver')
 subdir('src/simulation')

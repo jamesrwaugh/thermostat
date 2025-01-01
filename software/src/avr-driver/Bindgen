@@ -1,0 +1,1 @@
+bindgen driver.hpp -- -I./GU7000 -I./Serial -I./I2C -I./DS3231/src -I./TMP116 -I/usr/local/avr/avr/include/ -I/lib/gcc/x86_64-linux-gnu/14/include -x c++ --verbose > out.rs

@@ -18,3 +18,8 @@ pub trait IHardware {
     fn report_heating(&self);
     fn report_temperature(&self, new_temp: u8);
 }
+
+#[repr(C)]
+pub struct IHardware2 {
+    pub read_temperature: fn() -> u8,
+}

@@ -14,15 +14,28 @@ enum class Button : uint8_t {
   FanOn,
 };
 
+enum class Relay : uint8_t {
+  Fan,
+  Compressor,
+  Heat,
+  ReversingValve,
+};
+
 struct AvrDriverCallbacks {
   void (*OnButtonPressed)(Button b, void *userData);
-  void (*OnTemperatureRead)(uint8_t degreesC, void *userData);
   void (*OnSerialMessage)(const char *message, uint16_t messageLen,
                           void *userData);
   void (*OnSecondPassed)(void *userData);
 };
 
 void DriverInit(const AvrDriverCallbacks &callbacks, void *userData);
-void DriverWriteScreen(const char *message, uint8_t messageLen);
+void DriverDisplayTemp(uint8_t temp);
+void DriverDisplaySetPoint(uint8_t temp);
+void DriverDisplayIsHeating();
+void DriverDisplayIsCooling();
+uint8_t DriverReadTemp();
+void DriverDisplayIsIdle();
+void DriverRelayOn(Relay r);
+void DriverRelayOff(Relay r);
 void DriverWriteSerialPort(const uint8_t *bytes, uint8_t numBytes);
 }

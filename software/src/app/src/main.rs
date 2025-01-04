@@ -26,8 +26,6 @@ extern "C" fn on_button_pressed(b: Button, user_data: *mut ::core::ffi::c_void) 
     x.handle(&Event::UpButtonPressed);
 }
 
-extern "C" fn on_temperature_read(temp: u8, user_data: *mut ::core::ffi::c_void) {}
-
 extern "C" fn on_serial_message(
     message: *const ::core::ffi::c_char,
     messageLen: u16,
@@ -44,7 +42,6 @@ extern "C" fn on_second_passed(user_data: *mut ::core::ffi::c_void) {
 pub extern "C" fn main() {
     let callbacks = AvrDriverCallbacks {
         OnButtonPressed: Some(on_button_pressed),
-        OnTemperatureRead: Some(on_temperature_read),
         OnSerialMessage: Some(on_serial_message),
         OnSecondPassed: Some(on_second_passed),
     };

@@ -8,14 +8,16 @@ pub const Button_TempNone: Button = 4;
 pub const Button_FanAuto: Button = 5;
 pub const Button_FanOn: Button = 6;
 pub type Button = u8;
+pub const Relay_Fan: Relay = 0;
+pub const Relay_Compressor: Relay = 1;
+pub const Relay_Heat: Relay = 2;
+pub const Relay_ReversingValve: Relay = 3;
+pub type Relay = u8;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct AvrDriverCallbacks {
     pub OnButtonPressed:
         ::core::option::Option<unsafe extern "C" fn(b: Button, userData: *mut ::core::ffi::c_void)>,
-    pub OnTemperatureRead: ::core::option::Option<
-        unsafe extern "C" fn(degreesC: u8, userData: *mut ::core::ffi::c_void),
-    >,
     pub OnSerialMessage: ::core::option::Option<
         unsafe extern "C" fn(
             message: *const ::core::ffi::c_char,
@@ -28,6 +30,13 @@ pub struct AvrDriverCallbacks {
 }
 extern "C" {
     pub fn DriverInit(callbacks: *const AvrDriverCallbacks, userData: *mut ::core::ffi::c_void);
-    pub fn DriverWriteScreen(message: *const ::core::ffi::c_char, messageLen: u8);
+    pub fn DriverDisplayTemp(temp: u8);
+    pub fn DriverDisplaySetPoint(temp: u8);
+    pub fn DriverDisplayIsHeating();
+    pub fn DriverDisplayIsCooling();
+    pub fn DriverReadTemp() -> u8;
+    pub fn DriverDisplayIsIdle();
+    pub fn DriverRelayOn(r: Relay);
+    pub fn DriverRelayOff(r: Relay);
     pub fn DriverWriteSerialPort(bytes: *const u8, numBytes: u8);
 }

@@ -5,14 +5,12 @@ use statig::{
     Response::{self, Handled, Super, Transition},
 };
 
-#[repr(C)]
 #[derive(PartialEq, Clone)]
 pub enum HeatSetting {
     Heating,
     Cooling,
 }
 
-#[repr(C)]
 pub struct Thermostat<'a> {
     pub set_point: u8,
     pub hw: &'a dyn IHardware,
@@ -117,7 +115,7 @@ impl<'a> Thermostat<'a> {
         match event {
             Event::UpButtonPressed => {
                 self.update_setpoint(true);
-                if self.last_reported_temp >= self.set_point {
+                if self.hw.read_temperature() >= self.set_point {
                     Transition(State::idle(0))
                 } else {
                     Handled
@@ -125,14 +123,14 @@ impl<'a> Thermostat<'a> {
             }
             Event::DownButtonPressed => {
                 self.update_setpoint(false);
-                if self.last_reported_temp <= self.set_point {
+                if self.hw.read_temperature() <= self.set_point {
                     Handled
                 } else {
                     Transition(State::idle(0))
                 }
             }
             Event::SecondPassed => {
-                if self.last_reported_temp == self.set_point {
+                if self.hw.read_temperature() == self.set_point {
                     *equal_count += 1;
                     if *equal_count >= 5 {
                         return Transition(State::idle(0));
@@ -167,7 +165,46 @@ impl<'a> Thermostat<'a> {
 
     #[state(entry_action = "heating_enter", exit_action = "heating_exit")]
     fn heating(&mut self, equal_count: &mut u8, event: &Event) -> Response<State> {
-        self.handle_event_heating(event)
+        match event {
+            Event::UpButtonPressed => {
+                self.update_setpoint(true);
+                let temp = self.hw.read_temperature();
+                if temp >= self.set_point {
+                    Handled
+                } else {
+                    Transition(State::idle(0))
+                }
+            }
+            Event::DownButtonPressed => {
+                self.update_setpoint(false);
+                let temp = self.hw.read_temperature();
+                if temp <= self.set_point {
+                    Transition(State::idle(0))
+                } else {
+                    Handled
+                }
+            }
+            Event::SecondPassed => {
+                let temp = self.hw.read_temperature();
+                self.check_report_temp(temp);
+                if temp == self.set_point {
+                    *equal_count += 1;
+                    if *equal_count >= 5 {
+                        return Transition(State::idle(0));
+                    }
+                }
+                Handled
+            }
+            Event::CoolingModeChanged(e) => {
+                self.mode = e.clone();
+                if self.mode == HeatSetting::Cooling {
+                    Transition(State::idle(0))
+                } else {
+                    Handled
+                }
+            }
+            _ => Super,
+        }
     }
 
     #[action]
@@ -193,5 +230,3 @@ impl<'a> Thermostat<'a> {
         }
     }
 }
-
-fn main() {}

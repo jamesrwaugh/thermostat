@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(offset_of)]
 
 mod avr_driver_api;
 mod avr_hardware;
@@ -36,7 +35,10 @@ extern "C" fn on_serial_message(
 ) {
 }
 
-extern "C" fn on_second_passed(user_data: *mut ::core::ffi::c_void) {}
+extern "C" fn on_second_passed(user_data: *mut ::core::ffi::c_void) {
+    let x = get_fsm(user_data);
+    x.handle(&Event::SecondPassed);
+}
 
 #[no_mangle]
 pub extern "C" fn main() {

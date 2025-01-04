@@ -3,6 +3,7 @@ main_src = files(
     'Serial/HardwareSerial0.cpp',
     'Serial/Print.cpp',
     'driver.cpp',
+    'driver_rs_wrapper.cpp',
 )
 
 drivers_src = files(

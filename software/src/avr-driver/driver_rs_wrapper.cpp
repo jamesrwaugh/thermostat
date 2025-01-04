@@ -21,6 +21,10 @@ void DriverDisplayTemp(uint8_t temp) {
   //
 }
 
+void DriverDisplaySetPoint(uint8_t temp) {
+  //
+}
+
 void DriverDisplayIsHeating() {
   //
 }

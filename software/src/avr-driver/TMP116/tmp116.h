@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 class TMP116 {
-public:
+ public:
   void init();
   uint16_t read_temp() const;
 };

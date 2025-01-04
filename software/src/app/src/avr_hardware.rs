@@ -1,8 +1,7 @@
 use crate::{
     avr_driver_api::{
         DriverDisplayIsCooling, DriverDisplayIsHeating, DriverDisplayIsIdle, DriverDisplaySetPoint,
-        DriverDisplayTemp, DriverReadTemp, DriverRelayOn, Relay, Relay_Compressor, Relay_Fan,
-        Relay_Heat, Relay_ReversingValve,
+        DriverDisplayTemp, DriverReadTemp, DriverRelayOff, DriverRelayOn, Relay,
     },
     hardware::{self, IHardware},
 };
@@ -13,10 +12,10 @@ pub struct AvrHardware;
 impl AvrHardware {
     fn hardware_2_avr_relay(&self, r: hardware::Relay) -> Relay {
         match r {
-            crate::hardware::Relay::Fan => Relay_Fan,
-            crate::hardware::Relay::Compressor => Relay_Compressor,
-            crate::hardware::Relay::Heat => Relay_Heat,
-            crate::hardware::Relay::ReversingValve => Relay_ReversingValve,
+            crate::hardware::Relay::Fan => Relay::Fan,
+            crate::hardware::Relay::Compressor => Relay::Compressor,
+            crate::hardware::Relay::Heat => Relay::Heat,
+            crate::hardware::Relay::ReversingValve => Relay::ReversingValve,
         }
     }
 }
@@ -42,7 +41,7 @@ impl IHardware for AvrHardware {
 
     fn relay_off(&self, r: crate::hardware::Relay) {
         unsafe {
-            DriverRelayOn(self.hardware_2_avr_relay(r));
+            DriverRelayOff(self.hardware_2_avr_relay(r));
         }
     }
 

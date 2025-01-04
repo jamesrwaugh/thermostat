@@ -1,8 +1,10 @@
 #include "driver.hpp"
-#include "Serial/HardwareSerial.h"
-#include "driver_rs_wrapper.hpp"
+
 #include <etl/debounce.h>
 #include <twi_master.h>
+
+#include "Serial/HardwareSerial.h"
+#include "driver_rs_wrapper.hpp"
 
 AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData)
     : Screen(19), Serial_(Serial), Callbacks_(callbacks), UserData_{userData} {}

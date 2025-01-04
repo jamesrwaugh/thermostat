@@ -15,7 +15,7 @@ struct AvrDrivers {
 
   void Setup();
 
-private:
+ private:
   const AvrDriverCallbacks &Callbacks_;
   void *UserData_{nullptr};
   void SetupI2C();

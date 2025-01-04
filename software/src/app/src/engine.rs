@@ -7,8 +7,15 @@ use statig::{
 
 #[derive(PartialEq, Clone)]
 pub enum HeatSetting {
+    None,
     Heating,
     Cooling,
+}
+
+#[derive(PartialEq, Clone)]
+pub enum FanSetting {
+    Auto,
+    On,
 }
 
 pub struct Thermostat<'a> {
@@ -33,6 +40,7 @@ pub enum Event {
     UpButtonPressed,
     DownButtonPressed,
     CoolingModeChanged(HeatSetting),
+    FanSettingChanged(FanSetting),
     SecondPassed,
 }
 

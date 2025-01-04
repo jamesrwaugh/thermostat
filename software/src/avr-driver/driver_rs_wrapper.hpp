@@ -1,11 +1,12 @@
-#pragma once
+#ifndef RS_DRIVER_H
+#define RS_DRIVER_H
 
 #include <stdint.h>
 
 extern "C" {
 
 enum class Button : uint8_t {
-  Up,
+  Up = 0,
   Down,
   TempHeat,
   TempCold,
@@ -15,7 +16,7 @@ enum class Button : uint8_t {
 };
 
 enum class Relay : uint8_t {
-  Fan,
+  Fan = 0,
   Compressor,
   Heat,
   ReversingValve,
@@ -39,3 +40,5 @@ void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);
 void DriverWriteSerialPort(const uint8_t *bytes, uint8_t numBytes);
 }
+
+#endif

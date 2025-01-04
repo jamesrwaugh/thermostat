@@ -25,10 +25,36 @@ etl_dep = dependency(
     modules: ['etl::etl'],
 )
 
+bindgen = find_program('bindgen')
+
+gen_rust_bindings = custom_target(
+    'gen-rs-bindings-bindings',
+    output: ['_unused'],
+    command: [
+        bindgen,
+        '--use-core', meson.project_source_root()
+        + '/src/avr-driver/driver_rs_wrapper.hpp',
+        '--merge-extern-blocks',
+        '--rustified-enum', 'Relay',
+        '--rustified-enum', 'Button',
+        '--output', meson.project_source_root() + '/src/app/src/avr_driver_api.rs',
+        # https://github.com/rust-lang/rust-bindgen/issues/2931
+        '--no-layout-tests',
+        # https://github.com/rust-lang/rust-bindgen/issues/3052#issuecomment-2531954670
+        '--rust-target', '1.81.0',
+        '--',
+        '-I/usr/local/avr/avr/include',
+        '-I/lib/gcc/x86_64-linux-gnu/14/include',
+        '-x', 'c++',
+    ],
+    build_always_stale: true,
+)
+
 static_library(
     'thermo-avr-driver',
     main_src,
     drivers_src,
+    gen_rust_bindings,
     pic: false,
     dependencies: [etl_dep],
     include_directories: [drivers_include],

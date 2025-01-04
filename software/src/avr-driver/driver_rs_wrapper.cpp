@@ -1,6 +1,8 @@
 #include "driver_rs_wrapper.hpp"
-#include "driver.hpp"
+
 #include <etl/optional.h>
+
+#include "driver.hpp"
 
 etl::optional<AvrDrivers> gDriver;
 
@@ -28,8 +30,7 @@ void DriverDisplayIsCooling() {
 }
 
 uint8_t DriverReadTemp() {
-  //
-  return 0;
+  return gDriver->TempSensor.read_temp();
 }
 
 void DriverDisplayIsIdle() {

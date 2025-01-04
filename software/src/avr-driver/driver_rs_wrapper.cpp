@@ -6,8 +6,8 @@ etl::optional<AvrDrivers> gDriver;
 
 extern "C" {
 
-void DriverInit(const AvrDriverCallbacks &callbacks) {
-  gDriver.emplace(callbacks);
+void DriverInit(const AvrDriverCallbacks &callbacks, void *userData) {
+  gDriver.emplace(callbacks, userData);
   gDriver->Setup();
 }
 

@@ -6,7 +6,7 @@
 struct AvrDriverCallbacks;
 
 struct AvrDrivers {
-  AvrDrivers(const AvrDriverCallbacks &callbacks);
+  AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData);
 
   Noritake_VFD_GU7000 Screen;
   ds3231_handle_t Rtc;
@@ -17,6 +17,7 @@ struct AvrDrivers {
 
 private:
   const AvrDriverCallbacks &Callbacks_;
+  void *UserData_{nullptr};
   void SetupI2C();
   void SetupPins();
   void SetupScreen();

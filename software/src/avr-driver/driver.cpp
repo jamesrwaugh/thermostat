@@ -4,8 +4,8 @@
 #include <etl/debounce.h>
 #include <twi_master.h>
 
-AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks)
-    : Screen(19), Serial_(Serial), Callbacks_(callbacks) {}
+AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData)
+    : Screen(19), Serial_(Serial), Callbacks_(callbacks), UserData_{userData} {}
 
 void AvrDrivers::Setup() {
   SetupPins();
@@ -157,32 +157,31 @@ void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
   if (upButton.add(pind & PIND3) && upButton.is_set()) {
-    // ThermoUpButtonPressed();
+    Callbacks_.OnButtonPressed(Button::Up, UserData_);
   }
 
   if (downButton.add(pind & PIND2) && downButton.is_set()) {
-    // ThermoDownButtonPressed();
+    Callbacks_.OnButtonPressed(Button::Down, UserData_);
   }
 
   if (fanOnOff.add(pind & PIND6)) {
     if (fanOnOff.is_set()) {
-      // Fan on
+      Callbacks_.OnButtonPressed(Button::FanOn, UserData_);
     } else {
-      // Fan off
+      Callbacks_.OnButtonPressed(Button::FanAuto, UserData_);
     }
   }
 
   if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_set()) {
-    // Heat on
-    Callbacks_.OnButtonPressed(Button::TempHeat);
+    Callbacks_.OnButtonPressed(Button::TempHeat, UserData_);
   }
 
   if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_set()) {
-    // Cooling on
+    Callbacks_.OnButtonPressed(Button::TempCold, UserData_);
   }
 
   if (tempNone.add(!tempCoolOn.is_set() && !tempHeatOn.is_set() &&
                    tempNone.is_held())) {
-    // Neither heat nor cooling on
+    Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
   }
 }

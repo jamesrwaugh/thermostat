@@ -82,4 +82,5 @@ extern "C" {
     pub fn DriverRelayOn(r: Relay);
     pub fn DriverRelayOff(r: Relay);
     pub fn DriverWriteSerialPort(bytes: *const u8, numBytes: u8);
+    pub fn DriverMcuSleep();
 }

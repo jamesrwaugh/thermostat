@@ -1,10 +1,9 @@
 #include "driver_rs_wrapper.hpp"
 
+#include <avr/sleep.h>
 #include <etl/optional.h>
 
 #include "driver.hpp"
-
-etl::optional<AvrDrivers> gDriver;
 
 extern "C" {
 
@@ -47,6 +46,10 @@ void DriverRelayOn(Relay r) {
 
 void DriverRelayOff(Relay r) {
   //
+}
+
+void DriverMcuSleep() {
+  sleep_cpu();
 }
 
 //

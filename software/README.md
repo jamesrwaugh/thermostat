@@ -10,5 +10,11 @@ meson setup --build.pkg-config-path /usr/local/lib/pkgconfig --wipe --cross-file
 
 ## Parts
 
+- Fan Switch (auto and off)
+- 2MS1T1B1M2QES-5
+
+- Heat switch (heat, OFF, cold)
+- 2MS3T1B1M1QES-5
+
 - 5.08mm Pitch Connector
-  - TSW-209-15-G-S
+- TSW-209-15-G-S

@@ -39,6 +39,7 @@ void DriverDisplayIsIdle();
 void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);
 void DriverWriteSerialPort(const uint8_t *bytes, uint8_t numBytes);
+void DriverMcuSleep();
 }
 
 #endif

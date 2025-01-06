@@ -1,10 +1,13 @@
 #include "driver.hpp"
 
+#include <HardwareSerial.h>
+#include <avr/interrupt.h>
 #include <etl/debounce.h>
 #include <twi_master.h>
 
-#include "Serial/HardwareSerial.h"
 #include "driver_rs_wrapper.hpp"
+
+etl::optional<AvrDrivers> gDriver;
 
 AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData)
     : Screen(19), Serial_(Serial), Callbacks_(callbacks), UserData_{userData} {}
@@ -12,9 +15,11 @@ AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData)
 void AvrDrivers::Setup() {
   SetupPins();
   SetupI2C();
-  SetupTimer();
+  SetupInputTimer();
   SetupRTC();
   SetupScreen();
+  SetupSleep();
+  sei();
 }
 
 void AvrDrivers::SetupI2C() {
@@ -70,7 +75,7 @@ void AvrDrivers::SetupScreen() {
   Screen.GU7000_init();
 }
 
-void AvrDrivers::SetupTimer() {
+void AvrDrivers::SetupInputTimer() {
   // prescaler clk / 1024
   TCCR1A |= _BV(CS12);
   TCCR1A &= ~_BV(CS11);
@@ -89,6 +94,12 @@ void AvrDrivers::SetupTimer() {
 
   // Interrupt on compare A match
   TIMSK1 |= _BV(OCIE1A);
+}
+
+void AvrDrivers::SetupSleep() {
+  // Enable sleep.
+  // SM[2:0] remaining 0 for "Idle" sleep mode.
+  SMCR |= _BV(SE);
 }
 
 uint8_t dummy() {
@@ -136,15 +147,15 @@ uint8_t AvrDrivers::SetupRTC() {
 }
 
 // https://www.etlcpp.com/debounce.html
-const int BTN_DEBOUNCE_COUNT = 5;
-const int BTN_HOLD_COUNT = 50;
-const int BTN_REPEAT_COUNT = 200;
+const uint8_t BTN_DEBOUNCE_COUNT = 2;
+const uint8_t BTN_HOLD_COUNT = 50;
+const uint8_t BTN_REPEAT_COUNT = 200;
 typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
     BtnDebounce;
 
-const int TEMP_DEBOUNCE_COUNT = 200;
-const int TEMP_HOLD_COUNT = 1000;
-const int TEMP_REPEAT_COUNT = 2000;
+const uint8_t TEMP_DEBOUNCE_COUNT = 10;
+const uint8_t TEMP_HOLD_COUNT = 50;
+const uint8_t TEMP_REPEAT_COUNT = 200;
 typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
     TmpDebounce;
 

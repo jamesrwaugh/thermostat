@@ -4,6 +4,7 @@ main_src = files(
     'Serial/Print.cpp',
     'driver.cpp',
     'driver_rs_wrapper.cpp',
+    'interrupts.cpp',
 )
 
 drivers_src = files(
@@ -18,6 +19,7 @@ drivers_include = include_directories(
     'GU7000',
     'I2C/twi',
     'TMP116',
+    'Serial',
 )
 
 etl_dep = dependency(

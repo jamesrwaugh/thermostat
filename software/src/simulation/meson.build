@@ -1,4 +1,5 @@
 simulation_src = files(
+    'load.cpp',
     'main.cpp',
 )
 

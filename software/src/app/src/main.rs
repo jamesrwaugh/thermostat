@@ -7,7 +7,7 @@ mod avr_hardware;
 mod engine;
 mod hardware;
 
-use avr_driver_api::{AvrDriverCallbacks, Button, DriverInit};
+use avr_driver_api::{AvrDriverCallbacks, Button, DriverInit, DriverMcuSleep};
 use avr_hardware::AvrHardware;
 use core::{ffi::c_void, panic::PanicInfo};
 use engine::{Event, FanSetting, HeatSetting, Thermostat};
@@ -64,7 +64,11 @@ pub extern "C" fn main() {
         DriverInit(&callbacks, obj_ptr);
     }
 
-    loop {}
+    loop {
+        unsafe {
+            DriverMcuSleep();
+        }
+    }
 }
 
 #[panic_handler]

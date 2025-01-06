@@ -1,6 +1,7 @@
 #include <Noritake_VFD_GU7000.h>
 #include <Serial/HardwareSerial.h>
 #include <driver_ds3231.h>
+#include <etl/optional.h>
 #include <tmp116.h>
 
 struct AvrDriverCallbacks;
@@ -14,6 +15,7 @@ struct AvrDrivers {
   TMP116 TempSensor;
 
   void Setup();
+  void ReadInput();
 
  private:
   const AvrDriverCallbacks &Callbacks_;
@@ -21,7 +23,9 @@ struct AvrDrivers {
   void SetupI2C();
   void SetupPins();
   void SetupScreen();
-  void SetupTimer();
+  void SetupInputTimer();
+  void SetupSleep();
   uint8_t SetupRTC();
-  void ReadInput();
 };
+
+extern etl::optional<AvrDrivers> gDriver;

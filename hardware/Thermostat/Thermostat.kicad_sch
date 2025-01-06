@@ -7401,6 +7401,36 @@
 		)
 		(uuid "fef3749d-0c92-4a24-ab23-23eb6f4aea68")
 	)
+	(text "HEAT"
+		(exclude_from_sim no)
+		(at 72.898 178.816 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "2ff3c9fe-c13d-4c9d-b269-0ff6c991f539")
+	)
+	(text "COOL"
+		(exclude_from_sim no)
+		(at 72.898 184.912 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "3de91d4f-04e1-43d3-b52d-2f97272c37f8")
+	)
+	(text "FAN ON"
+		(exclude_from_sim no)
+		(at 72.898 188.214 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "da20b5d4-6739-4eda-a3db-3be8a6d1acd1")
+	)
 	(global_label "^RESET"
 		(shape input)
 		(at 77.47 113.03 270)

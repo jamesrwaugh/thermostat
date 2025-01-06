@@ -9,6 +9,12 @@ struct AvrDriverCallbacks;
 struct AvrDrivers {
   AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData);
 
+  enum Window {
+    UpperRight = 1,
+    LowerRight = 2,
+    LowerLeft = 3,
+  };
+
   Noritake_VFD_GU7000 Screen;
   ds3231_handle_t Rtc;
   HardwareSerial &Serial_;

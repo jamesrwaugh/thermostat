@@ -71,8 +71,10 @@ void writePort(const uint8_t data, const uint8_t busyPin) {
 void hardReset() {}
 
 void AvrDrivers::SetupScreen() {
-  //
   Screen.GU7000_init();
+  Screen.GU7000_defineWindow(Window::UpperRight, 58, 0, 58, 1);
+  Screen.GU7000_defineWindow(Window::LowerRight, 58, 1, 58, 1);
+  Screen.GU7000_defineWindow(Window::LowerLeft, 0, 1, 58, 1);
 }
 
 void AvrDrivers::SetupInputTimer() {

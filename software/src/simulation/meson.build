@@ -1,6 +1,9 @@
 simulation_src = files(
-    'load.cpp',
+    'ftxui_simulated_avr.cpp',
     'main.cpp',
+    'sim_thermostat.cpp',
+    'sim_tmp116.cpp',
+    'ui.cpp',
 )
 
 simavr_dep = dependency('simavr', native: true)

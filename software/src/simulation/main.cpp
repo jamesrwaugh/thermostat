@@ -14,6 +14,11 @@ void sim_debug_log(const char *fmt, va_list args) {
 
 int main() {
   set_sim_debug_log(sim_debug_log);
-  SimAvrThermostat Thermo("", false);
+
+  std::atomic<bool> refresh_ui_continue = true;
+  auto rec = ftxui::MakeReceiver<ftxui::Closure>();
+
+  SimAvrThermostat Thermo("", false, rec);
+
   return 0;
 }

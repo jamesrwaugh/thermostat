@@ -9,7 +9,7 @@
 
 class SimAvrThermostat : public FtxUiSimulatedAvr {
  public:
-  SimAvrThermostat(std::string_view filename, bool gdb);
+  SimAvrThermostat(std::string_view filename, bool gdb, TaskReceiver& receiver);
 
   void PushUpButton();
   void PushDownButton();
@@ -21,6 +21,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void SendSerialMessage(std::string_view message);
 
  private:
+  TaskSender S_;
   std::unique_ptr<SimGu7000> Screen;
   std::unique_ptr<SimBouncySwitch> UpButton;
   std::unique_ptr<SimBouncySwitch> DownButton;

@@ -6,11 +6,13 @@
 #include <ftxui/component/receiver.hpp>
 #include <ftxui/component/task.hpp>
 
+using TaskSender = ftxui::Sender<ftxui::Closure>;
+using TaskReceiver = ftxui::Receiver<ftxui::Closure>;
+
 class FtxUiSimulatedAvr {
  public:
   FtxUiSimulatedAvr(std::string_view filename, bool gdb);
-  void BlockingLoop(std::atomic_bool&,
-                    ftxui::Receiver<ftxui::Closure>& receiver);
+  void BlockingLoop(std::atomic_bool&, TaskReceiver& receiver);
   static avr_t* LoadFirmware(std::string_view filename, bool gdb);
 
  protected:

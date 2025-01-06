@@ -3,12 +3,12 @@
 #include <simavr/avr_uart.h>
 
 #include <memory>
+#include <simavr-toolbox/sim_bouncy_switch.hpp>
+#include <simavr-toolbox/sim_gu7000.hpp>
 
-#include "simavr-toolbox/sim_bouncy_switch.hpp"
-#include "simavr-toolbox/sim_gu7000.hpp"
-
-SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb)
-    : FtxUiSimulatedAvr(filename, gdb) {
+SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
+                                   TaskReceiver& receiver)
+    : FtxUiSimulatedAvr(filename, gdb), S_{receiver->MakeSender()} {
   Screen = std::make_unique<SimGu7000>(Avr_, get_pin_irq(Avr_, 'B', 1), 0xA0);
   UpButton =
       std::make_unique<SimBouncySwitch>(*Avr_, *get_pin_irq(Avr_, 'D', 3));

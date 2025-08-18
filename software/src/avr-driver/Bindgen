@@ -1,1 +1,0 @@
-bindgen --use-core driver_rs_wrapper.hpp --merge-extern-blocks --rustified-enum "Relay" --rustified-enum "Button" -- -I/usr/local/avr/avr/include/ -I/lib/gcc/x86_64-linux-gnu/14/include -x c++ --verbose > ../app/src/avr_driver_api.rs

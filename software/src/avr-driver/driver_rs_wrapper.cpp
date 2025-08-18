@@ -1,4 +1,4 @@
-#include "driver_rs_wrapper.hpp"
+#include "c_api/driver_rs_wrapper.hpp"
 
 #include <avr/io.h>
 #include <avr/sfr_defs.h>

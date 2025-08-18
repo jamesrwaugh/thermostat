@@ -32,3 +32,4 @@ simavr_toolbox_dep = toolkit.get_variable('simavr_toolbox_dep')
 
 subdir('src/avr-driver')
 subdir('src/simulation')
+subdir('src/app')

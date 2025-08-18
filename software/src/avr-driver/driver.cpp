@@ -5,7 +5,7 @@
 #include <etl/debounce.h>
 #include <twi_master.h>
 
-#include "driver_rs_wrapper.hpp"
+#include "c_api/driver_rs_wrapper.hpp"
 
 etl::optional<AvrDrivers> gDriver;
 

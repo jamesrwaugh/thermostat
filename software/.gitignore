@@ -24,6 +24,10 @@ Cargo.lock
 
 # ============== CPP
 
+# Clangd
+clangd_snapshot/
+builddir/
+
 *lck
 *.zip
 

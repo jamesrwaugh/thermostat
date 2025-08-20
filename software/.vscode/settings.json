@@ -1,8 +1,9 @@
 {
   "mesonbuild.configureOnOpen": false,
-  "rust-analyzer.linkedProjects": [
-    "./src/app/Cargo.toml",
+  "clangd.arguments": [
+    "--query-driver=/usr/local/avr/bin/avr-g++",
+    "--compile-commands-dir=builddir"
   ],
-  "clangd.arguments": ["--compile-commands-dir=builddir"],
+  "clangd.path": "clangd_snapshot/bin/clangd",
   "testMate.cpp.test.executables": "builddir/**/test-*"
 }

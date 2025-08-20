@@ -1,0 +1,10 @@
+#include <etl/hfsm.h>
+
+#include "machine.hpp"
+#include "state.hpp"
+
+class Heating : public etl::fsm_state<Machine, Heating, State::Type::Heating> {
+ public:
+  etl::fsm_state_id_t on_enter_state() override;
+  etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
+};

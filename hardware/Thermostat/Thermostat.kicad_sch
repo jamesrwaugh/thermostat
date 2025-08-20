@@ -4904,7 +4904,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Timer_RTC:DS3231MZ"
+		(symbol "Timer_RTC:DS3232M"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4917,8 +4917,8 @@
 					(justify right)
 				)
 			)
-			(property "Value" "DS3231MZ"
-				(at 11.43 8.89 0)
+			(property "Value" "DS3232M"
+				(at 10.16 8.89 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -4927,7 +4927,7 @@
 				)
 			)
 			(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
-				(at 0 -12.7 0)
+				(at 1.27 -12.7 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -4935,8 +4935,8 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf"
-				(at 0 -15.24 0)
+			(property "Datasheet" "http://datasheets.maximintegrated.com/en/ds/DS3232M.pdf"
+				(at 6.858 3.81 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -4944,7 +4944,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "±5ppm, I2C Real-Time Clock SOIC-8"
+			(property "Description" "±5ppm, I2C Real-Time Clock with SRAM SOIC-8"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4953,7 +4953,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "RTC TCXO Realtime Time Clock MEMS I2C"
+			(property "ki_keywords" "RTC TCXO Realtime Time Clock MEMS SRAM I2C"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4971,7 +4971,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "DS3231MZ_0_1"
+			(symbol "DS3232M_0_1"
 				(rectangle
 					(start -10.16 7.62)
 					(end 10.16 -7.62)
@@ -4984,7 +4984,7 @@
 					)
 				)
 			)
-			(symbol "DS3231MZ_1_1"
+			(symbol "DS3232M_1_1"
 				(pin input line
 					(at -12.7 5.08 0)
 					(length 2.54)
@@ -5093,7 +5093,7 @@
 						)
 					)
 				)
-				(pin open_collector line
+				(pin output line
 					(at 12.7 5.08 180)
 					(length 2.54)
 					(name "32KHZ"
@@ -5509,12 +5509,6 @@
 		(uuid "1dd20ef7-a1e9-422d-beeb-a9cc162884a3")
 	)
 	(junction
-		(at 160.02 31.75)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "2308e270-8555-48fc-b44e-bac5b8c6bf34")
-	)
-	(junction
 		(at 194.31 31.75)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5555,6 +5549,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "3b7568c5-3b3b-434e-a082-980eba8e6a67")
+	)
+	(junction
+		(at 160.02 31.75)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "50d077b5-5d3c-4480-9a9b-06776b0b02a9")
 	)
 	(junction
 		(at 104.14 109.22)
@@ -5779,10 +5779,6 @@
 		(uuid "8351dd1d-8d03-426e-bcd1-9449e879c901")
 	)
 	(no_connect
-		(at 53.34 184.15)
-		(uuid "83de80ae-0af6-4678-b4da-426b08faaede")
-	)
-	(no_connect
 		(at 134.62 140.97)
 		(uuid "8a152942-7664-467f-8af8-0c8c062e9a82")
 	)
@@ -5877,6 +5873,16 @@
 			(type default)
 		)
 		(uuid "02a0ba47-8ee0-4bf3-a0a5-5a775e2f5775")
+	)
+	(wire
+		(pts
+			(xy 53.34 194.31) (xy 88.9 194.31)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0406b2f3-9b34-45b4-a12e-357f9cd947d5")
 	)
 	(wire
 		(pts
@@ -6410,7 +6416,7 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 176.53) (xy 88.9 176.53)
+			(xy 95.25 176.53) (xy 92.71 176.53)
 		)
 		(stroke
 			(width 0)
@@ -6610,7 +6616,7 @@
 	)
 	(wire
 		(pts
-			(xy 88.9 168.91) (xy 53.34 168.91)
+			(xy 92.71 168.91) (xy 53.34 168.91)
 		)
 		(stroke
 			(width 0)
@@ -7160,6 +7166,16 @@
 	)
 	(wire
 		(pts
+			(xy 53.34 184.15) (xy 53.34 194.31)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c71d4152-3257-4f13-8310-d065a29b91c3")
+	)
+	(wire
+		(pts
 			(xy 41.91 39.37) (xy 43.18 39.37)
 		)
 		(stroke
@@ -7390,7 +7406,7 @@
 	)
 	(wire
 		(pts
-			(xy 88.9 176.53) (xy 88.9 168.91)
+			(xy 92.71 176.53) (xy 92.71 168.91)
 		)
 		(stroke
 			(width 0)
@@ -8548,93 +8564,6 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "#PWR02")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Timer_RTC:DS3231MZ")
-		(at 160.02 41.91 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1ac7f6d7-0509-4383-a0b5-8fe8c1919c5d")
-		(property "Reference" "U4"
-			(at 162.2141 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "DS3231MZ"
-			(at 154.686 41.402 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
-			(at 160.02 54.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf"
-			(at 160.02 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "±5ppm, I2C Real-Time Clock SOIC-8"
-			(at 160.02 41.91 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "8"
-			(uuid "6654381d-bb3a-40dd-9184-fcfae44ba56e")
-		)
-		(pin "2"
-			(uuid "98044a64-b3bf-4137-9980-28d4cb06d51f")
-		)
-		(pin "1"
-			(uuid "c73ef97e-50c0-41f7-a4a8-4e22f3227541")
-		)
-		(pin "7"
-			(uuid "c52f3bde-7b08-4316-9111-2e16c07edefe")
-		)
-		(pin "4"
-			(uuid "dc1c55fd-9df3-43e8-85de-897f291b3fa5")
-		)
-		(pin "3"
-			(uuid "ad383b70-8fc9-4208-9736-1a47d6f61fc8")
-		)
-		(pin "6"
-			(uuid "4ec696db-eb10-4d2e-b0ea-e586859a54e3")
-		)
-		(pin "5"
-			(uuid "6f73e98b-b584-46a8-be5a-8570c7e7738a")
-		)
-		(instances
-			(project ""
-				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
-					(reference "U4")
 					(unit 1)
 				)
 			)
@@ -10087,6 +10016,74 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "R7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 93.98 194.31 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6aeee854-0566-42ba-8068-1d1a2e117f12")
+		(property "Reference" "SW3_SELECT1"
+			(at 107.95 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "SW_Push"
+			(at 93.98 189.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "Button_Switch_THT:SW_PUSH-12mm"
+			(at 93.98 189.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 93.98 189.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Push button switch, generic, two pins"
+			(at 93.98 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "5a7e42fc-ad66-482b-954b-578eaea4a205")
+		)
+		(pin "1"
+			(uuid "df675941-f3fc-4d4d-b5d5-6264d62289ea")
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "SW3_SELECT1")
 					(unit 1)
 				)
 			)
@@ -13035,6 +13032,71 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 99.06 194.31 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "dbb84085-7ed1-4bc2-aa4d-90579b37f1fd")
+		(property "Reference" "#PWR032"
+			(at 99.06 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 103.378 196.088 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 99.06 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 99.06 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 99.06 194.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "87d0745c-fed8-4907-8509-5a2b86e27514")
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "#PWR032")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 107.95 120.65 270)
 		(unit 1)
@@ -13501,6 +13563,94 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "#PWR04")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Timer_RTC:DS3232M")
+		(at 160.02 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "ef0bf3bf-4db8-4b1e-8960-d989e06ae4f5")
+		(property "Reference" "U4"
+			(at 162.1633 52.07 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "DS3232M"
+			(at 162.1633 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+			(at 161.29 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://datasheets.maximintegrated.com/en/ds/DS3232M.pdf"
+			(at 166.878 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "±5ppm, I2C Real-Time Clock with SRAM SOIC-8"
+			(at 160.02 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "91a56562-66c1-431b-9c81-4bd2bbdc66cb")
+		)
+		(pin "6"
+			(uuid "0ddd60d3-2eb3-447e-8750-eb43acc54d47")
+		)
+		(pin "8"
+			(uuid "8cffef1a-09bf-4ad1-b032-d282cb049a2b")
+		)
+		(pin "1"
+			(uuid "3e48cc6f-0d67-4fcd-a49c-752e27e3acc3")
+		)
+		(pin "7"
+			(uuid "13938a26-8dd7-4795-ad5a-6516408b691d")
+		)
+		(pin "3"
+			(uuid "4e89d544-afed-448d-a136-b9204dc30b63")
+		)
+		(pin "4"
+			(uuid "68740ec6-d020-44f1-8dd7-b445a1b2abaa")
+		)
+		(pin "5"
+			(uuid "675d2c72-3bf6-44fd-8ccd-016d52e4643d")
+		)
+		(instances
+			(project ""
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "U4")
 					(unit 1)
 				)
 			)

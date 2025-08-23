@@ -70,17 +70,14 @@ int main() {
 
   machine.set_states(states.data(), states.size());
 
-  machine.start(true);
-  machine.receive(Event::UpButtonPressed{});
-  machine.receive(Event::DownButtonPressed{});
-  machine.receive(Event::SecondPassed{});
-
   AvrDriverCallbacks callbacks{
       .OnButtonPressed = OnButtonPressed,
       .OnSerialMessage = OnSerialMessage,
   };
 
   DriverInit(callbacks, nullptr);
+
+  machine.start(true);
 
   uint8_t lastTenMsCount = 0;
 

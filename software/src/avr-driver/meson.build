@@ -4,7 +4,6 @@ main_src = files(
     'Serial/Print.cpp',
     'driver.cpp',
     'driver_rs_wrapper.cpp',
-    'interrupts.cpp',
 )
 
 drivers_src = files(

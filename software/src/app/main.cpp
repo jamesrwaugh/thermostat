@@ -11,6 +11,7 @@
 #include "states/running_parent.hpp"
 
 Machine machine;
+volatile bool g10MillisecondPassed = false;
 
 void OnButtonPressed(Button b, void*) {
   switch (b) {
@@ -46,24 +47,6 @@ void OnSerialMessage(const char* message, uint16_t messageLen, void*) {
   (void)messageLen;
 }
 
-void OnSecondPassed(void*) {
-  machine.receive(Event::SecondPassed{});
-}
-
-void InitInterrupts() {
-  // CTC setting top at OCR1A
-  TCCR1B |= _BV(WGM12);
-
-  // Prescale clk_io (7372800) / 1024
-  TCCR1B |= _BV(CS12) | _BV(CS10);
-
-  // (7372800) / 1024 => 7200 top for 1 ms passed
-  OCR1A = 7200;
-}
-
-volatile bool gMillisecondPassed = false;
-volatile uint16_t gMillisecondsPassed = false;
-
 int main() {
   RunningParent runningParent;
   Idle idleState;
@@ -95,20 +78,21 @@ int main() {
   AvrDriverCallbacks callbacks{
       .OnButtonPressed = OnButtonPressed,
       .OnSerialMessage = OnSerialMessage,
-      .OnSecondPassed = OnSecondPassed,
   };
 
   DriverInit(callbacks, nullptr);
 
+  uint8_t lastTenMsCount = 0;
+
   while (true) {
-    if (gMillisecondPassed) {
-      gMillisecondPassed = false;
-      gMillisecondsPassed += 1;
+    if (g10MillisecondPassed) {
+      g10MillisecondPassed = false;
+      lastTenMsCount += 1;
       DriverPollInput();
     }
 
-    if (gMillisecondsPassed >= 1000) {
-      gMillisecondsPassed = 0;
+    if (lastTenMsCount >= 10) {
+      lastTenMsCount = 0;
       machine.receive(Event::SecondPassed{});
       uint8_t temp = DriverReadTemp();
       DriverDisplayTemp(temp);
@@ -118,8 +102,8 @@ int main() {
   return 0;
 }
 
-void operator delete(void*, unsigned int) {}
-
 ISR(TIMER1_OVF_vect) {
-  gMillisecondPassed = true;
+  g10MillisecondPassed = true;
 }
+
+void operator delete(void*, unsigned int) {}

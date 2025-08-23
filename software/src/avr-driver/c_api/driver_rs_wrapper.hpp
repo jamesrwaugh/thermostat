@@ -27,7 +27,6 @@ struct AvrDriverCallbacks {
   void (*OnButtonPressed)(Button b, void* userData);
   void (*OnSerialMessage)(const char* message, uint16_t messageLen,
                           void* userData);
-  void (*OnSecondPassed)(void* userData);
 };
 
 void DriverInit(const AvrDriverCallbacks& callbacks, void* userData);

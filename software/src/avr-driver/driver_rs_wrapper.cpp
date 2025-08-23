@@ -9,17 +9,17 @@
 
 extern "C" {
 
-void DriverInit(const AvrDriverCallbacks &callbacks, void *userData) {
+void DriverInit(const AvrDriverCallbacks& callbacks, void* userData) {
   gDriver.emplace(callbacks, userData);
   gDriver->Setup();
 }
 
-void DriverWriteSerialPort(const uint8_t *bytes, uint8_t numBytes) {
+void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
 }
 
 void DriverDisplayTemp(uint8_t temp) {
-  auto &screen = gDriver->Screen;
+  auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Window::LowerRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
@@ -27,7 +27,7 @@ void DriverDisplayTemp(uint8_t temp) {
 }
 
 void DriverDisplaySetPoint(uint8_t temp) {
-  auto &screen = gDriver->Screen;
+  auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Window::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
@@ -35,7 +35,7 @@ void DriverDisplaySetPoint(uint8_t temp) {
 }
 
 void DriverDisplayIsHeating() {
-  auto &screen = gDriver->Screen;
+  auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
@@ -43,7 +43,7 @@ void DriverDisplayIsHeating() {
 }
 
 void DriverDisplayIsCooling() {
-  auto &screen = gDriver->Screen;
+  auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
@@ -55,7 +55,7 @@ uint8_t DriverReadTemp() {
 }
 
 void DriverDisplayIsIdle() {
-  auto &screen = gDriver->Screen;
+  auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
   screen.GU7000_clearScreen();
 }
@@ -106,5 +106,7 @@ void DriverMcuSleep() {
   sleep_cpu();
 }
 
-//
+void DriverPollInput() {
+  gDriver->ReadInput();
+}
 }

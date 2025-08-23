@@ -3,6 +3,7 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "event.hpp"
 #include "states/cooling.hpp"
 #include "states/heating.hpp"
 #include "states/idle.hpp"
@@ -18,6 +19,9 @@ void OnButtonPressed(Button b, void*) {
       break;
     case Button::Down:
       machine.receive(Event::DownButtonPressed{});
+      break;
+    case Button::Select:
+      machine.receive(Event::SelectButtonPressed{});
       break;
     case Button::TempHeat:
       machine.receive(Event::HeatModeChanged{Event::HeatModeT::Heating});
@@ -46,7 +50,19 @@ void OnSecondPassed(void*) {
   machine.receive(Event::SecondPassed{});
 }
 
-volatile bool gSecondPassed = false;
+void InitInterrupts() {
+  // CTC setting top at OCR1A
+  TCCR1B |= _BV(WGM12);
+
+  // Prescale clk_io (7372800) / 1024
+  TCCR1B |= _BV(CS12) | _BV(CS10);
+
+  // (7372800) / 1024 => 7200 top for 1 ms passed
+  OCR1A = 7200;
+}
+
+volatile bool gMillisecondPassed = false;
+volatile uint16_t gMillisecondsPassed = false;
 
 int main() {
   RunningParent runningParent;
@@ -85,12 +101,17 @@ int main() {
   DriverInit(callbacks, nullptr);
 
   while (true) {
-    DriverMcuSleep();
-    uint8_t temp = DriverReadTemp();
-    DriverDisplayTemp(temp);
-    if (gSecondPassed) {
-      gSecondPassed = false;
+    if (gMillisecondPassed) {
+      gMillisecondPassed = false;
+      gMillisecondsPassed += 1;
+      DriverPollInput();
+    }
+
+    if (gMillisecondsPassed >= 1000) {
+      gMillisecondsPassed = 0;
       machine.receive(Event::SecondPassed{});
+      uint8_t temp = DriverReadTemp();
+      DriverDisplayTemp(temp);
     }
   }
 
@@ -100,5 +121,5 @@ int main() {
 void operator delete(void*, unsigned int) {}
 
 ISR(TIMER1_OVF_vect) {
-  gSecondPassed = true;
+  gMillisecondPassed = true;
 }

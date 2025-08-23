@@ -7,10 +7,11 @@ namespace Event {
 struct Type {
   enum TheType : etl::message_id_t {
     UpButtonPressed = 0,
-    DownButtonPressed = 1,
-    SecondPassed = 2,
-    FanModeChanged = 3,
-    HeatModeChanged = 4,
+    DownButtonPressed,
+    SelectButtonPressed,
+    SecondPassed,
+    FanModeChanged,
+    HeatModeChanged,
   };
 };
 
@@ -19,6 +20,7 @@ enum class HeatModeT : uint8_t { Heating, Cooling, None };
 
 struct UpButtonPressed : etl::message<Event::Type::UpButtonPressed> {};
 struct DownButtonPressed : etl::message<Event::Type::DownButtonPressed> {};
+struct SelectButtonPressed : etl::message<Event::Type::SelectButtonPressed> {};
 struct SecondPassed : etl::message<Event::Type::SecondPassed> {};
 
 struct FanModeChanged : etl::message<Event::Type::FanModeChanged> {

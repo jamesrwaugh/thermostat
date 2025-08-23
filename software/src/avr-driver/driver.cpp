@@ -9,7 +9,7 @@
 
 etl::optional<AvrDrivers> gDriver;
 
-AvrDrivers::AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData)
+AvrDrivers::AvrDrivers(const AvrDriverCallbacks& callbacks, void* userData)
     : Screen(19), Serial_(Serial), Callbacks_(callbacks), UserData_{userData} {}
 
 void AvrDrivers::Setup() {
@@ -18,7 +18,6 @@ void AvrDrivers::Setup() {
   SetupInputTimer();
   SetupRTC();
   SetupScreen();
-  SetupSleep();
   sei();
 }
 
@@ -98,32 +97,26 @@ void AvrDrivers::SetupInputTimer() {
   TIMSK1 |= _BV(OCIE1A);
 }
 
-void AvrDrivers::SetupSleep() {
-  // Enable sleep.
-  // SM[2:0] remaining 0 for "Idle" sleep mode.
-  SMCR |= _BV(SE);
-}
-
 uint8_t dummy() {
   // We init IIC elsewhere, just pass this to the DS3231 to do nothing.
   return 0;
 }
 
-uint8_t iic_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+uint8_t iic_write(uint8_t addr, uint8_t reg, uint8_t* buf, uint16_t len) {
   uint8_t err = 0;
   err |= tw_master_transmit_one(addr, reg, true);
   err |= tw_master_transmit(addr, buf, len, false);
   return !(err == SUCCESS);
 }
 
-uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len) {
+uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t* buf, uint16_t len) {
   uint8_t err = 0;
   err |= tw_master_transmit_one(addr, reg, true);
   err |= tw_master_receive(addr, buf, len);
   return !(err == SUCCESS);
 }
 
-void debug_print(const char *const fmt, ...) {}
+void debug_print(const char* const fmt, ...) {}
 
 void receive_callback(uint8_t type) {}
 
@@ -143,7 +136,6 @@ uint8_t AvrDrivers::SetupRTC() {
   Rtc.delay_ms = delay_ms;
 
   int res = ds3231_init(&Rtc);
-  res |= ds3231_set_square_wave(&Rtc, ds3231_bool_t::DS3231_BOOL_TRUE);
 
   return res;
 }
@@ -164,6 +156,7 @@ typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
 void AvrDrivers::ReadInput() {
   static BtnDebounce upButton;
   static BtnDebounce downButton;
+  static BtnDebounce selectButton;
   static BtnDebounce fanOnOff;
   static TmpDebounce tempCoolOn;
   static TmpDebounce tempHeatOn;
@@ -177,6 +170,10 @@ void AvrDrivers::ReadInput() {
 
   if (downButton.add(pind & PIND2) && downButton.is_set()) {
     Callbacks_.OnButtonPressed(Button::Down, UserData_);
+  }
+
+  if (selectButton.add(pind & PIND7) && selectButton.is_set()) {
+    Callbacks_.OnButtonPressed(Button::Select, UserData_);
   }
 
   if (fanOnOff.add(pind & PIND6)) {
@@ -199,4 +196,8 @@ void AvrDrivers::ReadInput() {
                    tempNone.is_held())) {
     Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
   }
+}
+
+ISR(TIMER1_OVF_vect) {
+  gDriver->ReadInput();
 }

@@ -7,7 +7,7 @@
 struct AvrDriverCallbacks;
 
 struct AvrDrivers {
-  AvrDrivers(const AvrDriverCallbacks &callbacks, void *userData);
+  AvrDrivers(const AvrDriverCallbacks& callbacks, void* userData);
 
   enum Window {
     UpperRight = 1,
@@ -17,20 +17,19 @@ struct AvrDrivers {
 
   Noritake_VFD_GU7000 Screen;
   ds3231_handle_t Rtc;
-  HardwareSerial &Serial_;
+  HardwareSerial& Serial_;
   TMP116 TempSensor;
 
   void Setup();
   void ReadInput();
 
  private:
-  const AvrDriverCallbacks &Callbacks_;
-  void *UserData_{nullptr};
+  const AvrDriverCallbacks& Callbacks_;
+  void* UserData_{nullptr};
   void SetupI2C();
   void SetupPins();
   void SetupScreen();
   void SetupInputTimer();
-  void SetupSleep();
   uint8_t SetupRTC();
 };
 

@@ -36,13 +36,16 @@ void AvrDrivers::SetupI2C() {
 }
 
 void AvrDrivers::SetupPins() {
-  // Up button, down button, cooling, heating
+  // Up button, down button, cooling, heating, select
   // -> Input pullup
   DDRD &= ~_BV(DDD2);
   DDRD &= ~_BV(DDD3);
+  DDRD &= ~_BV(DDD4);
+  DDRD &= ~_BV(DDD5);
   DDRD &= ~_BV(DDD6);
   DDRD &= ~_BV(DDD7);
-  PORTD |= _BV(PORTD2) | _BV(PORTD3) | _BV(PORTD6) | _BV(PORTD7);
+  PORTD |= _BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) |
+           _BV(PORTD7);
 
   // Screen Busy
   // -> Input

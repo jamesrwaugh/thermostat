@@ -1,0 +1,23 @@
+proto ThermoStateData
+
+const THERMO_STATE_DATA_MAGIC = 0x0124
+
+enum FanState : uint3 {
+    FAN_ON = 0
+    FAN_OFF = 1
+    FAN_AUTO = 2
+}
+
+enum HeatingState : uint3 {
+    HEATING_HEATING = 0
+    HEATING_COOLING = 1
+    HEATING_NONE = 2
+}
+
+message ThermoStateData {
+    uint16 magic = 1
+    uint8 set_point = 2
+    FanState fan_state = 3
+    HeatingState heating_state = 4
+}
+

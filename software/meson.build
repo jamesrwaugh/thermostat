@@ -30,6 +30,11 @@ assert(
 toolkit = subproject('simavr-toolbox')
 simavr_toolbox_dep = toolkit.get_variable('simavr_toolbox_dep')
 
+bitproto_dep = declare_dependency(
+    sources: ['submodules/bitproto/lib/c/bitproto.c'],
+    include_directories: ['submodules/bitproto/lib/c/'],
+)
+
 subdir('src/avr-driver')
 subdir('src/simulation')
 subdir('src/app')

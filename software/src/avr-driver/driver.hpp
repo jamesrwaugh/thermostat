@@ -1,6 +1,6 @@
 #include <Noritake_VFD_GU7000.h>
 #include <Serial/HardwareSerial.h>
-#include <driver_ds3231.h>
+#include <driver_ds1307.h>
 #include <etl/optional.h>
 #include <tmp116.h>
 
@@ -16,7 +16,7 @@ struct AvrDrivers {
   };
 
   Noritake_VFD_GU7000 Screen;
-  ds3231_handle_t Rtc;
+  ds1307_handle_t Rtc;
   HardwareSerial& Serial_;
   TMP116 TempSensor;
 

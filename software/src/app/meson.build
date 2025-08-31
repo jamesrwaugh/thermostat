@@ -1,4 +1,5 @@
 src = files(
+    'protos/ThermoStateData_bp.c',
     'states/cooling.cpp',
     'states/heating.cpp',
     'states/idle.cpp',
@@ -15,7 +16,7 @@ etl_dep = dependency(
 executable(
     'thermo-app',
     src,
-    dependencies: [etl_dep, avr_driver_dep],
+    dependencies: [etl_dep, avr_driver_dep, bitproto_dep],
     cpp_args: ['-DETL_NO_STL', '-fno-threadsafe-statics'],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',

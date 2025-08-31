@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <avr/sfr_defs.h>
 #include <avr/sleep.h>
+#include <driver_ds1307.h>
 #include <etl/optional.h>
 
 #include "driver.hpp"
@@ -108,5 +109,13 @@ void DriverMcuSleep() {
 
 void DriverPollInput() {
   gDriver->ReadInput();
+}
+
+uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length) {
+  return ds1307_write_ram(&gDriver->Rtc, address, data, length);
+}
+
+uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength) {
+  return ds1307_read_ram(&gDriver->Rtc, address, buffer, maxLength);
 }
 }

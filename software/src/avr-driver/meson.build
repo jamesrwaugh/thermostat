@@ -3,18 +3,18 @@ main_src = files(
     'Serial/HardwareSerial0.cpp',
     'Serial/Print.cpp',
     'driver.cpp',
-    'driver_rs_wrapper.cpp',
+    'c_api/driver_rs_wrapper.cpp',
 )
 
 drivers_src = files(
-    'DS3231/src/driver_ds3231.c',
+    'DS1307/src/driver_ds1307.c',
     'GU7000/Noritake_VFD_GU7000.cpp',
     'I2C/twi/twi_master.c',
     'TMP116/tmp116.cpp',
 )
 
 drivers_include = include_directories(
-    'DS3231/src',
+    'DS1307/src',
     'GU7000',
     'I2C/twi',
     'TMP116',

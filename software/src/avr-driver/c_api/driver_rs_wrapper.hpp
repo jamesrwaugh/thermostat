@@ -41,6 +41,8 @@ void DriverRelayOff(Relay r);
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes);
 void DriverMcuSleep();
 void DriverPollInput();
+uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length);
+uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength);
 }
 
 #endif

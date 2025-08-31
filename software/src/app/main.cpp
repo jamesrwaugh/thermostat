@@ -4,6 +4,7 @@
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
+#include "protos/ThermoStateData_bp.h"
 #include "states/cooling.hpp"
 #include "states/heating.hpp"
 #include "states/idle.hpp"
@@ -47,6 +48,18 @@ void OnSerialMessage(const char* message, uint16_t messageLen, void*) {
   (void)messageLen;
 }
 
+void TryReadSavedThermoStateData() {
+  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_STATE_DATA];
+  DriverReadFlash(0, rtcDataBuf, BYTES_LENGTH_THERMO_STATE_DATA);
+
+  ThermoStateData data;
+  DecodeThermoStateData(&data, rtcDataBuf);
+
+  if (data.magic == THERMO_STATE_DATA_MAGIC) {
+    machine.SetThermoStateData(data);
+  }
+}
+
 int main() {
   RunningParent runningParent;
   Idle idleState;
@@ -76,6 +89,8 @@ int main() {
   };
 
   DriverInit(callbacks, nullptr);
+
+  TryReadSavedThermoStateData();
 
   machine.start(true);
 

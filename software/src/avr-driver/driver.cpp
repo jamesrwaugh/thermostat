@@ -2,6 +2,7 @@
 
 #include <HardwareSerial.h>
 #include <avr/interrupt.h>
+#include <driver_ds1307.h>
 #include <etl/debounce.h>
 #include <twi_master.h>
 
@@ -121,11 +122,8 @@ uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t* buf, uint16_t len) {
 
 void debug_print(const char* const fmt, ...) {}
 
-void receive_callback(uint8_t type) {}
-
 void delay_ms(uint32_t ms) {
-  // Only used for reading temp, which we do not do, so get out of jail free
-  // card.
+  // Not used for DS1307
 }
 
 uint8_t AvrDrivers::SetupRTC() {
@@ -135,10 +133,9 @@ uint8_t AvrDrivers::SetupRTC() {
   Rtc.iic_write = iic_write;
   Rtc.iic_read = iic_read;
   Rtc.debug_print = debug_print;
-  Rtc.receive_callback = receive_callback;
   Rtc.delay_ms = delay_ms;
 
-  int res = ds3231_init(&Rtc);
+  int res = ds1307_init(&Rtc);
 
   return res;
 }

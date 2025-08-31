@@ -6,6 +6,14 @@
 # Remove: [-mmcu]
 
 CompileFlags:
- Compiler: avr-g++
- Add: [-D__WCHAR_MIN__=0, -D__WCHAR_MAX__=65535, -D__STDC_LIMIT_MACROS, -DETL_NO_STL]
- BuiltinHeaders: QueryDriver
+  Compiler: avr-g++
+  Add:
+    [
+      -D__WCHAR_MIN__=0,
+      -DINT16_MAXU=32727,
+      -DINT32_MAXU=2147483647,
+      -D__WCHAR_MAX__=65535,
+      -D__STDC_LIMIT_MACROS,
+      -DETL_NO_STL,
+    ]
+  BuiltinHeaders: QueryDriver

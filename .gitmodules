@@ -1,6 +1,9 @@
-[submodule "software/src/avr-driver/DS3231"]
-	path = software/src/avr-driver/DS3231
-	url = https://github.com/libdriver/ds3231.git
 [submodule "software/subprojects/simavr-toolbox"]
 	path = software/subprojects/simavr-toolbox
 	url = git@github.com:squared-electronic/simavr-toolbox.git
+[submodule "software/src/avr-driver/DS1307"]
+	path = software/src/avr-driver/DS1307
+	url = git@github.com:libdriver/ds1307.git
+[submodule "software/submodules/bitproto"]
+	path = software/submodules/bitproto
+	url = git@github.com:hit9/bitproto.git

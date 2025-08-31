@@ -1,5 +1,6 @@
 #pragma once
 
+#include <etl/algorithm.h>
 #include <etl/message.h>
 
 #include "protos/ThermoStateData_bp.h"
@@ -28,6 +29,13 @@ enum class HeatModeT : uint8_t {
   Cooling = HEATING_COOLING,
   None = HEATING_NONE,
 };
+
+static_assert(etl::is_same<etl::underlying_type_t<FanModeT>, FanState>::value,
+              "Types not same, needed for enum class cast");
+
+static_assert(
+    etl::is_same<etl::underlying_type_t<HeatModeT>, HeatingState>::value,
+    "Types not same, needed for enum class cast");
 
 class SmartThermoStateData {
  public:

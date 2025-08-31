@@ -109,6 +109,8 @@ int main() {
       uint8_t temp = DriverReadTemp();
       DriverDisplayTemp(temp);
     }
+
+    DriverMcuSleep();
   }
 
   return 0;

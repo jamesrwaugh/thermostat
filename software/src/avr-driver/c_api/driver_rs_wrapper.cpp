@@ -104,7 +104,9 @@ void DriverRelayOff(Relay r) {
 }
 
 void DriverMcuSleep() {
+  SMCR |= _BV(SE);
   sleep_cpu();
+  SMCR &= ~_BV(SE);
 }
 
 void DriverPollInput() {

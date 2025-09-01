@@ -7,11 +7,20 @@
 
 class Machine : public etl::hfsm {
  public:
-  Machine() : etl::hfsm(0) {}
+  Machine();
 
-  void SetThermoStateData(const ThermoStateData& p) {
-    new (&Data) Event::SmartThermoStateData(p);
-  }
+  void SetThermoStateData(const ThermoStateData& raw);
+  [[nodiscard]] Event::SmartThermoStateData& ThermoStateData();
+  void ResetStateChangeData();
+  void TickChangeCounter();
+  [[nodiscard]] bool HasChangeTimeoutPassed() const;
+
+ private:
+  struct StateChangeData {
+    static constexpr uint8_t MaxStateChangeTimeoutSec = 10;
+    uint8_t StateChangeTimeoutSec{0};
+  };
 
   Event::SmartThermoStateData Data;
+  StateChangeData ChData;
 };

@@ -11,6 +11,7 @@ class RunningParent
                             Event::HeatModeChanged> {
  public:
   etl::fsm_state_id_t on_enter_state() override;
+  void on_exit_state() override;
   etl::fsm_state_id_t on_event(const Event::UpButtonPressed&);
   etl::fsm_state_id_t on_event(const Event::DownButtonPressed&);
   etl::fsm_state_id_t on_event(const Event::SecondPassed&);
@@ -19,6 +20,6 @@ class RunningParent
   etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
 
  private:
-  etl::fsm_state_id_t SetSetPoint(int8_t change);
+  etl::fsm_state_id_t ChangeSetPoint(int8_t change);
   etl::fsm_state_id_t ChangeStateIfNeeded();
 };

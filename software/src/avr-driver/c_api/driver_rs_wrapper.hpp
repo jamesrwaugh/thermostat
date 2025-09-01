@@ -29,7 +29,17 @@ struct AvrDriverCallbacks {
                           void* userData);
 };
 
+enum class ReverseValveTypeE {
+  EnergizeToHeat = 0,
+  EnergizeToCool = 1,
+};
+
+struct ThermostatData {
+  ReverseValveTypeE ReverseValveType;
+};
+
 void DriverInit(const AvrDriverCallbacks& callbacks, void* userData);
+void DriverGetThermostatType(ThermostatData* data);
 void DriverDisplayTemp(uint8_t temp);
 void DriverDisplaySetPoint(uint8_t temp);
 void DriverDisplayIsHeating();

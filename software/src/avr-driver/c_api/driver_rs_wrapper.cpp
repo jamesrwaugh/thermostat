@@ -15,6 +15,11 @@ void DriverInit(const AvrDriverCallbacks& callbacks, void* userData) {
   gDriver->Setup();
 }
 
+void DriverGetThermostatType(ThermostatData* data) {
+  // TODO: Read pin to check user setting
+  data->ReverseValveType = ReverseValveTypeE::EnergizeToHeat;
+}
+
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
 }

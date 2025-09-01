@@ -3,6 +3,7 @@ src = files(
     'states/cooling.cpp',
     'states/heating.cpp',
     'states/idle.cpp',
+    'states/machine.cpp',
     'states/running_parent.cpp',
     'main.cpp',
 )

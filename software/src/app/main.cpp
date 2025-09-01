@@ -5,6 +5,7 @@
 
 #include "event.hpp"
 #include "protos/ThermoStateData_bp.h"
+#include "state.hpp"
 #include "states/cooling.hpp"
 #include "states/heating.hpp"
 #include "states/idle.hpp"
@@ -66,7 +67,7 @@ int main() {
   Heating heatingState;
   Cooling coolingState;
 
-  etl::array<etl::ifsm_state*, 4> states = {
+  etl::array<etl::ifsm_state*, State::Type::COUNT> states = {
       &runningParent,
       &idleState,
       &heatingState,

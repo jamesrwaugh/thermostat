@@ -1,8 +1,4 @@
-# AVR Thermostat
-
-James' interest in making a thermostat
-
-# Start
+# Software Start
 
 ```
 meson setup --wipe --cross-file avr-cross-compile.txt builddir -Dbuild.pkg_config_path=/usr/local/lib/pkgconfig

@@ -2,16 +2,22 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "states/machine.hpp"
+
 etl::fsm_state_id_t RunningParent::on_enter_state() {
   return No_State_Change;
 }
 
+void RunningParent::on_exit_state() {
+  get_fsm_context().ResetStateChangeData();
+}
+
 etl::fsm_state_id_t RunningParent::on_event(const Event::UpButtonPressed&) {
-  return SetSetPoint(-1);
+  return ChangeSetPoint(1);
 }
 
 etl::fsm_state_id_t RunningParent::on_event(const Event::DownButtonPressed&) {
-  return SetSetPoint(1);
+  return ChangeSetPoint(-1);
 }
 
 etl::fsm_state_id_t RunningParent::on_event(const Event::SecondPassed&) {
@@ -20,15 +26,13 @@ etl::fsm_state_id_t RunningParent::on_event(const Event::SecondPassed&) {
 
 etl::fsm_state_id_t RunningParent::on_event(
     const Event::FanModeChanged& event) {
-  auto& context = get_fsm_context();
-  context.Data.FanMode() = event.Mode;
+  get_fsm_context().ThermoStateData().FanMode() = event.Mode;
   return ChangeStateIfNeeded();
 }
 
 etl::fsm_state_id_t RunningParent::on_event(
     const Event::HeatModeChanged& event) {
-  auto& context = get_fsm_context();
-  context.Data.HeatingMode() = event.Mode;
+  get_fsm_context().ThermoStateData().HeatingMode() = event.Mode;
   return ChangeStateIfNeeded();
 }
 
@@ -36,10 +40,8 @@ etl::fsm_state_id_t RunningParent::on_event_unknown(const etl::imessage&) {
   return No_State_Change;
 }
 
-etl::fsm_state_id_t RunningParent::SetSetPoint(int8_t change) {
-  auto& context = get_fsm_context();
-
-  auto& setPoint = context.Data.SetPoint();
+etl::fsm_state_id_t RunningParent::ChangeSetPoint(int8_t change) {
+  auto& setPoint = get_fsm_context().ThermoStateData().SetPoint();
 
   if (setPoint == 1 && change < 0) {
     return No_State_Change;
@@ -57,12 +59,15 @@ etl::fsm_state_id_t RunningParent::SetSetPoint(int8_t change) {
 }
 
 etl::fsm_state_id_t RunningParent::ChangeStateIfNeeded() {
-  auto& data = get_fsm_context().Data;
+  auto& data = get_fsm_context().ThermoStateData();
 
-  uint8_t temp = DriverReadTemp();
+  if (!get_fsm_context().HasChangeTimeoutPassed()) {
+    return No_State_Change;
+  }
 
-  auto& heatMode = data.HeatingMode();
-  auto setPoint = data.SetPoint();
+  const uint8_t temp = DriverReadTemp();
+  const auto heatMode = data.HeatingMode();
+  const auto setPoint = data.SetPoint();
 
   if (heatMode == Event::HeatModeT::None) {
     return State::Type::Idle;

@@ -48,6 +48,10 @@ void AvrDrivers::SetupPins() {
   PORTD |= _BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6) |
            _BV(PORTD7);
 
+  // Reverse Valve SIP Switch Input Pullup
+  DDRC &= ~_BV(PC3);
+  PORTC |= _BV(PORTC3);
+
   // Screen Busy
   // -> Input
   DDRB &= ~_BV(DDB1);

@@ -16,8 +16,9 @@ void DriverInit(const AvrDriverCallbacks& callbacks, void* userData) {
 }
 
 void DriverGetThermostatType(ThermostatData* data) {
-  // TODO: Read pin to check user setting
-  data->ReverseValveType = ReverseValveTypeE::EnergizeToHeat;
+  bool on = (PINC & _BV(PINC3)) != 0;
+  data->ReverseValveType = on ? ReverseValveTypeE::EnergizeToCool
+                              : ReverseValveTypeE::EnergizeToHeat;
 }
 
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {

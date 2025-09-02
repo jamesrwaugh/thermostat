@@ -527,6 +527,18 @@
       ],
       "Net-(J1-Pin_7)": [
         "Power"
+      ],
+      "Net-(J4-Pin_2)": [
+        "Power"
+      ],
+      "Net-(J4-Pin_3)": [
+        "Power"
+      ],
+      "Net-(J4-Pin_4)": [
+        "Power"
+      ],
+      "Net-(J4-Pin_5)": [
+        "Power"
       ]
     },
     "netclass_patterns": [

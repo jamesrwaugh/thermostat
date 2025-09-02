@@ -153,9 +153,7 @@ typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
 
 const uint8_t TEMP_DEBOUNCE_COUNT = 5;
 const uint8_t TEMP_HOLD_COUNT = 50;
-const uint8_t TEMP_REPEAT_COUNT = 200;
-typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT, TEMP_REPEAT_COUNT>
-    TmpDebounce;
+typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT> TmpDebounce;
 
 void AvrDrivers::ReadInput() {
   static BtnDebounce upButton;

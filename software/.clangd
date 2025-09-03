@@ -1,10 +1,3 @@
-# https://github.com/clangd/clangd/issues/2216
-# We use attiny3224, but Clang does not support this one. It looks to be really new.
-# Use the next closest chip, just for intellisense. Compile with the right one, of course.
-# CompileFlags:
-# Add: [-mmcu=attiny3216]
-# Remove: [-mmcu]
-
 CompileFlags:
   Compiler: avr-g++
   Add:

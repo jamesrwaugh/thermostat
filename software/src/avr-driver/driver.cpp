@@ -147,23 +147,21 @@ uint8_t AvrDrivers::SetupRTC() {
 // https://www.etlcpp.com/debounce.html
 const uint8_t BTN_DEBOUNCE_COUNT = 2;
 const uint8_t BTN_HOLD_COUNT = 50;
-const uint8_t BTN_REPEAT_COUNT = 200;
-typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT, BTN_REPEAT_COUNT>
-    BtnDebounce;
+typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT> BtnDebounce;
 
 const uint8_t TEMP_DEBOUNCE_COUNT = 5;
 const uint8_t TEMP_HOLD_COUNT = 50;
 typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT> TmpDebounce;
 
-void AvrDrivers::ReadInput() {
-  static BtnDebounce upButton;
-  static BtnDebounce downButton;
-  static BtnDebounce selectButton;
-  static BtnDebounce fanOnOff;
-  static TmpDebounce tempCoolOn;
-  static TmpDebounce tempHeatOn;
-  static TmpDebounce tempNone;
+BtnDebounce upButton;
+BtnDebounce downButton;
+BtnDebounce selectButton;
+BtnDebounce fanOnOff;
+TmpDebounce tempCoolOn;
+TmpDebounce tempHeatOn;
+TmpDebounce tempNone;
 
+void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
   if (upButton.add(pind & PIND3) && upButton.is_set()) {

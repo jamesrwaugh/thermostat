@@ -6152,6 +6152,16 @@
 		)
 		(uuid "2ff3c9fe-c13d-4c9d-b269-0ff6c991f539")
 	)
+	(text "Should be 2MS3T1B1M2QES"
+		(exclude_from_sim no)
+		(at 93.726 173.736 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "35d4108d-9abb-4694-a7e1-536e8307bd07")
+	)
 	(text "COOL"
 		(exclude_from_sim no)
 		(at 82.804 172.212 0)
@@ -10090,7 +10100,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "2MS3T1B1M2QES"
+		(property "Value" "2MS1T1B1M2QES"
 			(at 81.28 170.1799 0)
 			(effects
 				(font
@@ -10329,6 +10339,134 @@
 		)
 	)
 	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 30.48 72.39 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "477ae286-a143-418d-b0f1-6f070e805b4a")
+		(property "Reference" "H6"
+			(at 33.02 71.1199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 33.02 73.6599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2mm"
+			(at 30.48 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 30.48 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 30.48 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "H6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 30.48 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4fd1197c-bf7f-45de-8780-52c1e4687c98")
+		(property "Reference" "H8"
+			(at 33.02 81.2799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 33.02 83.8199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2mm"
+			(at 30.48 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 30.48 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 30.48 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "H8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 93.98 96.52 180)
 		(unit 1)
@@ -10455,6 +10593,70 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "#PWR020")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 30.48 67.31 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "57008e00-357b-4113-9101-9b4505453648")
+		(property "Reference" "H5"
+			(at 33.02 66.0399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 33.02 68.5799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2mm"
+			(at 30.48 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 30.48 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 30.48 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "H5")
 					(unit 1)
 				)
 			)
@@ -14234,7 +14436,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "da516ec1-47c2-41c3-9112-2fc3d73af61c")
-		(property "Reference" "SW5_RESET1"
+		(property "Reference" "SW5"
 			(at 163.576 137.16 0)
 			(effects
 				(font
@@ -14287,7 +14489,7 @@
 		(instances
 			(project ""
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
-					(reference "SW5_RESET1")
+					(reference "SW5")
 					(unit 1)
 				)
 			)
@@ -14971,6 +15173,70 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "S3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Mechanical:MountingHole")
+		(at 30.48 77.47 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f353cb95-1dd2-42d9-917e-dff395f884bb")
+		(property "Reference" "H7"
+			(at 33.02 76.1999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "MountingHole"
+			(at 33.02 78.7399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "MountingHole:MountingHole_2mm"
+			(at 30.48 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 30.48 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Mounting Hole without connection"
+			(at 30.48 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "H7")
 					(unit 1)
 				)
 			)

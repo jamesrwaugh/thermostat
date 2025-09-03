@@ -1,6 +1,5 @@
 #pragma once
 
-#include <etl/algorithm.h>
 #include <etl/message.h>
 
 #include "protos/ThermoStateData_bp.h"
@@ -40,6 +39,7 @@ static_assert(
 class SmartThermoStateData {
  public:
   SmartThermoStateData() {
+    Data_.magic = THERMO_STATE_DATA_MAGIC;
     Data_.set_point = 70;
     Data_.fan_state = static_cast<FanState>(Event::FanModeT::Auto);
     Data_.heating_state = static_cast<HeatingState>(Event::HeatModeT::Heating);
@@ -47,6 +47,7 @@ class SmartThermoStateData {
 
   SmartThermoStateData(const ThermoStateData& data) {
     Data_ = data;
+    Data_.magic = THERMO_STATE_DATA_MAGIC;
   }
 
   Event::FanModeT& FanMode() {

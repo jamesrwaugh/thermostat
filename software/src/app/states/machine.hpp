@@ -4,22 +4,30 @@
 
 #include <driver_rs_wrapper.hpp>
 
-#include "event.hpp"
-#include "protos/ThermoStateData_bp.h"
+#include "protos/ThermoSaveData_bp.h"
+
+class SafeThermoSaveData {
+ public:
+  SafeThermoSaveData();
+  SafeThermoSaveData(const ThermoSaveData& other);
+  ThermoSaveData Data;
+};
 
 class Machine : public etl::hfsm {
  public:
   Machine();
 
-  void SetThermoStateData(const ThermoStateData& raw);
-  [[nodiscard]] Event::SmartThermoStateData& ThermoStateData();
+  void SetThermoSaveData(const ThermoSaveData& raw);
+  void SetThermoButtonState(const ThermoButtonState& raw);
+  [[nodiscard]] ThermoButtonState& ButtonState();
+  [[nodiscard]] ThermoSaveData& SaveState();
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;
   [[nodiscard]] etl::fsm_state_id_t ChangeSetPoint(int8_t change);
   [[nodiscard]] etl::fsm_state_id_t DetermineNextState();
   void ActivateCoolingRelays(Relay onRelay, Relay offRelay,
-                             ReverseValveTypeE onIfType);
+                             ReverseValveModeT onIfType);
   void EnterHeatingOrCooling();
   void ExitHeatingOrCooling();
   bool IsHeatingOrCoolingNow() const;
@@ -31,6 +39,7 @@ class Machine : public etl::hfsm {
     bool IsHeatingOrCoolingNow{false};
   };
 
-  Event::SmartThermoStateData Data;
+  SafeThermoSaveData SaveData;
+  ThermoButtonState Data;
   StateChangeData ChData;
 };

@@ -79,9 +79,9 @@ void hardReset() {}
 
 void AvrDrivers::SetupScreen() {
   Screen.GU7000_init();
-  Screen.GU7000_defineWindow(Window::UpperRight, 58, 0, 58, 1);
-  Screen.GU7000_defineWindow(Window::LowerRight, 58, 1, 58, 1);
-  Screen.GU7000_defineWindow(Window::LowerLeft, 0, 1, 58, 1);
+  Screen.GU7000_defineWindow(Gu7kWindowId::UpperRight, 58, 0, 58, 1);
+  Screen.GU7000_defineWindow(Gu7kWindowId::LowerRight, 58, 1, 58, 1);
+  Screen.GU7000_defineWindow(Gu7kWindowId::LowerLeft, 0, 1, 58, 1);
 }
 
 void AvrDrivers::SetupInputTimer() {
@@ -196,4 +196,17 @@ void AvrDrivers::ReadInput() {
                    tempNone.is_held())) {
     Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
   }
+}
+
+void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
+  bool heatingOn = (PIND & _BV(PIND4)) != 0;
+  bool coolingOn = (PIND & _BV(PIND5)) != 0;
+  bool reverseHeat = (PINC & _BV(PINC3)) != 0;
+  bool fanOn = (PIND & _BV(PIND6)) != 0;
+  data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
+                                        : ReverseValveModeT::OnForCooling;
+  data->FanState = fanOn ? FanModeT::On : FanModeT::Auto;
+  data->HeatingState = heatingOn   ? HeatModeT::Heating
+                       : coolingOn ? HeatModeT::Cooling
+                                   : HeatModeT::None;
 }

@@ -1,5 +1,6 @@
 #include <etl/hfsm.h>
 
+#include "event.hpp"
 #include "machine.hpp"
 #include "state.hpp"
 

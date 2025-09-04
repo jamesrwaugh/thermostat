@@ -1,5 +1,6 @@
 #include <etl/hfsm.h>
 
+#include "event.hpp"
 #include "machine.hpp"
 #include "state.hpp"
 
@@ -13,5 +14,6 @@ class CoolableParent
   etl::fsm_state_id_t on_event(const Event::SecondPassed&);
   etl::fsm_state_id_t on_event(const Event::FanModeChanged& event);
   etl::fsm_state_id_t on_event(const Event::HeatModeChanged& event);
+  etl::fsm_state_id_t on_event(const Event::ReverseValveModeChanged& event);
   etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
 };

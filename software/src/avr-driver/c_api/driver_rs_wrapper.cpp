@@ -15,10 +15,8 @@ void DriverInit(const AvrDriverCallbacks& callbacks, void* userData) {
   gDriver->Setup();
 }
 
-void DriverGetThermostatType(ThermostatData* data) {
-  bool on = (PINC & _BV(PINC3)) != 0;
-  data->ReverseValveType = on ? ReverseValveTypeE::EnergizeToCool
-                              : ReverseValveTypeE::EnergizeToHeat;
+void DriverGetButtonStateNow(ThermoButtonState* data) {
+  gDriver->ReadStateNow(data);
 }
 
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
@@ -27,7 +25,7 @@ void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
 
 void DriverDisplayTemp(uint8_t temp) {
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Window::LowerRight);
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(temp);
@@ -35,7 +33,7 @@ void DriverDisplayTemp(uint8_t temp) {
 
 void DriverDisplaySetPoint(uint8_t temp) {
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Window::UpperRight);
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(temp);
@@ -43,7 +41,7 @@ void DriverDisplaySetPoint(uint8_t temp) {
 
 void DriverDisplayIsHeating() {
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("HEAT");
@@ -51,7 +49,7 @@ void DriverDisplayIsHeating() {
 
 void DriverDisplayIsCooling() {
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("COOL");
@@ -63,7 +61,7 @@ uint8_t DriverReadTemp() {
 
 void DriverDisplayIsIdle() {
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Window::LowerLeft);
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
 }
 

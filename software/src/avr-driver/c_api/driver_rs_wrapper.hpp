@@ -14,6 +14,8 @@ enum class Button : uint8_t {
   TempNone,
   FanAuto,
   FanOn,
+  ReverseValveOnHeat,
+  ReverseValveOnCool,
 };
 
 enum class Relay : uint8_t {
@@ -29,17 +31,30 @@ struct AvrDriverCallbacks {
                           void* userData);
 };
 
-enum class ReverseValveTypeE : uint8_t {
-  EnergizeToHeat = 0,
-  EnergizeToCool = 1,
+enum class FanModeT : uint8_t {
+  On = 0,
+  Auto = 1,
 };
 
-struct ThermostatData {
-  ReverseValveTypeE ReverseValveType;
+enum class HeatModeT : uint8_t {
+  Heating = 0,
+  Cooling = 1,
+  None = 2,
+};
+
+enum class ReverseValveModeT : uint8_t {
+  OnForHeating = 0,
+  OnForCooling = 1,
+};
+
+struct ThermoButtonState {
+  FanModeT FanState;
+  HeatModeT HeatingState;
+  ReverseValveModeT ReverseValveState;
 };
 
 void DriverInit(const AvrDriverCallbacks& callbacks, void* userData);
-void DriverGetThermostatType(ThermostatData* data);
+void DriverGetButtonStateNow(ThermoButtonState* data);
 void DriverDisplayTemp(uint8_t temp);
 void DriverDisplaySetPoint(uint8_t temp);
 void DriverDisplayIsHeating();

@@ -5,11 +5,12 @@
 #include <tmp116.h>
 
 struct AvrDriverCallbacks;
+struct ThermoButtonState;
 
 struct AvrDrivers {
   AvrDrivers(const AvrDriverCallbacks& callbacks, void* userData);
 
-  enum Window {
+  enum Gu7kWindowId {
     UpperRight = 1,
     LowerRight = 2,
     LowerLeft = 3,
@@ -22,6 +23,7 @@ struct AvrDrivers {
 
   void Setup();
   void ReadInput();
+  void ReadStateNow(ThermoButtonState* out) const;
 
  private:
   const AvrDriverCallbacks& Callbacks_;

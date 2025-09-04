@@ -2,8 +2,8 @@ main_src = files(
     'Serial/HardwareSerial.cpp',
     'Serial/HardwareSerial0.cpp',
     'Serial/Print.cpp',
-    'driver.cpp',
     'c_api/driver_rs_wrapper.cpp',
+    'driver.cpp',
 )
 
 drivers_src = files(
@@ -43,7 +43,5 @@ arv_driver = static_library(
 
 avr_driver_dep = declare_dependency(
     link_with: arv_driver,
-    include_directories: [
-        'c_api',
-    ],
+    include_directories: ['c_api'],
 )

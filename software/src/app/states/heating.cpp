@@ -6,7 +6,7 @@ etl::fsm_state_id_t Heating::on_enter_state() {
   DriverDisplayIsHeating();
   get_fsm_context().EnterHeatingOrCooling();
   get_fsm_context().ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
-                                          ReverseValveTypeE::EnergizeToHeat);
+                                          ReverseValveModeT::OnForHeating);
   return No_State_Change;
 }
 

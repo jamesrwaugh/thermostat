@@ -4,7 +4,7 @@
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
-#include "protos/ThermoStateData_bp.h"
+#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 #include "states/coolable_parent.hpp"
 #include "states/cooling.hpp"
@@ -28,19 +28,28 @@ void OnButtonPressed(Button b, void*) {
       machine.receive(Event::SelectButtonPressed{});
       break;
     case Button::TempHeat:
-      machine.receive(Event::HeatModeChanged{Event::HeatModeT::Heating});
+      machine.receive(Event::HeatModeChanged{HeatModeT::Heating});
       break;
     case Button::TempCold:
-      machine.receive(Event::HeatModeChanged{Event::HeatModeT::Cooling});
+      machine.receive(Event::HeatModeChanged{HeatModeT::Cooling});
       break;
     case Button::TempNone:
-      machine.receive(Event::HeatModeChanged{Event::HeatModeT::None});
+      machine.receive(Event::HeatModeChanged{HeatModeT::None});
       break;
     case Button::FanAuto:
-      machine.receive(Event::FanModeChanged{Event::FanModeT::Auto});
+      machine.receive(Event::FanModeChanged{FanModeT::Auto});
       break;
     case Button::FanOn:
-      machine.receive(Event::FanModeChanged{Event::FanModeT::On});
+      machine.receive(Event::FanModeChanged{FanModeT::On});
+      break;
+    case Button::ReverseValveOnHeat:
+      machine.receive(
+          Event::ReverseValveModeChanged{ReverseValveModeT::OnForHeating});
+      break;
+    case Button::ReverseValveOnCool:
+      machine.receive(
+          Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
+      break;
       break;
   }
 }
@@ -50,16 +59,20 @@ void OnSerialMessage(const char* message, uint16_t messageLen, void*) {
   (void)messageLen;
 }
 
-void TryReadSavedThermoStateData() {
-  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_STATE_DATA];
-  DriverReadFlash(0, rtcDataBuf, BYTES_LENGTH_THERMO_STATE_DATA);
+void ReadThermostatStaticState() {
+  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_SAVE_DATA];
+  DriverReadFlash(0, rtcDataBuf, sizeof(rtcDataBuf));
 
-  ThermoStateData data;
-  DecodeThermoStateData(&data, rtcDataBuf);
+  ThermoSaveData data;
+  DecodeThermoSaveData(&data, rtcDataBuf);
 
   if (data.magic == THERMO_STATE_DATA_MAGIC) {
-    machine.SetThermoStateData(data);
+    machine.SetThermoSaveData(data);
   }
+
+  ThermoButtonState buttons;
+  DriverGetButtonStateNow(&buttons);
+  machine.SetThermoButtonState(buttons);
 }
 
 int main() {
@@ -92,7 +105,7 @@ int main() {
 
   DriverInit(callbacks, nullptr);
 
-  TryReadSavedThermoStateData();
+  ReadThermostatStaticState();
 
   machine.start(true);
 

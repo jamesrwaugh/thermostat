@@ -4,15 +4,24 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
 Machine::Machine() : etl::hfsm(0) {}
 
-void Machine::SetThermoStateData(const struct ThermoStateData& raw) {
-  ::new (&Data) Event::SmartThermoStateData(raw);
+void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
+  SaveData = raw;
 }
 
-[[nodiscard]] Event::SmartThermoStateData& Machine::ThermoStateData() {
+void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
+  Data = raw;
+}
+
+[[nodiscard]] ThermoSaveData& Machine::SaveState() {
+  return SaveData.Data;
+}
+
+[[nodiscard]] ThermoButtonState& Machine::ButtonState() {
   return Data;
 }
 
@@ -31,7 +40,7 @@ void Machine::TickChangeCounter() {
 }
 
 [[nodiscard]] etl::fsm_state_id_t Machine::ChangeSetPoint(int8_t change) {
-  auto& setPoint = ThermoStateData().SetPoint();
+  auto& setPoint = SaveData.Data.set_point;
 
   if (setPoint == 1 && change < 0) {
     return etl::ifsm_state::No_State_Change;
@@ -49,23 +58,23 @@ void Machine::TickChangeCounter() {
 }
 
 [[nodiscard]] etl::fsm_state_id_t Machine::DetermineNextState() {
-  const auto& data = ThermoStateData();
+  const auto& buttons = ButtonState();
 
   if (!HasChangeTimeoutPassed()) {
     return etl::ifsm_state::No_State_Change;
   }
 
   const uint8_t temp = DriverReadTemp();
-  const auto heatMode = data.HeatingMode();
-  const auto setPoint = data.SetPoint();
+  const auto heatMode = buttons.HeatingState;
+  const auto setPoint = SaveData.Data.set_point;
 
-  if (heatMode == Event::HeatModeT::None) {
+  if (heatMode == HeatModeT::None) {
     return State::Type::Idle;
   }
 
-  if (temp < setPoint && heatMode == Event::HeatModeT::Heating) {
+  if (temp < setPoint && heatMode == HeatModeT::Heating) {
     return State::Type::Heating;
-  } else if (temp > setPoint && heatMode == Event::HeatModeT::Cooling) {
+  } else if (temp > setPoint && heatMode == HeatModeT::Cooling) {
     return State::Type::Cooling;
   }
 
@@ -73,11 +82,8 @@ void Machine::TickChangeCounter() {
 }
 
 void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
-                                    ReverseValveTypeE onIfType) {
-  ThermostatData data;
-  DriverGetThermostatType(&data);
-
-  if (data.ReverseValveType == onIfType) {
+                                    ReverseValveModeT onIfType) {
+  if (ButtonState().ReverseValveState == onIfType) {
     DriverRelayOn(Relay::ReversingValve);
   } else {
     DriverRelayOff(Relay::ReversingValve);
@@ -90,7 +96,7 @@ void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
 void Machine::EnterHeatingOrCooling() {
   ChData.IsHeatingOrCoolingNow = true;
 
-  if (ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+  if (ButtonState().FanState == FanModeT::Auto) {
     DriverRelayOn(Relay::Fan);
   }
 }
@@ -99,11 +105,20 @@ void Machine::ExitHeatingOrCooling() {
   ResetStateChangeData();
   ChData.IsHeatingOrCoolingNow = false;
 
-  if (ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+  if (ButtonState().FanState == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
   }
 }
 
 bool Machine::IsHeatingOrCoolingNow() const {
   return ChData.IsHeatingOrCoolingNow;
+}
+
+SafeThermoSaveData::SafeThermoSaveData() {
+  Data.magic = THERMO_STATE_DATA_MAGIC;
+  Data.set_point = 70;
+}
+
+SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
+  Data = other;
 }

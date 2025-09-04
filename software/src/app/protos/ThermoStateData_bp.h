@@ -21,8 +21,7 @@ extern "C" {
 typedef uint8_t FanState; // 3bit
 
 #define FAN_ON 0
-#define FAN_OFF 1
-#define FAN_AUTO 2
+#define FAN_AUTO 1
 
 typedef uint8_t HeatingState; // 3bit
 

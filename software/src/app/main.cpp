@@ -6,11 +6,12 @@
 #include "event.hpp"
 #include "protos/ThermoStateData_bp.h"
 #include "state.hpp"
+#include "states/coolable_parent.hpp"
 #include "states/cooling.hpp"
 #include "states/heating.hpp"
 #include "states/idle.hpp"
 #include "states/machine.hpp"
-#include "states/running_parent.hpp"
+#include "states/program.hpp"
 
 Machine machine;
 volatile bool g10MillisecondPassed = false;
@@ -62,25 +63,25 @@ void TryReadSavedThermoStateData() {
 }
 
 int main() {
-  RunningParent runningParent;
+  CoolableParent coolableParent;
   Idle idleState;
   Heating heatingState;
   Cooling coolingState;
+  Program programmingState;
 
   etl::array<etl::ifsm_state*, State::Type::COUNT> states = {
-      &runningParent,
+      &coolableParent, &idleState,        &heatingState,
+      &coolingState,   &programmingState,
+  };
+
+  etl::array<etl::ifsm_state*, 3> coolableChildren = {
       &idleState,
       &heatingState,
       &coolingState,
   };
 
-  etl::array<etl::ifsm_state*, 2> runningChildren = {
-      &heatingState,
-      &coolingState,
-  };
-
-  runningParent.set_child_states(runningChildren.data(),
-                                 runningChildren.size());
+  coolableParent.set_child_states(coolableChildren.data(),
+                                  coolableChildren.size());
 
   machine.set_states(states.data(), states.size());
 

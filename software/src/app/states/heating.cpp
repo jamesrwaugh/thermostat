@@ -25,11 +25,6 @@ void Heating::on_exit_state() {
   get_fsm_context().ResetStateChangeData();
 }
 
-etl::fsm_state_id_t Heating::on_event(const Event::SecondPassed&) {
-  get_fsm_context().TickChangeCounter();
-  return No_State_Change;
-}
-
 etl::fsm_state_id_t Heating::on_event_unknown(const etl::imessage&) {
   return No_State_Change;
 }

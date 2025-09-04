@@ -19,7 +19,6 @@ struct Type {
 
 enum class FanModeT : uint8_t {
   On = FAN_ON,
-  Off = FAN_OFF,
   Auto = FAN_AUTO,
 };
 
@@ -29,14 +28,14 @@ enum class HeatModeT : uint8_t {
   None = HEATING_NONE,
 };
 
-static_assert(etl::is_same<etl::underlying_type_t<FanModeT>, FanState>::value,
-              "Types not same, needed for enum class cast");
-
-static_assert(
-    etl::is_same<etl::underlying_type_t<HeatModeT>, HeatingState>::value,
-    "Types not same, needed for enum class cast");
-
 class SmartThermoStateData {
+  static_assert(etl::is_same<etl::underlying_type_t<FanModeT>, FanState>::value,
+                "Types not same, needed for enum class cast");
+
+  static_assert(
+      etl::is_same<etl::underlying_type_t<HeatModeT>, HeatingState>::value,
+      "Types not same, needed for enum class cast");
+
  public:
   SmartThermoStateData() {
     Data_.magic = THERMO_STATE_DATA_MAGIC;
@@ -54,11 +53,23 @@ class SmartThermoStateData {
     return (Event::FanModeT&)(Data_.fan_state);
   }
 
+  const Event::FanModeT FanMode() const {
+    return static_cast<Event::FanModeT>(Data_.fan_state);
+  }
+
   Event::HeatModeT& HeatingMode() {
     return (Event::HeatModeT&)(Data_.heating_state);
   }
 
+  const Event::HeatModeT HeatingMode() const {
+    return static_cast<Event::HeatModeT>(Data_.heating_state);
+  }
+
   uint8_t& SetPoint() {
+    return Data_.set_point;
+  }
+
+  uint8_t SetPoint() const {
     return Data_.set_point;
   }
 

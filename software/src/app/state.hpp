@@ -5,10 +5,11 @@
 namespace State {
 struct Type {
   enum TheType : uint8_t {
-    RunningParent = 0,
+    CoolableParent = 0,
     Idle,
     Heating,
     Cooling,
+    Program,
     COUNT,
   };
 };

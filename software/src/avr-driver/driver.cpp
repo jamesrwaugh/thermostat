@@ -177,22 +177,22 @@ void AvrDrivers::ReadInput() {
   }
 
   if (fanOnOff.add(pind & PIND6)) {
-    if (fanOnOff.is_set()) {
+    if (fanOnOff.is_held()) {
       Callbacks_.OnButtonPressed(Button::FanOn, UserData_);
     } else {
       Callbacks_.OnButtonPressed(Button::FanAuto, UserData_);
     }
   }
 
-  if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_set()) {
+  if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_held()) {
     Callbacks_.OnButtonPressed(Button::TempHeat, UserData_);
   }
 
-  if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_set()) {
+  if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_held()) {
     Callbacks_.OnButtonPressed(Button::TempCold, UserData_);
   }
 
-  if (tempNone.add(!tempCoolOn.is_set() && !tempHeatOn.is_set() &&
+  if (tempNone.add(!tempCoolOn.is_held() && !tempHeatOn.is_held() &&
                    tempNone.is_held())) {
     Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
   }

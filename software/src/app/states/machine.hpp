@@ -14,6 +14,8 @@ class Machine : public etl::hfsm {
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;
+  [[nodiscard]] etl::fsm_state_id_t ChangeSetPoint(int8_t change);
+  [[nodiscard]] etl::fsm_state_id_t DetermineNextState();
 
  private:
   struct StateChangeData {

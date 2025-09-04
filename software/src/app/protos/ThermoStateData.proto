@@ -4,8 +4,7 @@ const THERMO_STATE_DATA_MAGIC = 0x0124
 
 enum FanState : uint3 {
     FAN_ON = 0
-    FAN_OFF = 1
-    FAN_AUTO = 2
+    FAN_AUTO = 1
 }
 
 enum HeatingState : uint3 {

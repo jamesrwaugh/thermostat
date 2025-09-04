@@ -1,10 +1,11 @@
 src = files(
     'protos/ThermoStateData_bp.c',
+    'states/coolable_parent.cpp',
     'states/cooling.cpp',
     'states/heating.cpp',
     'states/idle.cpp',
     'states/machine.cpp',
-    'states/running_parent.cpp',
+    'states/program.cpp',
     'main.cpp',
 )
 

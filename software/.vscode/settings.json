@@ -5,5 +5,6 @@
     "--compile-commands-dir=builddir"
   ],
   "clangd.path": "clangd_snapshot/bin/clangd",
-  "testMate.cpp.test.executables": "builddir/**/test-*"
+  "testMate.cpp.test.executables": "builddir/**/test-*",
+  "cSpell.words": ["Coolable", "vect"]
 }

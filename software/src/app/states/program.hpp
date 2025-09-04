@@ -3,9 +3,10 @@
 #include "machine.hpp"
 #include "state.hpp"
 
-class Heating : public etl::fsm_state<Machine, Heating, State::Type::Heating> {
+class Program : public etl::fsm_state<Machine, Program, State::Type::Program> {
  public:
   etl::fsm_state_id_t on_enter_state() override;
   void on_exit_state() override;
+  etl::fsm_state_id_t on_event(const Event::SecondPassed&);
   etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
 };

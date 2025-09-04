@@ -1,5 +1,11 @@
 #include "machine.hpp"
 
+#include <etl/hfsm.h>
+
+#include <driver_rs_wrapper.hpp>
+
+#include "state.hpp"
+
 Machine::Machine() : etl::hfsm(0) {}
 
 void Machine::SetThermoStateData(const struct ThermoStateData& raw) {
@@ -22,4 +28,46 @@ void Machine::TickChangeCounter() {
 
 [[nodiscard]] bool Machine::HasChangeTimeoutPassed() const {
   return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
+}
+
+[[nodiscard]] etl::fsm_state_id_t Machine::ChangeSetPoint(int8_t change) {
+  auto& setPoint = ThermoStateData().SetPoint();
+
+  if (setPoint == 1 && change < 0) {
+    return etl::ifsm_state::No_State_Change;
+  }
+
+  if (setPoint == 100 && change > 0) {
+    return etl::ifsm_state::No_State_Change;
+  }
+
+  setPoint += change;
+
+  DriverDisplaySetPoint(setPoint);
+
+  return DetermineNextState();
+}
+
+[[nodiscard]] etl::fsm_state_id_t Machine::DetermineNextState() {
+  const auto& data = ThermoStateData();
+
+  if (!HasChangeTimeoutPassed()) {
+    return etl::ifsm_state::No_State_Change;
+  }
+
+  const uint8_t temp = DriverReadTemp();
+  const auto heatMode = data.HeatingMode();
+  const auto setPoint = data.SetPoint();
+
+  if (heatMode == Event::HeatModeT::None) {
+    return State::Type::Idle;
+  }
+
+  if (temp < setPoint && heatMode == Event::HeatModeT::Heating) {
+    return State::Type::Heating;
+  } else if (temp > setPoint && heatMode == Event::HeatModeT::Cooling) {
+    return State::Type::Cooling;
+  }
+
+  return etl::ifsm_state::No_State_Change;
 }

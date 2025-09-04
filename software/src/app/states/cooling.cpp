@@ -2,6 +2,8 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "event.hpp"
+
 etl::fsm_state_id_t Cooling::on_enter_state() {
   DriverDisplayIsCooling();
 
@@ -16,18 +18,22 @@ etl::fsm_state_id_t Cooling::on_enter_state() {
 
   DriverRelayOn(Relay::Compressor);
   DriverRelayOff(Relay::Heat);
-  DriverRelayOn(Relay::Fan);
+
+  if (get_fsm_context().ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+    DriverRelayOn(Relay::Fan);
+  }
 
   return No_State_Change;
 }
 
 void Cooling::on_exit_state() {
-  get_fsm_context().ResetStateChangeData();
-}
+  auto& ctx = get_fsm_context();
 
-etl::fsm_state_id_t Cooling::on_event(const Event::SecondPassed&) {
-  get_fsm_context().TickChangeCounter();
-  return No_State_Change;
+  if (ctx.ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+    DriverRelayOff(Relay::Fan);
+  }
+
+  get_fsm_context().ResetStateChangeData();
 }
 
 etl::fsm_state_id_t Cooling::on_event_unknown(const etl::imessage&) {

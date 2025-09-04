@@ -1,14 +1,10 @@
 #include <etl/hfsm.h>
 
-#include "event.hpp"
 #include "machine.hpp"
 #include "state.hpp"
 
-class RunningParent
-    : public etl::fsm_state<Machine, RunningParent, State::Type::RunningParent,
-                            Event::UpButtonPressed, Event::DownButtonPressed,
-                            Event::SecondPassed, Event::FanModeChanged,
-                            Event::HeatModeChanged> {
+class CoolableParent
+    : public etl::fsm_state<Machine, CoolableParent, State::Type::Cooling> {
  public:
   etl::fsm_state_id_t on_enter_state() override;
   void on_exit_state() override;
@@ -18,8 +14,4 @@ class RunningParent
   etl::fsm_state_id_t on_event(const Event::FanModeChanged& event);
   etl::fsm_state_id_t on_event(const Event::HeatModeChanged& event);
   etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
-
- private:
-  etl::fsm_state_id_t ChangeSetPoint(int8_t change);
-  etl::fsm_state_id_t ChangeStateIfNeeded();
 };

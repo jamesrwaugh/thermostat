@@ -29,7 +29,7 @@ struct AvrDriverCallbacks {
                           void* userData);
 };
 
-enum class ReverseValveTypeE {
+enum class ReverseValveTypeE : uint8_t {
   EnergizeToHeat = 0,
   EnergizeToCool = 1,
 };

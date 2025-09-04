@@ -71,3 +71,39 @@ void Machine::TickChangeCounter() {
 
   return etl::ifsm_state::No_State_Change;
 }
+
+void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
+                                    ReverseValveTypeE onIfType) {
+  ThermostatData data;
+  DriverGetThermostatType(&data);
+
+  if (data.ReverseValveType == onIfType) {
+    DriverRelayOn(Relay::ReversingValve);
+  } else {
+    DriverRelayOff(Relay::ReversingValve);
+  }
+
+  DriverRelayOn(onRelay);
+  DriverRelayOff(offRelay);
+}
+
+void Machine::EnterHeatingOrCooling() {
+  ChData.IsHeatingOrCoolingNow = true;
+
+  if (ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+    DriverRelayOn(Relay::Fan);
+  }
+}
+
+void Machine::ExitHeatingOrCooling() {
+  ResetStateChangeData();
+  ChData.IsHeatingOrCoolingNow = false;
+
+  if (ThermoStateData().FanMode() == Event::FanModeT::Auto) {
+    DriverRelayOff(Relay::Fan);
+  }
+}
+
+bool Machine::IsHeatingOrCoolingNow() const {
+  return ChData.IsHeatingOrCoolingNow;
+}

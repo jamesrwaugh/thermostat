@@ -2,6 +2,8 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "event.hpp"
+
 etl::fsm_state_id_t CoolableParent::on_enter_state() {
   get_fsm_context().ResetStateChangeData();
   return No_State_Change;
@@ -26,7 +28,17 @@ etl::fsm_state_id_t CoolableParent::on_event(const Event::SecondPassed&) {
 
 etl::fsm_state_id_t CoolableParent::on_event(
     const Event::FanModeChanged& event) {
-  get_fsm_context().ThermoStateData().FanMode() = event.Mode;
+  auto& ctx = get_fsm_context();
+
+  ctx.ThermoStateData().FanMode() = event.Mode;
+
+  if (event.Mode == Event::FanModeT::On) {
+    DriverRelayOn(Relay::Fan);
+  } else if (event.Mode == Event::FanModeT::Auto &&
+             !ctx.IsHeatingOrCoolingNow()) {
+    DriverRelayOff(Relay::Fan);
+  }
+
   return No_State_Change;
 }
 

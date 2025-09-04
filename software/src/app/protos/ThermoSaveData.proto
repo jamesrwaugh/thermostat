@@ -1,0 +1,14 @@
+proto ThermoSaveData
+
+const THERMO_STATE_DATA_MAGIC = 0x0124
+
+enum TempDisplayUnit : uint1 {
+    TEMP_UNIT_FREEDOM = 0
+    TEMP_UNIT_CELSIUS = 1
+}
+
+message ThermoSaveData {
+    uint16 magic = 1
+    uint8 set_point = 2
+    TempDisplayUnit temp_display_unit = 3
+}

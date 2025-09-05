@@ -109,6 +109,10 @@ void Machine::ExitHeatingOrCooling() {
   ResetStateChangeData();
   ChData.IsHeatingOrCoolingNow = false;
 
+  DriverRelayOff(Relay::Heat);
+  DriverRelayOff(Relay::Compressor);
+  DriverRelayOff(Relay::ReversingValve);
+
   if (ButtonState().FanState == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
   }

@@ -21,6 +21,7 @@ class Machine : public etl::hfsm {
   void SetThermoButtonState(const ThermoButtonState& raw);
   [[nodiscard]] ThermoButtonState& ButtonState();
   [[nodiscard]] ThermoSaveData& SaveState();
+  [[nodiscard]] const ThermoSaveData& SaveState() const;
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;

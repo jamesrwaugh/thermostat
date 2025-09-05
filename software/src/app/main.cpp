@@ -3,7 +3,9 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "comm_event.hpp"
 #include "event.hpp"
+#include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 #include "states/coolable_parent.hpp"
@@ -110,6 +112,9 @@ int main() {
   machine.start(true);
 
   uint8_t lastTenMsCount = 0;
+
+  CommEvent::CommEventType e{SetPointChangedEvent{.new_set_point_f = 2}};
+  CommEvent::PrintCommEventToSerial(e);
 
   while (true) {
     if (g10MillisecondPassed) {

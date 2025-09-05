@@ -13,5 +13,7 @@ class Program : public etl::fsm_state<Machine, Program, State::Type::Program> {
   etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
 
  private:
+  enum class Screen { TempDisplayType = 0 };
+  Screen Screen_;
   ThermoSaveData DirtyData_;
 };

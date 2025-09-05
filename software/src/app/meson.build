@@ -1,4 +1,5 @@
 src = files(
+    'protos/ThermoCommEvent_bp.c',
     'protos/ThermoSaveData_bp.c',
     'states/coolable_parent.cpp',
     'states/cooling.cpp',
@@ -6,6 +7,7 @@ src = files(
     'states/idle.cpp',
     'states/machine.cpp',
     'states/program.cpp',
+    'comm_event.cpp',
     'main.cpp',
 )
 

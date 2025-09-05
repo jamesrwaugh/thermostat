@@ -21,6 +21,10 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
   return SaveData.Data;
 }
 
+[[nodiscard]] const ThermoSaveData& Machine::SaveState() const {
+  return SaveData.Data;
+}
+
 [[nodiscard]] ThermoButtonState& Machine::ButtonState() {
   return Data;
 }

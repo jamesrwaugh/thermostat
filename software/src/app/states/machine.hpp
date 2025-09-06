@@ -18,7 +18,7 @@ struct SerialPrintVisitor {
   void operator()(TempChangedEvent& e);
   void operator()(SetPointChangedEvent& e);
   void operator()(HeatingModeChangedEvent& e);
-  void operator()(SettingsChangedEvent& e);
+  void operator()(ThermoSaveData& e);
 };
 
 class Machine : public etl::hfsm {
@@ -37,8 +37,9 @@ class Machine : public etl::hfsm {
   [[nodiscard]] etl::fsm_state_id_t DetermineNextState();
   void ActivateCoolingRelays(Relay onRelay, Relay offRelay,
                              ReverseValveModeT onIfType);
-  void EnterHeatingOrCooling();
+  void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
+  void ReadTemperature();
   bool IsHeatingOrCoolingNow() const;
   SerialPrintVisitor& Comms();
 
@@ -53,4 +54,6 @@ class Machine : public etl::hfsm {
   ThermoButtonState Data;
   StateChangeData ChData;
   SerialPrintVisitor V;
+  uint8_t LastReadTemp;
+  uint8_t LastCommTemp;
 };

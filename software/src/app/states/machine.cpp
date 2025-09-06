@@ -8,7 +8,7 @@
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
-Machine::Machine() : etl::hfsm(0) {}
+Machine::Machine() : etl::hfsm(0), LastReadTemp(0), LastCommTemp(0) {}
 
 void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
   SaveData = raw;
@@ -40,6 +40,16 @@ void Machine::TickChangeCounter() {
   }
 }
 
+void Machine::ReadTemperature() {
+  LastReadTemp = DriverReadTemp();
+
+  if (LastReadTemp != LastCommTemp) {
+    auto v = TempChangedEvent{.new_temp_f = LastReadTemp};
+    Comms()(v);
+    LastCommTemp = LastReadTemp;
+  }
+}
+
 [[nodiscard]] bool Machine::HasChangeTimeoutPassed() const {
   return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
 }
@@ -59,6 +69,9 @@ void Machine::TickChangeCounter() {
 
   DriverDisplaySetPoint(setPoint);
 
+  auto v = SetPointChangedEvent{.new_set_point_f = setPoint};
+  Comms()(v);
+
   return DetermineNextState();
 }
 
@@ -69,7 +82,6 @@ void Machine::TickChangeCounter() {
     return etl::ifsm_state::No_State_Change;
   }
 
-  const uint8_t temp = DriverReadTemp();
   const auto heatMode = buttons.HeatingState;
   const auto setPoint = SaveData.Data.set_point;
 
@@ -77,9 +89,9 @@ void Machine::TickChangeCounter() {
     return State::Type::Idle;
   }
 
-  if (temp < setPoint && heatMode == HeatModeT::Heating) {
+  if (LastReadTemp < setPoint && heatMode == HeatModeT::Heating) {
     return State::Type::Heating;
-  } else if (temp > setPoint && heatMode == HeatModeT::Cooling) {
+  } else if (LastReadTemp > setPoint && heatMode == HeatModeT::Cooling) {
     return State::Type::Cooling;
   }
 
@@ -98,8 +110,25 @@ void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
   DriverRelayOff(offRelay);
 }
 
-void Machine::EnterHeatingOrCooling() {
+void Machine::EnterHeatingOrCooling(HeatModeT mode) {
   ChData.IsHeatingOrCoolingNow = true;
+
+  uint8_t mode2 = HEATING_COMM_IDLE;
+
+  switch (mode) {
+    case HeatModeT::Heating:
+      mode2 = HEATING_COMM_HEATING;
+      break;
+    case HeatModeT::Cooling:
+      mode2 = HEATING_COMM_COOLING;
+      break;
+    case HeatModeT::None:
+      mode2 = HEATING_COMM_IDLE;
+      break;
+  }
+
+  auto v = HeatingModeChangedEvent{.new_mode = mode2};
+  Comms()(v);
 
   if (ButtonState().FanState == FanModeT::Auto) {
     DriverRelayOn(Relay::Fan);
@@ -153,10 +182,10 @@ void SerialPrintVisitor::operator()(HeatingModeChangedEvent& e) {
   DriverWriteSerialPort(b, sizeof(b));
 }
 
-void SerialPrintVisitor::operator()(SettingsChangedEvent& e) {
-  uint8_t b[BYTES_LENGTH_SETTINGS_CHANGED_EVENT + 1];
+void SerialPrintVisitor::operator()(ThermoSaveData& e) {
+  uint8_t b[BYTES_LENGTH_THERMO_SAVE_DATA + 1];
   b[0] = 3;
-  EncodeSettingsChangedEvent(&e, b + 1);
+  EncodeThermoSaveData(&e, b + 1);
   DriverWriteSerialPort(b, sizeof(b));
 }
 

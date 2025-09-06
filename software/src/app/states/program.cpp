@@ -13,6 +13,7 @@ void Program::on_exit_state() {
   EncodeThermoSaveData(&DirtyData_, buffer);
   DriverWriteFlash(0, buffer, sizeof(buffer));
   get_fsm_context().SetThermoSaveData(DirtyData_);
+  get_fsm_context().Comms()(DirtyData_);
 }
 
 etl::fsm_state_id_t Program::on_event(const Event::SecondPassed&) {

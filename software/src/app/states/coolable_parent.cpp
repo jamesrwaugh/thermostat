@@ -30,8 +30,12 @@ etl::fsm_state_id_t CoolableParent::on_event(const Event::DownButtonPressed&) {
 }
 
 etl::fsm_state_id_t CoolableParent::on_event(const Event::SecondPassed&) {
-  get_fsm_context().TickChangeCounter();
-  return get_fsm_context().DetermineNextState();
+  auto& ctx = get_fsm_context();
+
+  ctx.ReadTemperature();
+  ctx.TickChangeCounter();
+
+  return ctx.DetermineNextState();
 }
 
 etl::fsm_state_id_t CoolableParent::on_event(

@@ -6182,6 +6182,26 @@
 		)
 		(uuid "da20b5d4-6739-4eda-a3db-3be8a6d1acd1")
 	)
+	(text "DOWN"
+		(exclude_from_sim no)
+		(at 87.122 158.75 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "dfc707f8-a730-48e1-9885-87f29da366e7")
+	)
+	(text "UP"
+		(exclude_from_sim no)
+		(at 80.518 154.178 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "e0b9ef57-93b1-4b89-8dee-c00c27ee1124")
+	)
 	(junction
 		(at 151.13 104.14)
 		(diameter 0)
@@ -11926,7 +11946,7 @@
 			)
 		)
 		(property "Value" "12MM"
-			(at 74.168 154.178 0)
+			(at 75.438 153.924 0)
 			(effects
 				(font
 					(size 1.27 1.27)

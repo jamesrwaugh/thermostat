@@ -1,6 +1,6 @@
 #include "sim_thermostat.hpp"
 
-void sim_debug_log(const char *fmt, va_list args) {
+void sim_debug_log(const char* fmt, va_list args) {
   va_list args2;
   va_copy(args2, args);
 
@@ -18,7 +18,7 @@ int main() {
   std::atomic<bool> refresh_ui_continue = true;
   auto rec = ftxui::MakeReceiver<ftxui::Closure>();
 
-  SimAvrThermostat Thermo("", false, rec);
+  SimAvrThermostat Thermo("s", false, rec);
 
   return 0;
 }

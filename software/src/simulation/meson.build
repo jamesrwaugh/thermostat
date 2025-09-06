@@ -7,6 +7,7 @@ simulation_src = files(
 )
 
 simavr_dep = dependency('simavr', native: true)
+simavr_parts_dep = dependency('simavrparts', native: true)
 
 ftxui_dep = dependency(
     'ftxui',
@@ -21,6 +22,7 @@ executable(
         simavr_dep,
         ftxui_dep,
         simavr_toolbox_dep,
+        simavr_parts_dep,
     ],
     include_directories: [],
     override_options: [

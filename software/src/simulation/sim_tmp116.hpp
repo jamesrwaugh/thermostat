@@ -1,9 +1,22 @@
 #pragma once
 
+#include <chrono>
 #include <simavr-toolbox/sim_i2c_base.hpp>
+
+#include "relay.hpp"
 
 class SimTMP116 final : public SimAvrI2CComponent {
  public:
-  void HandleI2CMessage(const avr_twi_msg_t &msg) override;
+  SimTMP116(avr_t* avr, uint8_t i2cAddress);
+
+  void HandleI2CMessage(const avr_twi_msg_t& msg) override;
   void ResetStateMachine() override;
+
+  void SetTempF(uint8_t tempF);
+  void SimulateTempChange(const RelayState& relays);
+
+ private:
+  void UpdateTemperature(const RelayState& relays);
+  float TempF_{0};
+  std::chrono::steady_clock::time_point LastTempTick;
 };

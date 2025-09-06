@@ -7,7 +7,6 @@ src = files(
     'states/idle.cpp',
     'states/machine.cpp',
     'states/program.cpp',
-    'comm_event.cpp',
     'main.cpp',
     'sim.c',
 )

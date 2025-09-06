@@ -4,6 +4,7 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
 
 class SafeThermoSaveData {
@@ -11,6 +12,13 @@ class SafeThermoSaveData {
   SafeThermoSaveData();
   SafeThermoSaveData(const ThermoSaveData& other);
   ThermoSaveData Data;
+};
+
+struct SerialPrintVisitor {
+  void operator()(TempChangedEvent& e);
+  void operator()(SetPointChangedEvent& e);
+  void operator()(HeatingModeChangedEvent& e);
+  void operator()(SettingsChangedEvent& e);
 };
 
 class Machine : public etl::hfsm {
@@ -32,6 +40,7 @@ class Machine : public etl::hfsm {
   void EnterHeatingOrCooling();
   void ExitHeatingOrCooling();
   bool IsHeatingOrCoolingNow() const;
+  SerialPrintVisitor& Comms();
 
  private:
   struct StateChangeData {
@@ -43,4 +52,5 @@ class Machine : public etl::hfsm {
   SafeThermoSaveData SaveData;
   ThermoButtonState Data;
   StateChangeData ChData;
+  SerialPrintVisitor V;
 };

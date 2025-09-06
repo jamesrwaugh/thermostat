@@ -3,7 +3,6 @@
 
 #include <driver_rs_wrapper.hpp>
 
-#include "comm_event.hpp"
 #include "event.hpp"
 #include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
@@ -51,7 +50,6 @@ void OnButtonPressed(Button b, void*) {
     case Button::ReverseValveOnCool:
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
-      break;
       break;
   }
 }
@@ -113,8 +111,8 @@ int main() {
 
   uint8_t lastTenMsCount = 0;
 
-  CommEvent::CommEventType e{SetPointChangedEvent{.new_set_point_f = 2}};
-  CommEvent::PrintCommEventToSerial(e);
+  auto v = SetPointChangedEvent{.new_set_point_f = 2};
+  machine.Comms()(v);
 
   while (true) {
     if (g10MillisecondPassed) {

@@ -38,5 +38,5 @@ uint16_t TMP116::read_temp() const {
   temp *= TEMP_RESOLUTION_INT;
   temp /= END;
 
-  return 0;
+  return temp;
 }

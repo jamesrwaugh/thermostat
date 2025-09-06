@@ -4,6 +4,7 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
@@ -129,4 +130,36 @@ SafeThermoSaveData::SafeThermoSaveData() {
 
 SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
   Data = other;
+}
+
+void SerialPrintVisitor::operator()(TempChangedEvent& e) {
+  uint8_t b[BYTES_LENGTH_TEMP_CHANGED_EVENT + 1];
+  b[0] = 0;
+  EncodeTempChangedEvent(&e, b + 1);
+  DriverWriteSerialPort(b, sizeof(b));
+}
+
+void SerialPrintVisitor::operator()(SetPointChangedEvent& e) {
+  uint8_t b[BYTES_LENGTH_SET_POINT_CHANGED_EVENT + 1];
+  b[0] = 1;
+  EncodeSetPointChangedEvent(&e, b + 1);
+  DriverWriteSerialPort(b, sizeof(b));
+}
+
+void SerialPrintVisitor::operator()(HeatingModeChangedEvent& e) {
+  uint8_t b[BYTES_LENGTH_HEATING_MODE_CHANGED_EVENT + 1];
+  b[0] = 2;
+  EncodeHeatingModeChangedEvent(&e, b + 1);
+  DriverWriteSerialPort(b, sizeof(b));
+}
+
+void SerialPrintVisitor::operator()(SettingsChangedEvent& e) {
+  uint8_t b[BYTES_LENGTH_SETTINGS_CHANGED_EVENT + 1];
+  b[0] = 3;
+  EncodeSettingsChangedEvent(&e, b + 1);
+  DriverWriteSerialPort(b, sizeof(b));
+}
+
+SerialPrintVisitor& Machine::Comms() {
+  return V;
 }

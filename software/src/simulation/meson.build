@@ -1,6 +1,8 @@
 simulation_src = files(
     'ftxui_simulated_avr.cpp',
     'main.cpp',
+    'sim_gu700.cpp',
+    'sim_i2c_smarter_base.cpp',
     'sim_thermostat.cpp',
     'sim_tmp116.cpp',
     'ui.cpp',

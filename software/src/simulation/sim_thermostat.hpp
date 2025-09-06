@@ -7,6 +7,7 @@
 
 #include "ftxui_simulated_avr.hpp"
 #include "relay.hpp"
+#include "sim_gu700.hpp"
 #include "sim_tmp116.hpp"
 
 extern "C" {
@@ -32,12 +33,13 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void SwitchReverseValve(bool onForHeat);
   void SendSerialMessage(std::string_view message);
   const RelayState& GetRelayState() const;
+  const SimFakeGu7000::State& GetScreenState() const;
 
  private:
   void OnRelayChange(Relay r, bool value);
 
   TaskSender S_;
-  std::unique_ptr<SimGu7000> Screen;
+  std::unique_ptr<SimFakeGu7000> Screen;
   std::unique_ptr<SimBouncySwitch> UpButton;
   std::unique_ptr<SimBouncySwitch> DownButton;
   std::unique_ptr<SimBouncySwitch> SelectButton;

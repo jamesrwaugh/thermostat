@@ -10,4 +10,6 @@ class Ui : public ftxui::ComponentBase {
 
  private:
   SimAvrThermostat& Thermostat_;
+  int fan_selection_ = 0;   // 0 = Auto, 1 = On
+  int heat_selection_ = 0;  // 0 = Heat, 1 = Cool, 2 = None
 };

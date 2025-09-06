@@ -74,8 +74,8 @@ void FtxUiSimulatedAvr::BeforeAvrCycleSideEffect() {
   //
 }
 
-avr_irq_t* FtxUiSimulatedAvr::get_pin_irq(avr_t* avr, char pin, uint8_t index) {
-  return avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ(pin), index);
+avr_irq_t* FtxUiSimulatedAvr::GetPinIrq(char pin, uint8_t index) {
+  return avr_io_getirq(Avr_, AVR_IOCTL_IOPORT_GETIRQ(pin), index);
 }
 
 void FtxUiSimulatedAvr::Post(ftxui::Closure&& f) {

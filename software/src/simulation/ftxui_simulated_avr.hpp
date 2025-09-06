@@ -21,6 +21,6 @@ class FtxUiSimulatedAvr {
 
   TaskSender S_;
   virtual void BeforeAvrCycleSideEffect();
-  avr_irq_t* get_pin_irq(avr_t* avr, char pin, uint8_t index);
+  avr_irq_t* GetPinIrq(char pin, uint8_t index);
   avr_t* Avr_{nullptr};
 };

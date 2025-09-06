@@ -114,11 +114,16 @@ int main() {
   auto v = SetPointChangedEvent{.new_set_point_f = 2};
   machine.Comms()(v);
 
+  const char* message = "Hello, world!\n";
+
+  DriverWriteSerialPort((uint8_t*)message, strlen(message));
+
   while (true) {
+    DriverPollInput();
+
     if (g10MillisecondPassed) {
       g10MillisecondPassed = false;
       lastTenMsCount += 1;
-      DriverPollInput();
     }
 
     if (lastTenMsCount >= 10) {
@@ -128,13 +133,13 @@ int main() {
       DriverDisplayTemp(temp);
     }
 
-    DriverMcuSleep();
+    // DriverMcuSleep();
   }
 
   return 0;
 }
 
-ISR(TIMER1_OVF_vect) {
+ISR(TIMER1_COMPA_vect) {
   g10MillisecondPassed = true;
 }
 

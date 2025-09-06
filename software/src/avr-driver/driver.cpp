@@ -19,6 +19,7 @@ void AvrDrivers::Setup() {
   SetupInputTimer();
   SetupRTC();
   SetupScreen();
+  SetupSerial();
   sei();
 }
 
@@ -90,18 +91,18 @@ void AvrDrivers::SetupScreen() {
 
 void AvrDrivers::SetupInputTimer() {
   // prescaler clk / 1024
-  TCCR1A |= _BV(CS12);
-  TCCR1A &= ~_BV(CS11);
-  TCCR1A |= _BV(CS10);
+  TCCR1B |= _BV(CS12);
+  TCCR1B &= ~_BV(CS11);
+  TCCR1B |= _BV(CS10);
 
-  // CTC mode on OCR1, to stop at that value
+  // CTC mode on OCR1A, to stop at that value
   // WGM1[3:0] = 0100 = 4
   TCCR1B &= ~_BV(WGM13);
   TCCR1B |= _BV(WGM12);
   TCCR1A &= ~_BV(WGM11);
   TCCR1A &= ~_BV(WGM10);
 
-  // Set OCR1, approx ~10ms per overflow
+  // Set OCR1A, approx ~10ms per overflow
   constexpr uint16_t top = 72;
   OCR1A = top;
 
@@ -148,6 +149,10 @@ uint8_t AvrDrivers::SetupRTC() {
   return res;
 }
 
+void AvrDrivers::SetupSerial() {
+  Serial_.begin(9600);
+}
+
 // https://www.etlcpp.com/debounce.html
 const uint8_t BTN_DEBOUNCE_COUNT = 2;
 const uint8_t BTN_HOLD_COUNT = 50;
@@ -168,19 +173,19 @@ TmpDebounce tempNone;
 void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
-  if (upButton.add(pind & PIND3) && upButton.is_set()) {
+  if (upButton.add(!(pind & _BV(PIND3))) && upButton.is_set()) {
     Callbacks_.OnButtonPressed(Button::Up, UserData_);
   }
 
-  if (downButton.add(pind & PIND2) && downButton.is_set()) {
+  if (downButton.add(!(pind & _BV(PIND2))) && downButton.is_set()) {
     Callbacks_.OnButtonPressed(Button::Down, UserData_);
   }
 
-  if (selectButton.add(pind & PIND7) && selectButton.is_set()) {
+  if (selectButton.add(!(pind & _BV(PIND7))) && selectButton.is_set()) {
     Callbacks_.OnButtonPressed(Button::Select, UserData_);
   }
 
-  if (fanOnOff.add(pind & PIND6)) {
+  if (fanOnOff.add(!(pind & _BV(PIND6)))) {
     if (fanOnOff.is_held()) {
       Callbacks_.OnButtonPressed(Button::FanOn, UserData_);
     } else {
@@ -188,11 +193,11 @@ void AvrDrivers::ReadInput() {
     }
   }
 
-  if (tempHeatOn.add(pind & PIND4) && tempHeatOn.is_held()) {
+  if (tempHeatOn.add(!(pind & _BV(PIND4))) && tempHeatOn.is_held()) {
     Callbacks_.OnButtonPressed(Button::TempHeat, UserData_);
   }
 
-  if (tempCoolOn.add(pind & PIND5) && tempCoolOn.is_held()) {
+  if (tempCoolOn.add(!(pind & _BV(PIND5))) && tempCoolOn.is_held()) {
     Callbacks_.OnButtonPressed(Button::TempCold, UserData_);
   }
 

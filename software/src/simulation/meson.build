@@ -1,5 +1,4 @@
 simulation_src = files(
-    'ftxui_simulated_avr.cpp',
     'main.cpp',
     'sim_gu700.cpp',
     'sim_i2c_smarter_base.cpp',
@@ -10,6 +9,7 @@ simulation_src = files(
 
 toolkit = subproject('simavr-toolbox')
 simavr_toolbox_dep = toolkit.get_variable('simavr_toolbox_dep')
+ftxui_toolbox_dep = toolkit.get_variable('ftxui_toolbox_dep')
 
 simavr_dep = dependency('simavr', native: true)
 simavr_parts_dep = dependency('simavrparts', native: true)
@@ -28,6 +28,7 @@ executable(
         ftxui_dep,
         simavr_toolbox_dep,
         simavr_parts_dep,
+        ftxui_toolbox_dep,
     ],
     include_directories: [],
     override_options: [

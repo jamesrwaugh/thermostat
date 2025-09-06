@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstring>
 #include <memory>
+#include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
 #include <simavr-toolbox/sim_gu7000.hpp>
 

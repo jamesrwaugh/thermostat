@@ -5,7 +5,10 @@
 #include <ftxui/screen/color.hpp>
 #include <string_view>
 
-Ui::Ui(SimAvrThermostat& thermostat) : Thermostat_(thermostat) {
+#include "ftxui-toolbox/logs_renderer.hpp"
+
+Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
+    : Thermostat_(thermostat) {
   using namespace ftxui;
 
   // Left Panel - Controls
@@ -103,27 +106,20 @@ Ui::Ui(SimAvrThermostat& thermostat) : Thermostat_(thermostat) {
         text("Relay States") | bold | center,
         separator(),
         hbox({
-            vbox({
-                text("Fan"),
-                fan_light | center,
-            }) | border,
-            separator(),
-            vbox({
-                text("Compressor"),
-                compressor_light | center,
-            }) | border,
+            text("Fan"),
+            fan_light | center,
         }),
-        separator(),
         hbox({
-            vbox({
-                text("Heat"),
-                heat_light | center,
-            }) | border,
-            separator(),
-            vbox({
-                text("Reverse Valve"),
-                reverse_valve_light | center,
-            }) | border,
+            text("Compressor"),
+            compressor_light | center,
+        }),
+        hbox({
+            text("Heat"),
+            heat_light | center,
+        }),
+        hbox({
+            text("Reverse Valve"),
+            reverse_valve_light | center,
         }),
     });
   });
@@ -158,11 +154,14 @@ Ui::Ui(SimAvrThermostat& thermostat) : Thermostat_(thermostat) {
     });
   });
 
+  auto logs_panel = LogsRenderer(logs);
+
   // Main layout - three panels side by side
   auto main_layout = Container::Horizontal({
       left_panel,
       relay_panel,
       screen_panel,
+      logs_panel,
   });
 
   Add(main_layout);

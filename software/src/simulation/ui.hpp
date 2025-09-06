@@ -1,12 +1,13 @@
 #pragma once
 
+#include <ftxui-toolbox/locked_dequeue.hpp>
 #include <ftxui/component/component_base.hpp>
 
 #include "sim_thermostat.hpp"
 
 class Ui : public ftxui::ComponentBase {
  public:
-  Ui(SimAvrThermostat& thermostat);
+  Ui(SimAvrThermostat& thermostat, LockedDequeue& logs);
 
  private:
   SimAvrThermostat& Thermostat_;

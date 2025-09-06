@@ -1,11 +1,11 @@
 #pragma once
 
+#include <ftxui-toolbox/ftxui_simulated_avr.hpp>
 #include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
 #include <simavr-toolbox/sim_gu7000.hpp>
 #include <string_view>
 
-#include "ftxui_simulated_avr.hpp"
 #include "relay.hpp"
 #include "sim_gu700.hpp"
 #include "sim_tmp116.hpp"

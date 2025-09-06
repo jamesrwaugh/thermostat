@@ -28,9 +28,10 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
 
 SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
-    : FtxUiSimulatedAvr(filename, gdb), S_{receiver->MakeSender()} {
+    : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
-  Screen = std::make_unique<SimGu7000>(Avr_, get_pin_irq(Avr_, 'B', 1), 0xA0);
+  // Screen = std::make_unique<SimGu7000>(Avr_, get_pin_irq(Avr_, 'B', 1),
+  // 0xA0);
 
   // Buttons
   UpButton = std::make_unique<SimBouncySwitch>(
@@ -92,48 +93,44 @@ const RelayState& SimAvrThermostat::GetRelayState() const {
 }
 
 void SimAvrThermostat::PushUpButton() {
-  UpButton->CloseForMs(std::chrono::milliseconds(100));
+  Post([this]() { UpButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
 void SimAvrThermostat::PushDownButton() {
-  DownButton->CloseForMs(std::chrono::milliseconds(100));
+  Post([this]() { DownButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
 void SimAvrThermostat::SwitchHeatingHeat() {
-  TempCool->Open();
-  TempHeat->Close();
+  Post([this]() { TempCool->Open(); });
+  Post([this]() { TempHeat->Close(); });
 }
 
 void SimAvrThermostat::SwitchHeatingCooling() {
-  TempHeat->Open();
-  TempCool->Close();
+  Post([this]() { TempHeat->Open(); });
+  Post([this]() { TempCool->Close(); });
 }
 
 void SimAvrThermostat::SwitchHeatingNone() {
-  TempHeat->Open();
-  TempCool->Open();
+  Post([this]() { TempHeat->Open(); });
+  Post([this]() { TempCool->Open(); });
 }
 
 void SimAvrThermostat::SwitchFanOn() {
-  FanSwitch->Close();
+  Post([this]() { FanSwitch->Close(); });
 }
 
 void SimAvrThermostat::SwitchFanAuto() {
-  FanSwitch->Open();
+  Post([this]() { FanSwitch->Open(); });
 }
 
 void SimAvrThermostat::SwitchReverseValve(bool onForHeat) {
-  FanSwitch->Set(onForHeat);
+  Post([this, onForHeat]() { FanSwitch->Set(onForHeat); });
 }
 
 void SimAvrThermostat::SendSerialMessage(std::string_view message) {
   //
 }
 
-void SimAvrThermostat::UpdateSimulatedTemperature() {
+void SimAvrThermostat::BeforeAvrCycleSideEffect() {
   Tmp116_->SimulateTempChange(Relays_);
-}
-
-void SimAvrThermostat::RunOnceExtra() {
-  UpdateSimulatedTemperature();
 }

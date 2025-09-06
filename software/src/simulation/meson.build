@@ -6,6 +6,9 @@ simulation_src = files(
     'ui.cpp',
 )
 
+toolkit = subproject('simavr-toolbox')
+simavr_toolbox_dep = toolkit.get_variable('simavr_toolbox_dep')
+
 simavr_dep = dependency('simavr', native: true)
 simavr_parts_dep = dependency('simavrparts', native: true)
 

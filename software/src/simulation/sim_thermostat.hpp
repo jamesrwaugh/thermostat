@@ -19,7 +19,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
 
   using RelayCb = std::function<void(Relay r, bool value)>;
 
-  virtual void RunOnceExtra() override;
+  virtual void BeforeAvrCycleSideEffect() override;
 
   void PushUpButton();
   void PushDownButton();
@@ -32,7 +32,6 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void SwitchReverseValve(bool onForHeat);
   void SendSerialMessage(std::string_view message);
   const RelayState& GetRelayState() const;
-  void UpdateSimulatedTemperature();
 
  private:
   void OnRelayChange(Relay r, bool value);

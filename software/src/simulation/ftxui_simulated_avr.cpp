@@ -13,7 +13,9 @@
 #include <ftxui/component/task.hpp>
 #include <simavr-toolbox/sim_base.hpp>
 
-FtxUiSimulatedAvr::FtxUiSimulatedAvr(std::string_view filename, bool gdb) {
+FtxUiSimulatedAvr::FtxUiSimulatedAvr(std::string_view filename, bool gdb,
+                                     TaskReceiver& receiver)
+    : S_{receiver->MakeSender()} {
   Avr_ = LoadFirmware(filename, gdb);
 }
 
@@ -63,15 +65,19 @@ void FtxUiSimulatedAvr::BlockingLoop(
     while (receiver->ReceiveNonBlocking(&t)) {
       t();
     }
-    RunOnceExtra();
+    BeforeAvrCycleSideEffect();
     state = avr_run(Avr_);
   }
 }
 
-void FtxUiSimulatedAvr::RunOnceExtra() {
+void FtxUiSimulatedAvr::BeforeAvrCycleSideEffect() {
   //
 }
 
 avr_irq_t* FtxUiSimulatedAvr::get_pin_irq(avr_t* avr, char pin, uint8_t index) {
   return avr_io_getirq(avr, AVR_IOCTL_IOPORT_GETIRQ(pin), index);
+}
+
+void FtxUiSimulatedAvr::Post(ftxui::Closure&& f) {
+  S_->Send(std::move(f));
 }

@@ -9,6 +9,7 @@ src = files(
     'states/program.cpp',
     'comm_event.cpp',
     'main.cpp',
+    'sim.c',
 )
 
 etl_dep = dependency(
@@ -17,11 +18,14 @@ etl_dep = dependency(
     modules: ['etl::etl'],
 )
 
+sim_avr_avr_inc = ['/usr/local/include/simavr/avr']
+
 executable(
     'thermo-app',
     src,
     dependencies: [etl_dep, avr_driver_dep, bitproto_dep],
     cpp_args: ['-DETL_NO_STL', '-fno-threadsafe-statics'],
+    include_directories: sim_avr_avr_inc,
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
         '-mmcu=atmega88p',

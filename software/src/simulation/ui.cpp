@@ -64,12 +64,16 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
       },
       ButtonOption::Animated());
 
+  auto topLabel = Renderer([] { return text("Buttons") | bold; });
   auto fan_label = Renderer([] { return text("Fan Mode:") | bold; });
   auto heat_label = Renderer([] { return text("Heat Mode:") | bold; });
+  auto separator0 = Renderer([] { return separator(); });
   auto separator1 = Renderer([] { return separator(); });
   auto separator2 = Renderer([] { return separator(); });
 
   auto left_panel = Container::Vertical({
+      topLabel,
+      separator0,
       up,
       down,
       select,

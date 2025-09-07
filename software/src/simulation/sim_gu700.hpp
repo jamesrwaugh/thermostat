@@ -16,7 +16,7 @@ class SimFakeGu7000 : public SimAvrI2CSmarterComponent {
     uint8_t Temp{0};
   };
 
-  SimFakeGu7000(avr_t* avr, uint8_t i2cAddress);
+  SimFakeGu7000(avr_t* avr);
   void OnDataReceived(const std::vector<uint8_t>& data) override;
   const State& GetState() const;
 

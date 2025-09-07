@@ -31,7 +31,7 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
     : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
-  Screen = std::make_unique<SimFakeGu7000>(Avr_, 0xA0);
+  Screen = std::make_unique<SimFakeGu7000>(Avr_);
 
   // Buttons
   UpButton =

@@ -6,11 +6,13 @@
 #include <string_view>
 #include <variant>
 
-class SimI2CListener : public SimAvrI2CComponent {
+using I2cStructMessageCallback = std::function<void(avr_twi_msg_irq_t*)>;
+
+class SimI2CListener {
  public:
   SimI2CListener(avr_t* avr);
 
-  virtual void HandleI2CMessage(const avr_twi_msg_t& msg) override;
+  void HandleI2CMessage(const avr_twi_msg_t& msg);
 
   enum class RegWriteMethod { RegisterThenData = 0, RawDataOnly };
 
@@ -39,6 +41,12 @@ class SimI2CListener : public SimAvrI2CComponent {
   typedef std::variant<ReadMessage, WriteMessage> Message;
 
  private:
+  avr_t* Avr_{nullptr};
+  I2cStructMessageCallback OnMessageFromAvr_;
+  I2cStructMessageCallback OnMessageToAvr_;
+  void OnMessageFromAvr(avr_twi_msg_irq_t* value);
+  void OnMessageToAvr(avr_twi_msg_irq_t* value);
+
   std::optional<Message> MessageInProgress_;
   std::vector<Message> Messages_;
 };

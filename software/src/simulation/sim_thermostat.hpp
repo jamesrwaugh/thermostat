@@ -8,6 +8,7 @@
 
 #include "relay.hpp"
 #include "sim_gu700.hpp"
+#include "sim_i2c_listener.hpp"
 #include "sim_tmp116.hpp"
 
 extern "C" {
@@ -51,4 +52,5 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   std::unique_ptr<SimTMP116> Tmp116_;
   RelayState Relays_;
   RelayCb RelayCb_;
+  SimI2CListener I2CListener_;
 };

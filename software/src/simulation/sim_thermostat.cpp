@@ -29,7 +29,7 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
 
 SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
-    : FtxUiSimulatedAvr(filename, gdb, receiver) {
+    : FtxUiSimulatedAvr(filename, gdb, receiver), I2CListener_(Avr_) {
   // Screen
   Screen = std::make_unique<SimFakeGu7000>(Avr_);
 

@@ -6,7 +6,7 @@
 
 class SimAvrI2CSmarterComponent : public SimAvrI2CComponent {
  public:
-  SimAvrI2CSmarterComponent(avr_t* avr, uint8_t i2cAddress);
+  using SimAvrI2CComponent::SimAvrI2CComponent;
 
   void HandleI2CMessage(const avr_twi_msg_t& msg) override;
   void ResetStateMachine() override;

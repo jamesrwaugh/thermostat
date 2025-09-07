@@ -1,9 +1,5 @@
 #include "sim_i2c_smarter_base.hpp"
 
-SimAvrI2CSmarterComponent::SimAvrI2CSmarterComponent(avr_t* avr,
-                                                     uint8_t i2cAddress)
-    : SimAvrI2CComponent(avr, i2cAddress) {}
-
 void SimAvrI2CSmarterComponent::HandleI2CMessage(const avr_twi_msg_t& msg) {
   if (msg.msg & TWI_COND_START) {
     ResetStateMachine();

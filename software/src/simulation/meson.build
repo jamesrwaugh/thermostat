@@ -1,6 +1,7 @@
 simulation_src = files(
     'ftxui_simulated_avr.cpp',
     'main.cpp',
+    'sim_i2c_listener.cpp',
     'sim_thermostat.cpp',
     'sim_tmp116.cpp',
     'ui.cpp',

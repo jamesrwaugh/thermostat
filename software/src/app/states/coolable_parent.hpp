@@ -5,7 +5,11 @@
 #include "state.hpp"
 
 class CoolableParent
-    : public etl::fsm_state<Machine, CoolableParent, State::Type::Cooling> {
+    : public etl::fsm_state<Machine, CoolableParent,
+                            State::Type::CoolableParent, Event::UpButtonPressed,
+                            Event::DownButtonPressed, Event::SecondPassed,
+                            Event::FanModeChanged, Event::HeatModeChanged,
+                            Event::ReverseValveModeChanged> {
  public:
   etl::fsm_state_id_t on_enter_state() override;
   void on_exit_state() override;

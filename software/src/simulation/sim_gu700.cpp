@@ -9,7 +9,7 @@ enum CommandId : uint8_t {
 };
 
 SimFakeGu7000::SimFakeGu7000(avr_t* avr)
-    : SimAvrI2CSmarterComponent(avr, 0x64) {}
+    : SimAvrI2CSmarterComponent(avr, 0x32) {}
 
 void SimFakeGu7000::OnDataReceived(const std::vector<uint8_t>& data) {
   if (data.empty()) {

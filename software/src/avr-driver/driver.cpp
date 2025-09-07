@@ -118,15 +118,15 @@ uint8_t dummy() {
 
 uint8_t iic_write(uint8_t addr, uint8_t reg, uint8_t* buf, uint16_t len) {
   uint8_t err = 0;
-  err |= tw_master_transmit_one(addr, reg, true);
-  err |= tw_master_transmit(addr, buf, len, false);
+  err |= tw_master_transmit_one(addr >> 1, reg, true);
+  err |= tw_master_transmit(addr >> 1, buf, len, false);
   return !(err == SUCCESS);
 }
 
 uint8_t iic_read(uint8_t addr, uint8_t reg, uint8_t* buf, uint16_t len) {
   uint8_t err = 0;
-  err |= tw_master_transmit_one(addr, reg, true);
-  err |= tw_master_receive(addr, buf, len);
+  err |= tw_master_transmit_one(addr >> 1, reg, true);
+  err |= tw_master_receive(addr >> 1, buf, len);
   return !(err == SUCCESS);
 }
 

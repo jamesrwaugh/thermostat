@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ftxui-toolbox/i2c_listener_renderer.hpp>
 #include <ftxui-toolbox/locked_dequeue.hpp>
 #include <ftxui/component/component_base.hpp>
 

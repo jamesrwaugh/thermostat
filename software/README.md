@@ -4,13 +4,11 @@
 meson setup --wipe --cross-file avr-cross-compile.txt builddir -Dbuild.pkg_config_path=/usr/local/lib/pkgconfig
 ```
 
-## Parts
+# Simulator Bugs Hall of Fame
 
-- Fan Switch (auto and off)
-- 2MS1T1B1M2QES-5
+In line with tradition, we pay respects, and list difficult bugs that would have been very difficult to solve on real hardware, but were found using the simulator.
 
-- Heat switch (heat, OFF, cold)
-- 2MS3T1B1M1QES-5
-
-- 5.08mm Pitch Connector
-- TSW-209-15-G-S
+- [x] Fixed incorrect register usage with Timer1 counting 10 ms
+- [x] Using TIMER1_OVF_vect instead of TIMER1_COMPA_vect
+- [x] RTC IIC interface was taking left-shifted addresses, not right
+- [x] TMP116 double-sending address in I2C

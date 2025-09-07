@@ -32,32 +32,32 @@ void OnButtonPressed(Button b, void*) {
       machine.receive(Event::SelectButtonPressed{});
       break;
     case Button::TempHeat:
-      DriverWriteSerialPortLine("TempHeat");
+      DriverWriteSerialPortLine("TH");
       machine.receive(Event::HeatModeChanged{HeatModeT::Heating});
       break;
     case Button::TempCold:
-      DriverWriteSerialPortLine("TempCold");
+      DriverWriteSerialPortLine("TC");
       machine.receive(Event::HeatModeChanged{HeatModeT::Cooling});
       break;
     case Button::TempNone:
-      DriverWriteSerialPortLine("TempNone");
+      DriverWriteSerialPortLine("TN");
       machine.receive(Event::HeatModeChanged{HeatModeT::None});
       break;
     case Button::FanAuto:
-      DriverWriteSerialPortLine("FanAuto");
+      DriverWriteSerialPortLine("FA");
       machine.receive(Event::FanModeChanged{FanModeT::Auto});
       break;
     case Button::FanOn:
-      DriverWriteSerialPortLine("FanOn");
+      DriverWriteSerialPortLine("FO");
       machine.receive(Event::FanModeChanged{FanModeT::On});
       break;
     case Button::ReverseValveOnHeat:
-      DriverWriteSerialPortLine("ReverseValveOnHeat");
+      DriverWriteSerialPortLine("RVOH");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForHeating});
       break;
     case Button::ReverseValveOnCool:
-      DriverWriteSerialPortLine("ReverseValveOnCool");
+      DriverWriteSerialPortLine("RVOCO");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
       break;
@@ -178,7 +178,9 @@ int main() {
       lastTenMsCount = 0;
       machine.receive(Event::SecondPassed{});
       uint8_t temp = DriverReadTemp();
-      DriverDisplayTemp(temp);
+      // (void)temp;
+      // DriverDisplayTemp(temp);
+      DriverDisplayTemp(0x2B);
     }
 
     DriverMcuSleep();

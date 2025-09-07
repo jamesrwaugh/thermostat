@@ -14,13 +14,13 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
   auto cb = (SimAvrThermostat::RelayCb*)param;
   bool on = value != 0;
 
-  if (strcmp(irq->name, "PC0") == 0) {
+  if (strcmp(irq->name, "=avr.portc.pin0") == 0) {
     (*cb)(Relay::Fan, on);
-  } else if (strcmp(irq->name, "PB2") == 0) {
+  } else if (strcmp(irq->name, "=avr.portb.pin2") == 0) {
     (*cb)(Relay::Compressor, on);
-  } else if (strcmp(irq->name, "PC1") == 0) {
+  } else if (strcmp(irq->name, "=avr.portc.pin1") == 0) {
     (*cb)(Relay::Heat, on);
-  } else if (strcmp(irq->name, "PC2") == 0) {
+  } else if (strcmp(irq->name, "=avr.portc.pin2") == 0) {
     (*cb)(Relay::ReverseValve, on);
   } else {
     std::abort();
@@ -29,7 +29,7 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
 
 SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
-    : FtxUiSimulatedAvr(filename, gdb, receiver), I2CListener_(Avr_) {
+    : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
   Screen = std::make_unique<SimFakeGu7000>(Avr_);
 
@@ -50,7 +50,7 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 6), false);
 
   // TMP116
-  Tmp116_ = std::make_unique<SimTMP116>(Avr_, 0x90);
+  Tmp116_ = std::make_unique<SimTMP116>(Avr_);
 
   // RTC
   ds1338_virt_init(Avr_, &Rtc_);
@@ -90,6 +90,10 @@ const RelayState& SimAvrThermostat::GetRelayState() const {
 
 const SimFakeGu7000::State& SimAvrThermostat::GetScreenState() const {
   return Screen->GetState();
+}
+
+avr_t* SimAvrThermostat::GetAvr() const {
+  return Avr_;
 }
 
 void SimAvrThermostat::PushUpButton() {

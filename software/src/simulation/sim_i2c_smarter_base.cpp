@@ -2,20 +2,15 @@
 
 void SimAvrI2CSmarterComponent::HandleI2CMessage(const avr_twi_msg_t& msg) {
   if (msg.msg & TWI_COND_START) {
-    ResetStateMachine();
     SendToAvrI2CAck();
   } else if (msg.msg & TWI_COND_STOP) {
     OnDataReceived(DataBuffer_);
-    ResetStateMachine();
     SendToAvrI2CAck();
+    DataBuffer_.clear();
   } else if (msg.msg & TWI_COND_WRITE) {
     DataBuffer_.push_back(msg.data);
     SendToAvrI2CAck();
   } else if (msg.msg & TWI_COND_READ) {
     // No ack
   }
-}
-
-void SimAvrI2CSmarterComponent::ResetStateMachine() {
-  DataBuffer_.clear();
 }

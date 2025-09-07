@@ -9,7 +9,6 @@ class SimAvrI2CSmarterComponent : public SimAvrI2CComponent {
   using SimAvrI2CComponent::SimAvrI2CComponent;
 
   void HandleI2CMessage(const avr_twi_msg_t& msg) override;
-  void ResetStateMachine() override;
   virtual void OnDataReceived(const std::vector<uint8_t>& data) = 0;
 
  private:

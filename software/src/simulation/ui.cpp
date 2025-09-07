@@ -160,11 +160,15 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
 
   auto logs_panel = LogsRenderer(logs);
 
-  // Main layout - three panels side by side
+  // I2C Listener Panel
+  auto i2c_listener_panel = I2CListenerRenderer(Thermostat_.GetAvr());
+
+  // Main layout - four panels side by side with horizontal divider
   auto main_layout = Container::Horizontal({
       left_panel,
       relay_panel,
       screen_panel,
+      i2c_listener_panel,
       logs_panel,
   });
 

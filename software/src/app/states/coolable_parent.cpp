@@ -22,6 +22,7 @@ void CoolableParent::on_exit_state() {
 }
 
 etl::fsm_state_id_t CoolableParent::on_event(const Event::UpButtonPressed&) {
+  DriverWriteSerialPortLine("Up2");
   return get_fsm_context().ChangeSetPoint(1);
 }
 

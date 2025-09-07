@@ -1,17 +1,26 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "lldb",
-        "request": "launch",
-        "name": "Simulate Thermostat",
-        "program": "${workspaceFolder}/builddir/src/simulation/thermo-simulation",
-        "args": [],
-        "cwd": "${workspaceFolder}/builddir/src/simulation"
-      },
-    ]
-  }
-  
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Simulate Thermostat",
+      "program": "${workspaceFolder}/builddir/src/simulation/thermo-simulation",
+      "args": [],
+      "cwd": "${workspaceFolder}/builddir/src/simulation"
+    },
+    {
+      "type": "gdb",
+      "request": "attach",
+      "name": "Attach to GDB  Thermostat",
+      "executable": "builddir/src/app/thermo-app",
+      "target": "localhost:1234",
+      "remote": true,
+      "cwd": "${workspaceRoot}",
+      "gdbpath": "/usr/bin/avr-gdb"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 #include "sim_tmp116.hpp"
 
-SimTMP116::SimTMP116(avr_t* avr, uint8_t i2cAddress)
-    : SimAvrI2CComponent(avr, i2cAddress),
+SimTMP116::SimTMP116(avr_t* avr)
+    : SimAvrI2CComponent(avr, 0x48),
       LastTempTick(std::chrono::steady_clock::now()) {
   //
 }

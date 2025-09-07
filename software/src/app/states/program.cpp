@@ -16,10 +16,6 @@ void Program::on_exit_state() {
   get_fsm_context().Comms()(DirtyData_);
 }
 
-etl::fsm_state_id_t Program::on_event(const Event::SecondPassed&) {
-  return No_State_Change;
-}
-
 etl::fsm_state_id_t Program::on_event_unknown(const etl::imessage&) {
   return No_State_Change;
 }

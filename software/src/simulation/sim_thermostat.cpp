@@ -39,9 +39,9 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
   DownButton =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 2), false);
   SelectButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
-  ReverseValveSwitch =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
+  ReverseValveSwitch =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
   TempHeat =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 4), false);
   TempCool =

@@ -64,6 +64,7 @@ uint8_t DriverReadTemp();
 void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes);
+void DriverWriteSerialPortLine(const char* message);
 void DriverMcuSleep();
 void DriverPollInput();
 uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length);

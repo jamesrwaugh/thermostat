@@ -20,34 +20,44 @@ volatile bool g10MillisecondPassed = false;
 void OnButtonPressed(Button b, void*) {
   switch (b) {
     case Button::Up:
+      DriverWriteSerialPortLine("Up");
       machine.receive(Event::UpButtonPressed{});
       break;
     case Button::Down:
+      DriverWriteSerialPortLine("Down");
       machine.receive(Event::DownButtonPressed{});
       break;
     case Button::Select:
+      DriverWriteSerialPortLine("Select");
       machine.receive(Event::SelectButtonPressed{});
       break;
     case Button::TempHeat:
+      DriverWriteSerialPortLine("TempHeat");
       machine.receive(Event::HeatModeChanged{HeatModeT::Heating});
       break;
     case Button::TempCold:
+      DriverWriteSerialPortLine("TempCold");
       machine.receive(Event::HeatModeChanged{HeatModeT::Cooling});
       break;
     case Button::TempNone:
+      DriverWriteSerialPortLine("TempNone");
       machine.receive(Event::HeatModeChanged{HeatModeT::None});
       break;
     case Button::FanAuto:
+      DriverWriteSerialPortLine("FanAuto");
       machine.receive(Event::FanModeChanged{FanModeT::Auto});
       break;
     case Button::FanOn:
+      DriverWriteSerialPortLine("FanOn");
       machine.receive(Event::FanModeChanged{FanModeT::On});
       break;
     case Button::ReverseValveOnHeat:
+      DriverWriteSerialPortLine("ReverseValveOnHeat");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForHeating});
       break;
     case Button::ReverseValveOnCool:
+      DriverWriteSerialPortLine("ReverseValveOnCool");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
       break;
@@ -73,6 +83,37 @@ void ReadThermostatStaticState() {
   ThermoButtonState buttons;
   DriverGetButtonStateNow(&buttons);
   machine.SetThermoButtonState(buttons);
+}
+
+void PrintStateChange(const char* message) {
+  DriverWriteSerialPortLine("New State: ");
+  DriverWriteSerialPortLine(message);
+}
+
+void OnStateChange(State::Type::TheType state) {
+  switch (state) {
+    case State::Type::CoolableParent:
+      PrintStateChange("CP");
+      break;
+    case State::Type::Idle:
+      PrintStateChange("ID");
+      break;
+    case State::Type::Heating:
+      PrintStateChange("H");
+      break;
+    case State::Type::Cooling:
+      PrintStateChange("C");
+      break;
+    case State::Type::Program:
+      PrintStateChange("P");
+      break;
+    case State::Type::COUNT:
+      PrintStateChange("?");
+      break;
+    default:
+      PrintStateChange("?");
+      break;
+  }
 }
 
 int main() {
@@ -114,14 +155,21 @@ int main() {
   auto v = SetPointChangedEvent{.new_set_point_f = 2};
   machine.Comms()(v);
 
-  const char* message = "Hello, world!\n";
+  const char* message = "Hello, world!";
+  DriverWriteSerialPortLine(message);
 
-  DriverWriteSerialPort((uint8_t*)message, strlen(message));
+  etl::fsm_state_id_t lastState = etl::ifsm_state::No_State_Change;
 
   while (true) {
-    DriverPollInput();
+    auto state = machine.get_state_id();
+
+    if (lastState != state) {
+      lastState = state;
+      OnStateChange(static_cast<State::Type::TheType>(state));
+    }
 
     if (g10MillisecondPassed) {
+      DriverPollInput();
       g10MillisecondPassed = false;
       lastTenMsCount += 1;
     }
@@ -133,7 +181,7 @@ int main() {
       DriverDisplayTemp(temp);
     }
 
-    // DriverMcuSleep();
+    DriverMcuSleep();
   }
 
   return 0;

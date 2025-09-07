@@ -23,6 +23,11 @@ void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
 }
 
+void DriverWriteSerialPortLine(const char* message) {
+  gDriver->Serial_.write(message);
+  gDriver->Serial_.write("\n");
+}
+
 void DriverDisplayTemp(uint8_t temp) {
 #ifdef SIMULATED
   auto& screen = gDriver->Screen;

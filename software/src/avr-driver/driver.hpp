@@ -33,6 +33,7 @@ struct AvrDrivers {
   void SetupScreen();
   void SetupInputTimer();
   uint8_t SetupRTC();
+  void SetupTemp();
 };
 
 extern etl::optional<AvrDrivers> gDriver;

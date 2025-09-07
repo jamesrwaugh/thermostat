@@ -19,6 +19,7 @@ void AvrDrivers::Setup() {
   SetupInputTimer();
   SetupRTC();
   SetupScreen();
+  SetupTemp();
   sei();
 }
 
@@ -209,4 +210,8 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
   data->HeatingState = heatingOn   ? HeatModeT::Heating
                        : coolingOn ? HeatModeT::Cooling
                                    : HeatModeT::None;
+}
+
+void AvrDrivers::SetupTemp() {
+  TempSensor.init();
 }

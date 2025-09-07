@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cstring>
 #include <memory>
+#include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
 #include <simavr-toolbox/sim_gu7000.hpp>
 
@@ -30,24 +31,23 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
     : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
-  // Screen = std::make_unique<SimGu7000>(Avr_, get_pin_irq(Avr_, 'B', 1),
-  // 0xA0);
+  Screen = std::make_unique<SimFakeGu7000>(Avr_);
 
   // Buttons
-  UpButton = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 3), false);
-  DownButton = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 2), false);
-  SelectButton = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'C', 3), false);
-  ReverseValveSwitch = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 7), false);
-  TempHeat = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 4), false);
-  TempCool = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 5), false);
-  FanSwitch = std::make_unique<SimBouncySwitch>(
-      *Avr_, *get_pin_irq(Avr_, 'D', 6), false);
+  UpButton =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 3), false);
+  DownButton =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 2), false);
+  SelectButton =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
+  ReverseValveSwitch =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
+  TempHeat =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 4), false);
+  TempCool =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 5), false);
+  FanSwitch =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 6), false);
 
   // TMP116
   Tmp116_ = std::make_unique<SimTMP116>(Avr_, 0x90);
@@ -61,14 +61,10 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                        std::placeholders::_1, std::placeholders::_2);
 
   // Relay IRQs
-  auto x = get_pin_irq(Avr_, 'C', 0);
-  avr_irq_register_notify(x, FakeCb, &RelayCb_);
-  x = get_pin_irq(Avr_, 'B', 2);
-  avr_irq_register_notify(x, FakeCb, &RelayCb_);
-  x = get_pin_irq(Avr_, 'C', 1);
-  avr_irq_register_notify(x, FakeCb, &RelayCb_);
-  x = get_pin_irq(Avr_, 'C', 2);
-  avr_irq_register_notify(x, FakeCb, &RelayCb_);
+  avr_irq_register_notify(GetPinIrq('C', 0), FakeCb, &RelayCb_);
+  avr_irq_register_notify(GetPinIrq('B', 2), FakeCb, &RelayCb_);
+  avr_irq_register_notify(GetPinIrq('C', 1), FakeCb, &RelayCb_);
+  avr_irq_register_notify(GetPinIrq('C', 2), FakeCb, &RelayCb_);
 }
 
 void SimAvrThermostat::OnRelayChange(Relay r, bool value) {
@@ -92,12 +88,20 @@ const RelayState& SimAvrThermostat::GetRelayState() const {
   return Relays_;
 }
 
+const SimFakeGu7000::State& SimAvrThermostat::GetScreenState() const {
+  return Screen->GetState();
+}
+
 void SimAvrThermostat::PushUpButton() {
   Post([this]() { UpButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
 void SimAvrThermostat::PushDownButton() {
   Post([this]() { DownButton->CloseForMs(std::chrono::milliseconds(100)); });
+}
+
+void SimAvrThermostat::PushSelectButton() {
+  Post([this]() { SelectButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
 void SimAvrThermostat::SwitchHeatingHeat() {

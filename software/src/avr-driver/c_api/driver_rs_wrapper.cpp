@@ -23,46 +23,76 @@ void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
 }
 
+void DriverWriteSerialPortLine(const char* message) {
+  gDriver->Serial_.write(message);
+  gDriver->Serial_.write("\n");
+}
+
 void DriverDisplayTemp(uint8_t temp) {
+#ifdef SIMULATED
+  auto& screen = gDriver->Screen;
+  screen.DriverDisplayTemp(temp);
+#else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(temp);
+#endif
 }
 
 void DriverDisplaySetPoint(uint8_t temp) {
+#ifdef SIMULATED
+  auto& screen = gDriver->Screen;
+  screen.DriverDisplaySetPoint(temp);
+#else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(temp);
+#endif
 }
 
 void DriverDisplayIsHeating() {
+#ifdef SIMULATED
+  auto& screen = gDriver->Screen;
+  screen.DriverDisplayIsHeating();
+#else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("HEAT");
+#endif
 }
 
 void DriverDisplayIsCooling() {
+#ifdef SIMULATED
+  auto& screen = gDriver->Screen;
+  screen.DriverDisplayIsCooling();
+#else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("COOL");
+#endif
+}
+
+void DriverDisplayIsIdle() {
+#ifdef SIMULATED
+  auto& screen = gDriver->Screen;
+  screen.DriverDisplayIsIdle();
+#else
+  auto& screen = gDriver->Screen;
+  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
+  screen.GU7000_clearScreen();
+#endif
 }
 
 uint8_t DriverReadTemp() {
   return gDriver->TempSensor.read_temp();
-}
-
-void DriverDisplayIsIdle() {
-  auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
-  screen.GU7000_clearScreen();
 }
 
 void DriverRelayOn(Relay r) {

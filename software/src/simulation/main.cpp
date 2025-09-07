@@ -1,30 +1,28 @@
+#include <ftxui-toolbox/locked_dequeue.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/loop.hpp>
 #include <ftxui/component/receiver.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/task.hpp>
+#include <simavr-toolbox/sim_base.hpp>
 
 #include "sim_thermostat.hpp"
 #include "ui.hpp"
 
-void sim_debug_log(const char* fmt, va_list args) {
-  va_list args2;
-  va_copy(args2, args);
+LockedDequeue gLogs;
 
-  int len = 1 + vsnprintf(NULL, 0, fmt, args);
-  va_end(args);
-
-  std::string message(len, 0);
-  vsnprintf(message.data(), message.length(), fmt, args2);
-  va_end(args2);
+void ftxui_debug_log(const char* fmt, va_list args) {
+  char buffer[1024];
+  vsnprintf(buffer, sizeof(buffer), fmt, args);
+  gLogs.Insert(buffer);
 }
 
 void UiThread(SimAvrThermostat& thermo,
               std::atomic<bool>& refresh_ui_continue) {
   auto screen = ftxui::ScreenInteractive::Fullscreen();
 
-  auto top = ftxui::Make<Ui>(thermo);
+  auto top = ftxui::Make<Ui>(thermo, gLogs);
 
   auto topWCatch = CatchEvent(top, [&](ftxui::Event event) {
     if (event == ftxui::Event::Character('q') ||
@@ -45,8 +43,8 @@ void UiThread(SimAvrThermostat& thermo,
   }
 }
 
-int main() {
-  set_sim_debug_log(sim_debug_log);
+int main(int argc, char** argv) {
+  set_sim_debug_log(ftxui_debug_log);
 
   std::atomic<bool> refresh_ui_continue = true;
   auto rec = ftxui::MakeReceiver<ftxui::Closure>();
@@ -55,7 +53,7 @@ int main() {
       "/home/james/Desktop/Git/squaredel/thermostat/software/builddir/src/app/"
       "thermo-app";
 
-  SimAvrThermostat thermo(firmware_path, false, rec);
+  SimAvrThermostat thermo(firmware_path, argc > 1, rec);
 
   auto ui_thread =
       std::thread(UiThread, std::ref(thermo), std::ref(refresh_ui_continue));

@@ -41,6 +41,7 @@ class Machine : public etl::hfsm {
   void ExitHeatingOrCooling();
   void ReadTemperature();
   bool IsHeatingOrCoolingNow() const;
+  void ReadAndApplySettings();
   SerialPrintVisitor& Comms();
 
  private:

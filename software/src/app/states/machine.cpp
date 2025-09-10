@@ -202,3 +202,23 @@ void SerialPrintVisitor::operator()(ThermoSaveData& e) {
 SerialPrintVisitor& Machine::Comms() {
   return V;
 }
+
+void Machine::ReadAndApplySettings() {
+  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_SAVE_DATA];
+  DriverReadFlash(0, rtcDataBuf, sizeof(rtcDataBuf));
+
+  ThermoSaveData data;
+  DecodeThermoSaveData(&data, rtcDataBuf);
+
+  if (data.magic == THERMO_STATE_DATA_MAGIC) {
+    SetThermoSaveData(data);
+  }
+
+  ThermoButtonState buttons;
+  DriverGetButtonStateNow(&buttons);
+  SetThermoButtonState(buttons);
+
+  if (buttons.FanState == FanModeT::On) {
+    DriverRelayOn(Relay::Fan);
+  }
+}

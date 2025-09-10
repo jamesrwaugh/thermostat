@@ -69,22 +69,6 @@ void OnSerialMessage(const char* message, uint16_t messageLen, void*) {
   (void)messageLen;
 }
 
-void ReadThermostatStaticState() {
-  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_SAVE_DATA];
-  DriverReadFlash(0, rtcDataBuf, sizeof(rtcDataBuf));
-
-  ThermoSaveData data;
-  DecodeThermoSaveData(&data, rtcDataBuf);
-
-  if (data.magic == THERMO_STATE_DATA_MAGIC) {
-    machine.SetThermoSaveData(data);
-  }
-
-  ThermoButtonState buttons;
-  DriverGetButtonStateNow(&buttons);
-  machine.SetThermoButtonState(buttons);
-}
-
 void PrintStateChange(const char* message) {
   const char* n = "New State --> ";
   DriverWriteSerialPortRaw((uint8_t*)n, strlen(n));
@@ -147,8 +131,6 @@ int main() {
   };
 
   DriverInit(callbacks, nullptr);
-
-  ReadThermostatStaticState();
 
   machine.start(true);
 

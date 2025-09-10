@@ -20,44 +20,44 @@ volatile bool g10MillisecondPassed = false;
 void OnButtonPressed(Button b, void*) {
   switch (b) {
     case Button::Up:
-      DriverWriteSerialPortLine("Up");
+      DriverWriteSerialPortS("Up");
       machine.receive(Event::UpButtonPressed{});
       break;
     case Button::Down:
-      DriverWriteSerialPortLine("Down");
+      DriverWriteSerialPortS("DN");
       machine.receive(Event::DownButtonPressed{});
       break;
     case Button::Select:
-      DriverWriteSerialPortLine("Select");
+      DriverWriteSerialPortS("SEL");
       machine.receive(Event::SelectButtonPressed{});
       break;
     case Button::TempHeat:
-      DriverWriteSerialPortLine("TH");
+      DriverWriteSerialPortS("TH");
       machine.receive(Event::HeatModeChanged{HeatModeT::Heating});
       break;
     case Button::TempCold:
-      DriverWriteSerialPortLine("TC");
+      DriverWriteSerialPortS("TC");
       machine.receive(Event::HeatModeChanged{HeatModeT::Cooling});
       break;
     case Button::TempNone:
-      DriverWriteSerialPortLine("TN");
+      DriverWriteSerialPortS("TN");
       machine.receive(Event::HeatModeChanged{HeatModeT::None});
       break;
     case Button::FanAuto:
-      DriverWriteSerialPortLine("FA");
+      DriverWriteSerialPortS("FA");
       machine.receive(Event::FanModeChanged{FanModeT::Auto});
       break;
     case Button::FanOn:
-      DriverWriteSerialPortLine("FO");
+      DriverWriteSerialPortS("FO");
       machine.receive(Event::FanModeChanged{FanModeT::On});
       break;
     case Button::ReverseValveOnHeat:
-      DriverWriteSerialPortLine("RVOH");
+      DriverWriteSerialPortS("RVOH");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForHeating});
       break;
     case Button::ReverseValveOnCool:
-      DriverWriteSerialPortLine("RVOCO");
+      DriverWriteSerialPortS("RVOCO");
       machine.receive(
           Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
       break;
@@ -86,8 +86,8 @@ void ReadThermostatStaticState() {
 }
 
 void PrintStateChange(const char* message) {
-  DriverWriteSerialPortLine("New State: ");
-  DriverWriteSerialPortLine(message);
+  DriverWriteSerialPortS("New State: ");
+  DriverWriteSerialPortS(message);
 }
 
 void OnStateChange(State::Type::TheType state) {
@@ -156,7 +156,7 @@ int main() {
   machine.Comms()(v);
 
   const char* message = "Hello, world!";
-  DriverWriteSerialPortLine(message);
+  DriverWriteSerialPortS(message);
 
   etl::fsm_state_id_t lastState = etl::ifsm_state::No_State_Change;
 

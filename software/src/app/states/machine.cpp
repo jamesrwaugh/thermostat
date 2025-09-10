@@ -15,7 +15,7 @@ void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
 }
 
 void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
-  Data = raw;
+  ButtonData = raw;
 }
 
 [[nodiscard]] ThermoSaveData& Machine::SaveState() {
@@ -27,7 +27,7 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
 }
 
 [[nodiscard]] ThermoButtonState& Machine::ButtonState() {
-  return Data;
+  return ButtonData;
 }
 
 void Machine::ResetStateChangeData() {
@@ -90,9 +90,13 @@ void Machine::ReadTemperature() {
     return State::Type::Idle;
   }
 
-  if (LastReadTemp < setPoint && heatMode == HeatModeT::Heating) {
+  if (LastReadTemp >= setPoint && heatMode == HeatModeT::Heating) {
+    return State::Type::Idle;
+  } else if (LastReadTemp <= setPoint && heatMode == HeatModeT::Cooling) {
+    return State::Type::Idle;
+  } else if (LastReadTemp <= setPoint && heatMode == HeatModeT::Heating) {
     return State::Type::Heating;
-  } else if (LastReadTemp > setPoint && heatMode == HeatModeT::Cooling) {
+  } else if (LastReadTemp >= setPoint && heatMode == HeatModeT::Cooling) {
     return State::Type::Cooling;
   }
 
@@ -112,8 +116,6 @@ void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
 }
 
 void Machine::EnterHeatingOrCooling(HeatModeT mode) {
-  ChData.IsHeatingOrCoolingNow = true;
-
   uint8_t mode2 = HEATING_COMM_IDLE;
 
   switch (mode) {
@@ -138,7 +140,6 @@ void Machine::EnterHeatingOrCooling(HeatModeT mode) {
 
 void Machine::ExitHeatingOrCooling() {
   ResetStateChangeData();
-  ChData.IsHeatingOrCoolingNow = false;
 
   DriverRelayOff(Relay::Heat);
   DriverRelayOff(Relay::Compressor);
@@ -150,7 +151,8 @@ void Machine::ExitHeatingOrCooling() {
 }
 
 bool Machine::IsHeatingOrCoolingNow() const {
-  return ChData.IsHeatingOrCoolingNow;
+  return get_state_id() == State::Type::Heating ||
+         get_state_id() == State::Type::Cooling;
 }
 
 SafeThermoSaveData::SafeThermoSaveData() {
@@ -162,32 +164,39 @@ SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
   Data = other;
 }
 
+static constexpr uint16_t PrinterId = 0x5645;
+
+void Print(uint8_t commandId, uint8_t* buffer, uint8_t len) {
+  DriverWriteSerialPortRawCh((PrinterId >> 8) & 0xFF);
+  DriverWriteSerialPortRawCh(PrinterId & 0xFF);
+  DriverWriteSerialPortRawCh(commandId);
+  DriverWriteSerialPortRaw(buffer, len);
+  DriverWriteSerialPortRawCh('\r');
+  DriverWriteSerialPortRawCh('\n');
+}
+
 void SerialPrintVisitor::operator()(TempChangedEvent& e) {
-  uint8_t b[BYTES_LENGTH_TEMP_CHANGED_EVENT + 1];
-  b[0] = 0;
-  EncodeTempChangedEvent(&e, b + 1);
-  DriverWriteSerialPort(b, sizeof(b));
+  uint8_t b[BYTES_LENGTH_TEMP_CHANGED_EVENT];
+  EncodeTempChangedEvent(&e, b);
+  Print(0x00, b, sizeof(b));
 }
 
 void SerialPrintVisitor::operator()(SetPointChangedEvent& e) {
-  uint8_t b[BYTES_LENGTH_SET_POINT_CHANGED_EVENT + 1];
-  b[0] = 1;
-  EncodeSetPointChangedEvent(&e, b + 1);
-  DriverWriteSerialPort(b, sizeof(b));
+  uint8_t b[BYTES_LENGTH_SET_POINT_CHANGED_EVENT];
+  EncodeSetPointChangedEvent(&e, b);
+  Print(0x01, b, sizeof(b));
 }
 
 void SerialPrintVisitor::operator()(HeatingModeChangedEvent& e) {
-  uint8_t b[BYTES_LENGTH_HEATING_MODE_CHANGED_EVENT + 1];
-  b[0] = 2;
-  EncodeHeatingModeChangedEvent(&e, b + 1);
-  DriverWriteSerialPort(b, sizeof(b));
+  uint8_t b[BYTES_LENGTH_HEATING_MODE_CHANGED_EVENT];
+  EncodeHeatingModeChangedEvent(&e, b);
+  Print(0x02, b, sizeof(b));
 }
 
 void SerialPrintVisitor::operator()(ThermoSaveData& e) {
-  uint8_t b[BYTES_LENGTH_THERMO_SAVE_DATA + 1];
-  b[0] = 3;
-  EncodeThermoSaveData(&e, b + 1);
-  DriverWriteSerialPort(b, sizeof(b));
+  uint8_t b[BYTES_LENGTH_THERMO_SAVE_DATA];
+  EncodeThermoSaveData(&e, b);
+  Print(0x03, b, sizeof(b));
 }
 
 SerialPrintVisitor& Machine::Comms() {

@@ -156,17 +156,15 @@ void AvrDrivers::SetupSerial() {
 
 // https://www.etlcpp.com/debounce.html
 const uint8_t BTN_DEBOUNCE_COUNT = 2;
-const uint8_t BTN_HOLD_COUNT = 50;
-typedef etl::debounce<BTN_DEBOUNCE_COUNT, BTN_HOLD_COUNT> BtnDebounce;
+typedef etl::debounce<BTN_DEBOUNCE_COUNT> BtnDebounce;
 
 const uint8_t TEMP_DEBOUNCE_COUNT = 5;
-const uint8_t TEMP_HOLD_COUNT = 50;
-typedef etl::debounce<TEMP_DEBOUNCE_COUNT, TEMP_HOLD_COUNT> TmpDebounce;
+typedef etl::debounce<TEMP_DEBOUNCE_COUNT> TmpDebounce;
 
 BtnDebounce upButton;
 BtnDebounce downButton;
 BtnDebounce selectButton;
-BtnDebounce fanOnOff;
+BtnDebounce fanOn;
 TmpDebounce tempCoolOn;
 TmpDebounce tempHeatOn;
 TmpDebounce tempNone;
@@ -186,24 +184,24 @@ void AvrDrivers::ReadInput() {
     Callbacks_.OnButtonPressed(Button::Select, UserData_);
   }
 
-  if (fanOnOff.add(!(pind & _BV(PIND6)))) {
-    if (fanOnOff.is_held()) {
+  if (fanOn.add(!(pind & _BV(PIND6)))) {
+    if (fanOn.is_set()) {
       Callbacks_.OnButtonPressed(Button::FanOn, UserData_);
     } else {
       Callbacks_.OnButtonPressed(Button::FanAuto, UserData_);
     }
   }
 
-  if (tempHeatOn.add(!(pind & _BV(PIND4))) && tempHeatOn.is_held()) {
+  if (tempHeatOn.add(!(pind & _BV(PIND4))) && tempHeatOn.is_set()) {
     Callbacks_.OnButtonPressed(Button::TempHeat, UserData_);
   }
 
-  if (tempCoolOn.add(!(pind & _BV(PIND5))) && tempCoolOn.is_held()) {
+  if (tempCoolOn.add(!(pind & _BV(PIND5))) && tempCoolOn.is_set()) {
     Callbacks_.OnButtonPressed(Button::TempCold, UserData_);
   }
 
-  if (tempNone.add(!tempCoolOn.is_held() && !tempHeatOn.is_held() &&
-                   tempNone.is_held())) {
+  if (tempNone.add(!tempCoolOn.is_set() && !tempHeatOn.is_set()) &&
+      tempNone.is_set()) {
     Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
   }
 }

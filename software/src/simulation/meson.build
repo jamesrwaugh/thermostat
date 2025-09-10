@@ -30,6 +30,7 @@ executable(
         simavr_parts_dep,
         ftxui_toolbox_dep,
     ],
+    cpp_args: ['-std=c++20'],
     include_directories: [],
     override_options: [
         'buildtype=debug',

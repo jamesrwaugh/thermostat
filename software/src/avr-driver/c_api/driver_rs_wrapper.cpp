@@ -21,11 +21,20 @@ void DriverGetButtonStateNow(ThermoButtonState* data) {
 
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
+  gDriver->Serial_.write("\r\n");
 }
 
-void DriverWriteSerialPortLine(const char* message) {
+void DriverWriteSerialPortS(const char* message) {
   gDriver->Serial_.write(message);
-  gDriver->Serial_.write("\n");
+  gDriver->Serial_.write("\r\n");
+}
+
+void DriverWriteSerialPortRaw(const uint8_t* bytes, uint8_t numBytes) {
+  gDriver->Serial_.write(bytes, numBytes);
+}
+
+void DriverWriteSerialPortRawCh(char ch) {
+  gDriver->Serial_.write(ch);
 }
 
 void DriverDisplayTemp(uint8_t temp) {

@@ -47,13 +47,12 @@ class Machine : public etl::hfsm {
   struct StateChangeData {
     static constexpr uint8_t MaxStateChangeTimeoutSec = 10;
     uint8_t StateChangeTimeoutSec{0};
-    bool IsHeatingOrCoolingNow{false};
   };
 
   SafeThermoSaveData SaveData;
-  ThermoButtonState Data;
+  ThermoButtonState ButtonData;
   StateChangeData ChData;
   SerialPrintVisitor V;
-  uint8_t LastReadTemp;
-  uint8_t LastCommTemp;
+  uint8_t LastReadTemp{0};
+  uint8_t LastCommTemp{0};
 };

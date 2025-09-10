@@ -25,12 +25,6 @@ void AvrDrivers::Setup() {
 }
 
 void AvrDrivers::SetupI2C() {
-  // set no pullups for SDA / SCL
-  DDRC &= ~_BV(PC1);
-  DDRC &= ~_BV(PC0);
-  PORTC &= ~_BV(PC1);
-  PORTC &= ~_BV(PC0);
-
   // initialize twi prescaler and bit rate (250k)
   // Set prescaler value of 1
   TWSR &= ~_BV(TWPS0);
@@ -51,7 +45,7 @@ void AvrDrivers::SetupPins() {
            _BV(PORTD7);
 
   // Reverse Valve SIP Switch Input Pullup
-  DDRC &= ~_BV(PC3);
+  DDRC &= ~_BV(DDC3);
   PORTC |= _BV(PORTC3);
 
   // Screen Busy

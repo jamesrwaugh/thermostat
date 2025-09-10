@@ -86,8 +86,10 @@ void ReadThermostatStaticState() {
 }
 
 void PrintStateChange(const char* message) {
-  DriverWriteSerialPortS("New State: ");
-  DriverWriteSerialPortS(message);
+  const char* n = "New State --> ";
+  DriverWriteSerialPortRaw((uint8_t*)n, strlen(n));
+  DriverWriteSerialPortRaw((uint8_t*)message, strlen(message));
+  DriverWriteSerialPortRaw((uint8_t*)"\r\n", 2);
 }
 
 void OnStateChange(State::Type::TheType state) {

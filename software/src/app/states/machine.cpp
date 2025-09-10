@@ -46,6 +46,7 @@ void Machine::ReadTemperature() {
   if (LastReadTemp != LastCommTemp) {
     auto v = TempChangedEvent{.new_temp_f = LastReadTemp};
     Comms()(v);
+    DriverDisplayTemp(LastReadTemp);
     LastCommTemp = LastReadTemp;
   }
 }

@@ -177,10 +177,6 @@ int main() {
     if (lastTenMsCount >= 10) {
       lastTenMsCount = 0;
       machine.receive(Event::SecondPassed{});
-      uint8_t temp = DriverReadTemp();
-      // (void)temp;
-      // DriverDisplayTemp(temp);
-      DriverDisplayTemp(0x2B);
     }
 
     DriverMcuSleep();

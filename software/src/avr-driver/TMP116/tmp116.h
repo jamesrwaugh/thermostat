@@ -4,6 +4,6 @@
 
 class TMP116 {
  public:
-  void init();
-  uint16_t read_temp() const;
+  void Init();
+  uint16_t ReadTempC() const;
 };

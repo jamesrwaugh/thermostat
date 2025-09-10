@@ -17,6 +17,6 @@ class SimTMP116 final : public SimAvrI2CComponent {
 
  private:
   void UpdateTemperature(const RelayState& relays);
-  float TempF_{0};
+  float TempF_{78};
   std::chrono::steady_clock::time_point LastTempTick;
 };

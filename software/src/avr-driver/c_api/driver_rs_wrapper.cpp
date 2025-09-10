@@ -92,7 +92,7 @@ void DriverDisplayIsIdle() {
 }
 
 uint8_t DriverReadTemp() {
-  return gDriver->TempSensor.read_temp();
+  return gDriver->TempSensor.ReadTempC();
 }
 
 void DriverRelayOn(Relay r) {

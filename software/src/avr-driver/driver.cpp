@@ -222,5 +222,5 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
 }
 
 void AvrDrivers::SetupTemp() {
-  TempSensor.init();
+  TempSensor.Init();
 }

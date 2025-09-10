@@ -14,6 +14,10 @@ etl::fsm_state_id_t CoolableParent::on_enter_state() {
   DriverGetButtonStateNow(&buttons);
   ctx.SetThermoButtonState(buttons);
 
+  DriverDisplaySetPoint(ctx.SaveState().set_point);
+
+  ctx.ReadTemperature();
+
   return No_State_Change;
 }
 

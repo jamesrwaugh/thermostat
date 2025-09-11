@@ -43,30 +43,30 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
 }
 
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
-#ifdef SIMULATED
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+#ifdef SIMULATED
   gDriver->Screen.DriverDisplayTemp(displayTemp);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
-  screen.print(temp);
+  screen.print(displayTemp);
 #endif
 }
 
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
-#ifdef SIMULATED
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+#ifdef SIMULATED
   gDriver->Screen.DriverDisplaySetPoint(displayTemp);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
-  screen.print(temp);
+  screen.print(displayTemp);
 #endif
 }
 

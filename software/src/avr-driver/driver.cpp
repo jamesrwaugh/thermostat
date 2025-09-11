@@ -213,6 +213,48 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
                                    : HeatModeT::None;
 }
 
+void AvrDrivers::RelayOn(Relay r) const {
+  switch (r) {
+    case Relay::Fan:
+      // PC0
+      PORTC |= _BV(PORTC0);
+      break;
+    case Relay::Compressor:
+      // PB2
+      PORTB |= _BV(PORTB2);
+      break;
+    case Relay::Heat:
+      // PC1
+      PORTC |= _BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      // PC2
+      PORTC |= _BV(PORTC2);
+      break;
+  }
+}
+
+void AvrDrivers::RelayOff(Relay r) const {
+  switch (r) {
+    case Relay::Fan:
+      // PC0
+      PORTC &= ~_BV(PORTC0);
+      break;
+    case Relay::Compressor:
+      // PB2
+      PORTB &= ~_BV(PORTB2);
+      break;
+    case Relay::Heat:
+      // PC1
+      PORTC &= ~_BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      // PC2
+      PORTC &= ~_BV(PORTC2);
+      break;
+  }
+}
+
 void AvrDrivers::SetupTemp() {
   TempSensor.Init();
 }

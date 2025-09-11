@@ -3,6 +3,8 @@
 #include <etl/optional.h>
 #include <tmp116.h>
 
+#include "data_types.hpp"
+
 #ifdef SIMULATED
 #include "SimulatedGu7000/SimulatedGu7000.hpp"
 #else
@@ -34,6 +36,8 @@ struct AvrDrivers {
   void Setup();
   void ReadInput();
   void ReadStateNow(ThermoButtonState* out) const;
+  void RelayOn(Relay r) const;
+  void RelayOff(Relay r) const;
 
  private:
   const AvrDriverCallbacks& Callbacks_;

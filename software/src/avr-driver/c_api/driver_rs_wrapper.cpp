@@ -38,7 +38,7 @@ void DriverWriteSerialPortRawCh(char ch) {
 
 uint8_t CelsiusToFreedom(uint8_t celsius) {
   uint16_t scratch = celsius;
-  scratch = (scratch << 1) - (scratch >> 2) + (scratch << 4);
+  scratch = (scratch << 1) - (scratch >> 2) + (scratch >> 4) + 32;
   return scratch & 0xFF;
 }
 
@@ -46,7 +46,7 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
 #ifdef SIMULATED
-  gDriver->Screen.DriverDisplayTemp(displayTemp);
+  gDriver->Screen.DriverDisplayTemp(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
@@ -60,7 +60,7 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
 #ifdef SIMULATED
-  gDriver->Screen.DriverDisplaySetPoint(displayTemp);
+  gDriver->Screen.DriverDisplaySetPoint(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
@@ -112,45 +112,11 @@ uint8_t DriverReadTemp() {
 }
 
 void DriverRelayOn(Relay r) {
-  switch (r) {
-    case Relay::Fan:
-      // PC0
-      PORTC |= _BV(PORTC0);
-      break;
-    case Relay::Compressor:
-      // PB2
-      PORTB |= _BV(PORTB2);
-      break;
-    case Relay::Heat:
-      // PC1
-      PORTC |= _BV(PORTC1);
-      break;
-    case Relay::ReversingValve:
-      // PC2
-      PORTC |= _BV(PORTC2);
-      break;
-  }
+  gDriver->RelayOn(r);
 }
 
 void DriverRelayOff(Relay r) {
-  switch (r) {
-    case Relay::Fan:
-      // PC0
-      PORTC &= ~_BV(PORTC0);
-      break;
-    case Relay::Compressor:
-      // PB2
-      PORTB &= ~_BV(PORTB2);
-      break;
-    case Relay::Heat:
-      // PC1
-      PORTC &= ~_BV(PORTC1);
-      break;
-    case Relay::ReversingValve:
-      // PC2
-      PORTC &= ~_BV(PORTC2);
-      break;
-  }
+  gDriver->RelayOff(r);
 }
 
 void DriverMcuSleep() {

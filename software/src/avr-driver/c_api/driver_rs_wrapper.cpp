@@ -36,10 +36,17 @@ void DriverWriteSerialPortRawCh(char ch) {
   gDriver->Serial_.write(ch);
 }
 
-void DriverDisplayTemp(uint8_t temp) {
+uint8_t CelsiusToFreedom(uint8_t celsius) {
+  uint16_t scratch = celsius;
+  scratch = (scratch << 1) - (scratch >> 2) + (scratch << 4);
+  return scratch & 0xFF;
+}
+
+void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
 #ifdef SIMULATED
-  auto& screen = gDriver->Screen;
-  screen.DriverDisplayTemp(temp);
+  auto displayTemp =
+      unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+  gDriver->Screen.DriverDisplayTemp(displayTemp);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
@@ -49,10 +56,11 @@ void DriverDisplayTemp(uint8_t temp) {
 #endif
 }
 
-void DriverDisplaySetPoint(uint8_t temp) {
+void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
 #ifdef SIMULATED
-  auto& screen = gDriver->Screen;
-  screen.DriverDisplaySetPoint(temp);
+  auto displayTemp =
+      unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+  gDriver->Screen.DriverDisplaySetPoint(displayTemp);
 #else
   auto& screen = gDriver->Screen;
   screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);

@@ -47,6 +47,11 @@ enum class ReverseValveModeT : uint8_t {
   OnForCooling = 1,
 };
 
+enum class TemperatureUnitT : uint8_t {
+  Freedom,
+  Celsius,
+};
+
 struct ThermoButtonState {
   FanModeT FanState;
   HeatModeT HeatingState;
@@ -55,8 +60,8 @@ struct ThermoButtonState {
 
 void DriverInit(const AvrDriverCallbacks& callbacks, void* userData);
 void DriverGetButtonStateNow(ThermoButtonState* data);
-void DriverDisplayTemp(uint8_t temp);
-void DriverDisplaySetPoint(uint8_t temp);
+void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit);
+void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT);
 void DriverDisplayIsHeating();
 void DriverDisplayIsCooling();
 void DriverDisplayIsIdle();

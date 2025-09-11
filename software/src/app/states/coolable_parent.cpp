@@ -12,7 +12,8 @@ etl::fsm_state_id_t CoolableParent::on_enter_state() {
 
   ctx.ReadAndApplySettings();
 
-  DriverDisplaySetPoint(ctx.SaveState().set_point);
+  DriverDisplaySetPoint(ctx.SaveState().set_point,
+                        ctx.SafeSaveState().TemperatureUnit());
 
   ctx.ReadTemperature();
 
@@ -20,6 +21,7 @@ etl::fsm_state_id_t CoolableParent::on_enter_state() {
 }
 
 void CoolableParent::on_exit_state() {
+  DriverRelayOff(Relay::Fan);
   get_fsm_context().ResetStateChangeData();
 }
 
@@ -29,6 +31,11 @@ etl::fsm_state_id_t CoolableParent::on_event(const Event::UpButtonPressed&) {
 
 etl::fsm_state_id_t CoolableParent::on_event(const Event::DownButtonPressed&) {
   return get_fsm_context().ChangeSetPoint(-1);
+}
+
+etl::fsm_state_id_t CoolableParent::on_event(
+    const Event::SelectButtonPressed&) {
+  return State::Type::Program;
 }
 
 etl::fsm_state_id_t CoolableParent::on_event(const Event::SecondPassed&) {

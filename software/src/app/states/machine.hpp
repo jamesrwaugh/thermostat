@@ -12,6 +12,7 @@ class SafeThermoSaveData {
   SafeThermoSaveData();
   SafeThermoSaveData(const ThermoSaveData& other);
   ThermoSaveData Data;
+  TemperatureUnitT TemperatureUnit() const;
 };
 
 struct SerialPrintVisitor {
@@ -30,6 +31,7 @@ class Machine : public etl::hfsm {
   [[nodiscard]] ThermoButtonState& ButtonState();
   [[nodiscard]] ThermoSaveData& SaveState();
   [[nodiscard]] const ThermoSaveData& SaveState() const;
+  [[nodiscard]] const SafeThermoSaveData& SafeSaveState() const;
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;

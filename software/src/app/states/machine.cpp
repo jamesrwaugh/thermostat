@@ -8,6 +8,17 @@
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
+TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
+  switch (Data.temp_display_unit) {
+    case TEMP_UNIT_FREEDOM:
+      return TemperatureUnitT::Freedom;
+    case TEMP_UNIT_CELSIUS:
+      return TemperatureUnitT::Celsius;
+    default:
+      return TemperatureUnitT::Freedom;
+  }
+}
+
 Machine::Machine() : etl::hfsm(0), LastReadTemp(0), LastCommTemp(0) {}
 
 void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
@@ -24,6 +35,10 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
 
 [[nodiscard]] const ThermoSaveData& Machine::SaveState() const {
   return SaveData.Data;
+}
+
+[[nodiscard]] const SafeThermoSaveData& Machine::SafeSaveState() const {
+  return SaveData;
 }
 
 [[nodiscard]] ThermoButtonState& Machine::ButtonState() {
@@ -46,7 +61,7 @@ void Machine::ReadTemperature() {
   if (LastReadTemp != LastCommTemp) {
     auto v = TempChangedEvent{.new_temp_f = LastReadTemp};
     Comms()(v);
-    DriverDisplayTemp(LastReadTemp);
+    DriverDisplayTemp(LastReadTemp, SaveData.TemperatureUnit());
     LastCommTemp = LastReadTemp;
   }
 }
@@ -68,7 +83,7 @@ void Machine::ReadTemperature() {
 
   setPoint += change;
 
-  DriverDisplaySetPoint(setPoint);
+  DriverDisplaySetPoint(setPoint, SaveData.TemperatureUnit());
 
   auto v = SetPointChangedEvent{.new_set_point_f = setPoint};
   Comms()(v);
@@ -158,6 +173,7 @@ bool Machine::IsHeatingOrCoolingNow() const {
 SafeThermoSaveData::SafeThermoSaveData() {
   Data.magic = THERMO_STATE_DATA_MAGIC;
   Data.set_point = 70;
+  Data.temp_display_unit = TEMP_UNIT_FREEDOM;
 }
 
 SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {

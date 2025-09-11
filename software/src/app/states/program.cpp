@@ -1,6 +1,7 @@
 #include "program.hpp"
 
-#include "driver_rs_wrapper.hpp"
+#include <driver_rs_wrapper.hpp>
+
 #include "protos/ThermoSaveData_bp.h"
 
 etl::fsm_state_id_t Program::on_enter_state() {

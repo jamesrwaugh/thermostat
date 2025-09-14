@@ -159,7 +159,7 @@ enum DebounceIndex {
   COUNT
 };
 
-struct ButtonState {
+struct DebounceState {
   uint8_t ZeroCount{0};
   bool IsSet{false};
 
@@ -182,68 +182,42 @@ struct ButtonState {
   };
 };
 
-ButtonState Buttons[DebounceIndex::COUNT];
-
-auto& up = Buttons[DebounceIndex::Up];
-auto& down = Buttons[DebounceIndex::Down];
-auto& select = Buttons[DebounceIndex::Select];
-auto& heat = Buttons[DebounceIndex::TempHeat];
-auto& cool = Buttons[DebounceIndex::TempCool];
-auto& none = Buttons[DebounceIndex::TempNone];
-
-bool Add(bool sample, uint8_t i) {
-  auto& b = Buttons[i];
-  bool changed = false;
-
-  if (!sample) {
-    if (b.ZeroCount < 2) {
-      b.ZeroCount += 1;
-    } else if (!b.IsSet) {
-      b.IsSet = true;
-      changed = true;
-    }
-  } else {
-    b.IsSet = false;
-    b.ZeroCount = 0;
-  }
-
-  return changed;
-}
+DebounceState Buttons[DebounceIndex::COUNT];
 
 void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
-  if (Add(pind & _BV(PIND3), DebounceIndex::Up)) {
+  if (Buttons[DebounceIndex::Up].Add(pind & _BV(PIND3))) {
     Callbacks_.OnButtonPressed(Button::Up);
   }
 
-  if (Add(pind & _BV(PIND2), DebounceIndex::Down)) {
+  if (Buttons[DebounceIndex::Down].Add(pind & _BV(PIND2))) {
     Callbacks_.OnButtonPressed(Button::Down);
   }
 
-  if (Add(pind & _BV(PIND7), DebounceIndex::Select)) {
+  if (Buttons[DebounceIndex::Select].Add(pind & _BV(PIND7))) {
     Callbacks_.OnButtonPressed(Button::Select);
   }
 
-  if (Add(pind & _BV(PIND6), DebounceIndex::FanOn)) {
+  if (Buttons[DebounceIndex::FanOn].Add(pind & _BV(PIND6))) {
     Callbacks_.OnButtonPressed(Button::FanOn);
   }
 
-  if (Add(!(pind & _BV(PIND6)), DebounceIndex::FanAuto)) {
+  if (Buttons[DebounceIndex::FanAuto].Add(!(pind & _BV(PIND6)))) {
     Callbacks_.OnButtonPressed(Button::FanAuto);
   }
 
-  if (Add(pind & _BV(PIND4), DebounceIndex::TempHeat)) {
+  if (Buttons[DebounceIndex::TempHeat].Add(pind & _BV(PIND4))) {
     Callbacks_.OnButtonPressed(Button::TempHeat);
   }
 
-  if (Add(pind & _BV(PIND5), DebounceIndex::TempCool)) {
+  if (Buttons[DebounceIndex::TempCool].Add(pind & _BV(PIND5))) {
     Callbacks_.OnButtonPressed(Button::TempCold);
   }
 
   bool tempNoneInput = !((pind & _BV(PIND4)) && (pind & _BV(PIND5)));
 
-  if (Add(tempNoneInput, DebounceIndex::TempNone)) {
+  if (Buttons[DebounceIndex::TempNone].Add(tempNoneInput)) {
     Callbacks_.OnButtonPressed(Button::TempNone);
   }
 }

@@ -9,8 +9,8 @@
 
 extern "C" {
 
-void DriverInit(const AvrDriverCallbacks& callbacks, void* userData) {
-  gDriver.emplace(callbacks, userData);
+void DriverInit(const AvrDriverCallbacks& callbacks) {
+  gDriver.emplace(callbacks);
   gDriver->Setup();
 }
 

@@ -8,9 +8,8 @@
 extern "C" {
 
 struct AvrDriverCallbacks {
-  void (*OnButtonPressed)(Button b, void* userData);
-  void (*OnSerialMessage)(const char* message, uint16_t messageLen,
-                          void* userData);
+  void (*OnButtonPressed)(Button b);
+  void (*OnSerialMessage)(const char* message, uint16_t messageLen);
 };
 
 struct ThermoButtonState {
@@ -19,7 +18,7 @@ struct ThermoButtonState {
   ReverseValveModeT ReverseValveState;
 };
 
-void DriverInit(const AvrDriverCallbacks& callbacks, void* userData);
+void DriverInit(const AvrDriverCallbacks& callbacks);
 void DriverGetButtonStateNow(ThermoButtonState* data);
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit);
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT);

@@ -5,7 +5,6 @@
 
 #include "event.hpp"
 #include "protos/ThermoCommEvent_bp.h"
-#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 #include "states/coolable_parent.hpp"
 #include "states/cooling.hpp"
@@ -17,7 +16,7 @@
 Machine machine;
 volatile bool g10MillisecondPassed = false;
 
-void OnButtonPressed(Button b, void*) {
+void OnButtonPressed(Button b) {
   switch (b) {
     case Button::Up:
       DriverWriteSerialPortS("Up");
@@ -64,7 +63,7 @@ void OnButtonPressed(Button b, void*) {
   }
 }
 
-void OnSerialMessage(const char* message, uint16_t messageLen, void*) {
+void OnSerialMessage(const char* message, uint16_t messageLen) {
   (void)message;
   (void)messageLen;
 }
@@ -130,7 +129,7 @@ int main() {
       .OnSerialMessage = OnSerialMessage,
   };
 
-  DriverInit(callbacks, nullptr);
+  DriverInit(callbacks);
 
   machine.start(true);
 

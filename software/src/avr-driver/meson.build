@@ -35,7 +35,10 @@ arv_driver = static_library(
     pic: false,
     dependencies: [etl_dep],
     include_directories: [drivers_include],
-    cpp_args: ['-DETL_NO_STL', '-fno-threadsafe-statics', '-DSIMULATED'],
+    cpp_args: [
+        '-DETL_NO_STL',
+        '-fno-threadsafe-statics',
+    ],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
         '-mmcu=atmega88p',

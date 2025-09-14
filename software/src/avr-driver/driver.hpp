@@ -15,7 +15,7 @@ struct AvrDriverCallbacks;
 struct ThermoButtonState;
 
 struct AvrDrivers {
-  AvrDrivers(const AvrDriverCallbacks& callbacks, void* userData);
+  AvrDrivers(const AvrDriverCallbacks& callbacks);
 
   enum Gu7kWindowId {
     UpperRight = 1,
@@ -41,7 +41,6 @@ struct AvrDrivers {
 
  private:
   const AvrDriverCallbacks& Callbacks_;
-  void* UserData_{nullptr};
   void SetupI2C();
   void SetupPins();
   void SetupScreen();

@@ -3,15 +3,14 @@
 #include <HardwareSerial.h>
 #include <avr/interrupt.h>
 #include <driver_ds1307.h>
-#include <etl/debounce.h>
 #include <twi_master.h>
 
 #include "c_api/driver_rs_wrapper.hpp"
 
 etl::optional<AvrDrivers> gDriver;
 
-AvrDrivers::AvrDrivers(const AvrDriverCallbacks& callbacks, void* userData)
-    : Screen(19), Serial_(Serial), Callbacks_(callbacks), UserData_{userData} {}
+AvrDrivers::AvrDrivers(const AvrDriverCallbacks& callbacks)
+    : Screen(19), Serial_(Serial), Callbacks_(callbacks) {}
 
 void AvrDrivers::Setup() {
   SetupPins();
@@ -148,55 +147,104 @@ void AvrDrivers::SetupSerial() {
   Serial_.begin(9600);
 }
 
-// https://www.etlcpp.com/debounce.html
-const uint8_t BTN_DEBOUNCE_COUNT = 2;
-typedef etl::debounce<BTN_DEBOUNCE_COUNT> BtnDebounce;
+enum DebounceIndex {
+  Up = 0,
+  Down = 1,
+  Select,
+  FanOn,
+  FanAuto,
+  TempHeat,
+  TempCool,
+  TempNone,
+  COUNT
+};
 
-const uint8_t TEMP_DEBOUNCE_COUNT = 5;
-typedef etl::debounce<TEMP_DEBOUNCE_COUNT> TmpDebounce;
+struct ButtonState {
+  uint8_t ZeroCount{0};
+  bool IsSet{false};
 
-BtnDebounce upButton;
-BtnDebounce downButton;
-BtnDebounce selectButton;
-BtnDebounce fanOn;
-TmpDebounce tempCoolOn;
-TmpDebounce tempHeatOn;
-TmpDebounce tempNone;
+  bool Add(bool sample) {
+    bool changed = false;
+
+    if (!sample) {
+      if (ZeroCount < 2) {
+        ZeroCount += 1;
+      } else if (!IsSet) {
+        IsSet = true;
+        changed = true;
+      }
+    } else {
+      IsSet = false;
+      ZeroCount = 0;
+    }
+
+    return changed;
+  };
+};
+
+ButtonState Buttons[DebounceIndex::COUNT];
+
+auto& up = Buttons[DebounceIndex::Up];
+auto& down = Buttons[DebounceIndex::Down];
+auto& select = Buttons[DebounceIndex::Select];
+auto& heat = Buttons[DebounceIndex::TempHeat];
+auto& cool = Buttons[DebounceIndex::TempCool];
+auto& none = Buttons[DebounceIndex::TempNone];
+
+bool Add(bool sample, uint8_t i) {
+  auto& b = Buttons[i];
+  bool changed = false;
+
+  if (!sample) {
+    if (b.ZeroCount < 2) {
+      b.ZeroCount += 1;
+    } else if (!b.IsSet) {
+      b.IsSet = true;
+      changed = true;
+    }
+  } else {
+    b.IsSet = false;
+    b.ZeroCount = 0;
+  }
+
+  return changed;
+}
 
 void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
-  if (upButton.add(!(pind & _BV(PIND3))) && upButton.is_set()) {
-    Callbacks_.OnButtonPressed(Button::Up, UserData_);
+  if (Add(pind & _BV(PIND3), DebounceIndex::Up)) {
+    Callbacks_.OnButtonPressed(Button::Up);
   }
 
-  if (downButton.add(!(pind & _BV(PIND2))) && downButton.is_set()) {
-    Callbacks_.OnButtonPressed(Button::Down, UserData_);
+  if (Add(pind & _BV(PIND2), DebounceIndex::Down)) {
+    Callbacks_.OnButtonPressed(Button::Down);
   }
 
-  if (selectButton.add(!(pind & _BV(PIND7))) && selectButton.is_set()) {
-    Callbacks_.OnButtonPressed(Button::Select, UserData_);
+  if (Add(pind & _BV(PIND7), DebounceIndex::Select)) {
+    Callbacks_.OnButtonPressed(Button::Select);
   }
 
-  if (fanOn.add(!(pind & _BV(PIND6)))) {
-    if (fanOn.is_set()) {
-      Callbacks_.OnButtonPressed(Button::FanOn, UserData_);
-    } else {
-      Callbacks_.OnButtonPressed(Button::FanAuto, UserData_);
-    }
+  if (Add(pind & _BV(PIND6), DebounceIndex::FanOn)) {
+    Callbacks_.OnButtonPressed(Button::FanOn);
   }
 
-  if (tempHeatOn.add(!(pind & _BV(PIND4))) && tempHeatOn.is_set()) {
-    Callbacks_.OnButtonPressed(Button::TempHeat, UserData_);
+  if (Add(!(pind & _BV(PIND6)), DebounceIndex::FanAuto)) {
+    Callbacks_.OnButtonPressed(Button::FanAuto);
   }
 
-  if (tempCoolOn.add(!(pind & _BV(PIND5))) && tempCoolOn.is_set()) {
-    Callbacks_.OnButtonPressed(Button::TempCold, UserData_);
+  if (Add(pind & _BV(PIND4), DebounceIndex::TempHeat)) {
+    Callbacks_.OnButtonPressed(Button::TempHeat);
   }
 
-  if (tempNone.add(!tempCoolOn.is_set() && !tempHeatOn.is_set()) &&
-      tempNone.is_set()) {
-    Callbacks_.OnButtonPressed(Button::TempNone, UserData_);
+  if (Add(pind & _BV(PIND5), DebounceIndex::TempCool)) {
+    Callbacks_.OnButtonPressed(Button::TempCold);
+  }
+
+  bool tempNoneInput = !((pind & _BV(PIND4)) && (pind & _BV(PIND5)));
+
+  if (Add(tempNoneInput, DebounceIndex::TempNone)) {
+    Callbacks_.OnButtonPressed(Button::TempNone);
   }
 }
 

@@ -147,18 +147,6 @@ void AvrDrivers::SetupSerial() {
   Serial_.begin(9600);
 }
 
-enum DebounceIndex {
-  Up = 0,
-  Down = 1,
-  Select,
-  FanOn,
-  FanAuto,
-  TempHeat,
-  TempCool,
-  TempNone,
-  COUNT
-};
-
 struct DebounceState {
   uint8_t ZeroCount{0};
   bool IsSet{false};
@@ -182,42 +170,49 @@ struct DebounceState {
   };
 };
 
-DebounceState Buttons[DebounceIndex::COUNT];
+DebounceState UpButton;
+DebounceState DownButton;
+DebounceState SelectButton;
+DebounceState FanOnButton;
+DebounceState FanAutoButton;
+DebounceState TempHeatButton;
+DebounceState TempCoolButton;
+DebounceState TempNoneButton;
 
 void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
 
-  if (Buttons[DebounceIndex::Up].Add(pind & _BV(PIND3))) {
+  if (UpButton.Add(pind & _BV(PIND3))) {
     Callbacks_.OnButtonPressed(Button::Up);
   }
 
-  if (Buttons[DebounceIndex::Down].Add(pind & _BV(PIND2))) {
+  if (DownButton.Add(pind & _BV(PIND2))) {
     Callbacks_.OnButtonPressed(Button::Down);
   }
 
-  if (Buttons[DebounceIndex::Select].Add(pind & _BV(PIND7))) {
+  if (SelectButton.Add(pind & _BV(PIND7))) {
     Callbacks_.OnButtonPressed(Button::Select);
   }
 
-  if (Buttons[DebounceIndex::FanOn].Add(pind & _BV(PIND6))) {
+  if (FanOnButton.Add(pind & _BV(PIND6))) {
     Callbacks_.OnButtonPressed(Button::FanOn);
   }
 
-  if (Buttons[DebounceIndex::FanAuto].Add(!(pind & _BV(PIND6)))) {
+  if (FanAutoButton.Add(!(pind & _BV(PIND6)))) {
     Callbacks_.OnButtonPressed(Button::FanAuto);
   }
 
-  if (Buttons[DebounceIndex::TempHeat].Add(pind & _BV(PIND4))) {
+  if (TempHeatButton.Add(pind & _BV(PIND4))) {
     Callbacks_.OnButtonPressed(Button::TempHeat);
   }
 
-  if (Buttons[DebounceIndex::TempCool].Add(pind & _BV(PIND5))) {
+  if (TempCoolButton.Add(pind & _BV(PIND5))) {
     Callbacks_.OnButtonPressed(Button::TempCold);
   }
 
   bool tempNoneInput = !((pind & _BV(PIND4)) && (pind & _BV(PIND5)));
 
-  if (Buttons[DebounceIndex::TempNone].Add(tempNoneInput)) {
+  if (TempNoneButton.Add(tempNoneInput)) {
     Callbacks_.OnButtonPressed(Button::TempNone);
   }
 }

@@ -5,75 +5,63 @@
 #include "event.hpp"
 #include "state.hpp"
 
-etl::fsm_state_id_t CoolableParent::on_enter_state() {
-  auto& ctx = get_fsm_context();
+CoolableParent::CoolableParent(Machine& machine) : machine_(machine) {
+  machine_.ResetStateChangeData();
 
-  ctx.ResetStateChangeData();
+  machine_.ReadAndApplySettings();
 
-  ctx.ReadAndApplySettings();
+  DriverDisplaySetPoint(machine_.SaveState().set_point,
+                        machine_.SafeSaveState().TemperatureUnit());
 
-  DriverDisplaySetPoint(ctx.SaveState().set_point,
-                        ctx.SafeSaveState().TemperatureUnit());
-
-  ctx.ReadTemperature();
-
-  return No_State_Change;
+  machine_.ReadTemperature();
 }
 
-void CoolableParent::on_exit_state() {
+CoolableParent::~CoolableParent() {
   DriverRelayOff(Relay::Fan);
-  get_fsm_context().ResetStateChangeData();
+  machine_.ResetStateChangeData();
 }
 
-etl::fsm_state_id_t CoolableParent::on_event(const Event::UpButtonPressed&) {
-  return get_fsm_context().ChangeSetPoint(1);
-}
+State::Type::TheType CoolableParent::handle_event(const Event::Base& event) {
+  switch (event.id_) {
+    case Event::Type::UpButtonPressed: {
+      return machine_.ChangeSetPoint(1);
+    }
+    case Event::Type::DownButtonPressed: {
+      return machine_.ChangeSetPoint(-1);
+    }
+    case Event::Type::SelectButtonPressed: {
+      return State::Type::Program;
+    }
+    case Event::Type::SecondPassed: {
+      machine_.ReadTemperature();
+      machine_.TickChangeCounter();
+      return machine_.DetermineNextState();
+    }
+    case Event::Type::FanModeChanged: {
+      const auto& fanEvent = static_cast<const Event::FanModeChanged&>(event);
+      machine_.ButtonState().FanState = fanEvent.Mode;
 
-etl::fsm_state_id_t CoolableParent::on_event(const Event::DownButtonPressed&) {
-  return get_fsm_context().ChangeSetPoint(-1);
-}
+      if (fanEvent.Mode == FanModeT::On) {
+        DriverRelayOn(Relay::Fan);
+      } else if (fanEvent.Mode == FanModeT::Auto &&
+                 !machine_.IsHeatingOrCoolingNow()) {
+        DriverRelayOff(Relay::Fan);
+      }
 
-etl::fsm_state_id_t CoolableParent::on_event(
-    const Event::SelectButtonPressed&) {
-  return State::Type::Program;
-}
-
-etl::fsm_state_id_t CoolableParent::on_event(const Event::SecondPassed&) {
-  auto& ctx = get_fsm_context();
-
-  ctx.ReadTemperature();
-  ctx.TickChangeCounter();
-
-  return ctx.DetermineNextState();
-}
-
-etl::fsm_state_id_t CoolableParent::on_event(
-    const Event::FanModeChanged& event) {
-  auto& ctx = get_fsm_context();
-
-  ctx.ButtonState().FanState = event.Mode;
-
-  if (event.Mode == FanModeT::On) {
-    DriverRelayOn(Relay::Fan);
-  } else if (event.Mode == FanModeT::Auto && !ctx.IsHeatingOrCoolingNow()) {
-    DriverRelayOff(Relay::Fan);
+      return State::Type::CoolableParent;  // Stay in current state
+    }
+    case Event::Type::HeatModeChanged: {
+      const auto& heatEvent = static_cast<const Event::HeatModeChanged&>(event);
+      machine_.ButtonState().HeatingState = heatEvent.Mode;
+      return machine_.DetermineNextState();
+    }
+    case Event::Type::ReverseValveModeChanged: {
+      const auto& valveEvent =
+          static_cast<const Event::ReverseValveModeChanged&>(event);
+      machine_.ButtonState().ReverseValveState = valveEvent.Mode;
+      return State::Type::Idle;
+    }
+    default:
+      return State::Type::CoolableParent;  // Stay in current state
   }
-
-  return No_State_Change;
-}
-
-etl::fsm_state_id_t CoolableParent::on_event(
-    const Event::HeatModeChanged& event) {
-  get_fsm_context().ButtonState().HeatingState = event.Mode;
-  return get_fsm_context().DetermineNextState();
-}
-
-etl::fsm_state_id_t CoolableParent::on_event(
-    const Event::ReverseValveModeChanged& event) {
-  get_fsm_context().ButtonState().ReverseValveState = event.Mode;
-  return State::Type::Idle;
-}
-
-etl::fsm_state_id_t CoolableParent::on_event_unknown(const etl::imessage&) {
-  return No_State_Change;
 }

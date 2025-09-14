@@ -1,16 +1,15 @@
-#include <etl/hfsm.h>
-
 #include "machine.hpp"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
-class Program : public etl::fsm_state<Machine, Program, State::Type::Program> {
+class Program : public State::Base {
  public:
-  etl::fsm_state_id_t on_enter_state() override;
-  void on_exit_state() override;
-  etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
+  Program(Machine& machine);
+  ~Program();
+  State::Type::TheType handle_event(const Event::Base& event) override;
 
  private:
+  Machine& machine_;
   enum class Screen { TempDisplayType = 0 };
   Screen Screen_;
   ThermoSaveData DirtyData_;

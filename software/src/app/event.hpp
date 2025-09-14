@@ -1,13 +1,16 @@
 #pragma once
 
-#include <etl/message.h>
-
 #include <driver_rs_wrapper.hpp>
 
 namespace Event {
 
+struct Base {
+  Base(uint8_t id) : id_(id) {}
+  const uint8_t id_;
+};
+
 struct Type {
-  enum TheType : etl::message_id_t {
+  enum TheType : uint8_t {
     UpButtonPressed = 0,
     DownButtonPressed,
     SelectButtonPressed,
@@ -18,24 +21,37 @@ struct Type {
   };
 };
 
-struct UpButtonPressed : etl::message<Event::Type::UpButtonPressed> {};
-struct DownButtonPressed : etl::message<Event::Type::DownButtonPressed> {};
-struct SelectButtonPressed : etl::message<Event::Type::SelectButtonPressed> {};
-struct SecondPassed : etl::message<Event::Type::SecondPassed> {};
+struct UpButtonPressed : Base {
+  UpButtonPressed() : Base(Event::Type::UpButtonPressed) {}
+};
 
-struct FanModeChanged : etl::message<Event::Type::FanModeChanged> {
-  FanModeChanged(FanModeT mode) : Mode(mode) {}
+struct DownButtonPressed : Base {
+  DownButtonPressed() : Base(Event::Type::DownButtonPressed) {}
+};
+
+struct SelectButtonPressed : Base {
+  SelectButtonPressed() : Base(Event::Type::SelectButtonPressed) {}
+};
+
+struct SecondPassed : Base {
+  SecondPassed() : Base(Event::Type::SecondPassed) {}
+};
+
+struct FanModeChanged : Base {
+  FanModeChanged(FanModeT mode)
+      : Base(Event::Type::FanModeChanged), Mode(mode) {}
   const FanModeT Mode;
 };
 
-struct HeatModeChanged : etl::message<Event::Type::HeatModeChanged> {
-  HeatModeChanged(HeatModeT mode) : Mode(mode) {}
+struct HeatModeChanged : Base {
+  HeatModeChanged(HeatModeT mode)
+      : Base(Event::Type::HeatModeChanged), Mode(mode) {}
   const HeatModeT Mode;
 };
 
-struct ReverseValveModeChanged
-    : etl::message<Event::Type::ReverseValveModeChanged> {
-  ReverseValveModeChanged(ReverseValveModeT mode) : Mode(mode) {}
+struct ReverseValveModeChanged : Base {
+  ReverseValveModeChanged(ReverseValveModeT mode)
+      : Base(Event::Type::ReverseValveModeChanged), Mode(mode) {}
   const ReverseValveModeT Mode;
 };
 

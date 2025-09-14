@@ -1,11 +1,12 @@
-#include <etl/hfsm.h>
-
 #include "machine.hpp"
 #include "state.hpp"
 
-class Idle : public etl::fsm_state<Machine, Idle, State::Type::Idle> {
+class Idle : public State::Base {
  public:
-  etl::fsm_state_id_t on_enter_state() override;
-  void on_exit_state() override;
-  etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
+  Idle(Machine& machine);
+  ~Idle();
+  State::Type::TheType handle_event(const Event::Base& event) override;
+
+ private:
+  Machine& machine_;
 };

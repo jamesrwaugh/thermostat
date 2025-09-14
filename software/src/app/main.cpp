@@ -1,17 +1,12 @@
 #include <avr/interrupt.h>
-#include <etl/hfsm.h>
+#include <string.h>
 
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
 #include "protos/ThermoCommEvent_bp.h"
 #include "state.hpp"
-#include "states/coolable_parent.hpp"
-#include "states/cooling.hpp"
-#include "states/heating.hpp"
-#include "states/idle.hpp"
 #include "states/machine.hpp"
-#include "states/program.hpp"
 
 Machine machine;
 volatile bool g10MillisecondPassed = false;
@@ -20,45 +15,45 @@ void OnButtonPressed(Button b) {
   switch (b) {
     case Button::Up:
       DriverWriteSerialPortS("Up");
-      machine.receive(Event::UpButtonPressed{});
+      machine.receive(Event::UpButtonPressed());
       break;
     case Button::Down:
       DriverWriteSerialPortS("DN");
-      machine.receive(Event::DownButtonPressed{});
+      machine.receive(Event::DownButtonPressed());
       break;
     case Button::Select:
       DriverWriteSerialPortS("SEL");
-      machine.receive(Event::SelectButtonPressed{});
+      machine.receive(Event::SelectButtonPressed());
       break;
     case Button::TempHeat:
       DriverWriteSerialPortS("TH");
-      machine.receive(Event::HeatModeChanged{HeatModeT::Heating});
+      machine.receive(Event::HeatModeChanged(HeatModeT::Heating));
       break;
     case Button::TempCold:
       DriverWriteSerialPortS("TC");
-      machine.receive(Event::HeatModeChanged{HeatModeT::Cooling});
+      machine.receive(Event::HeatModeChanged(HeatModeT::Cooling));
       break;
     case Button::TempNone:
       DriverWriteSerialPortS("TN");
-      machine.receive(Event::HeatModeChanged{HeatModeT::None});
+      machine.receive(Event::HeatModeChanged(HeatModeT::None));
       break;
     case Button::FanAuto:
       DriverWriteSerialPortS("FA");
-      machine.receive(Event::FanModeChanged{FanModeT::Auto});
+      machine.receive(Event::FanModeChanged(FanModeT::Auto));
       break;
     case Button::FanOn:
       DriverWriteSerialPortS("FO");
-      machine.receive(Event::FanModeChanged{FanModeT::On});
+      machine.receive(Event::FanModeChanged(FanModeT::On));
       break;
     case Button::ReverseValveOnHeat:
       DriverWriteSerialPortS("RVOH");
       machine.receive(
-          Event::ReverseValveModeChanged{ReverseValveModeT::OnForHeating});
+          Event::ReverseValveModeChanged(ReverseValveModeT::OnForHeating));
       break;
     case Button::ReverseValveOnCool:
       DriverWriteSerialPortS("RVOCO");
       machine.receive(
-          Event::ReverseValveModeChanged{ReverseValveModeT::OnForCooling});
+          Event::ReverseValveModeChanged(ReverseValveModeT::OnForCooling));
       break;
   }
 }
@@ -102,28 +97,6 @@ void OnStateChange(State::Type::TheType state) {
 }
 
 int main() {
-  CoolableParent coolableParent;
-  Idle idleState;
-  Heating heatingState;
-  Cooling coolingState;
-  Program programmingState;
-
-  etl::array<etl::ifsm_state*, State::Type::COUNT> states = {
-      &coolableParent, &idleState,        &heatingState,
-      &coolingState,   &programmingState,
-  };
-
-  etl::array<etl::ifsm_state*, 3> coolableChildren = {
-      &idleState,
-      &heatingState,
-      &coolingState,
-  };
-
-  coolableParent.set_child_states(coolableChildren.data(),
-                                  coolableChildren.size());
-
-  machine.set_states(states.data(), states.size());
-
   AvrDriverCallbacks callbacks{
       .OnButtonPressed = OnButtonPressed,
       .OnSerialMessage = OnSerialMessage,
@@ -137,18 +110,18 @@ int main() {
 
   auto v = SetPointChangedEvent{.new_set_point_f = 2};
   machine.Comms()(v);
-
   const char* message = "Hello, world!";
   DriverWriteSerialPortS(message);
 
-  etl::fsm_state_id_t lastState = etl::ifsm_state::No_State_Change;
+  State::Type::TheType lastState =
+      State::Type::COUNT;  // Invalid state to force initial update
 
   while (true) {
     auto state = machine.get_state_id();
 
     if (lastState != state) {
       lastState = state;
-      OnStateChange(static_cast<State::Type::TheType>(state));
+      OnStateChange(state);
     }
 
     if (g10MillisecondPassed) {
@@ -159,7 +132,7 @@ int main() {
 
     if (lastTenMsCount >= 10) {
       lastTenMsCount = 0;
-      machine.receive(Event::SecondPassed{});
+      machine.receive(Event::SecondPassed());
     }
 
     DriverMcuSleep();

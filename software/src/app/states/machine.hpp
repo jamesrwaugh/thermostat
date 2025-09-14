@@ -1,11 +1,11 @@
 #pragma once
 
-#include <etl/hfsm.h>
-
 #include <driver_rs_wrapper.hpp>
 
+#include "event.hpp"
 #include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
+#include "state.hpp"
 
 class SafeThermoSaveData {
  public:
@@ -22,7 +22,7 @@ struct SerialPrintVisitor {
   void operator()(ThermoSaveData& e);
 };
 
-class Machine : public etl::hfsm {
+class Machine {
  public:
   Machine();
 
@@ -35,8 +35,8 @@ class Machine : public etl::hfsm {
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;
-  [[nodiscard]] etl::fsm_state_id_t ChangeSetPoint(int8_t change);
-  [[nodiscard]] etl::fsm_state_id_t DetermineNextState();
+  [[nodiscard]] State::Type::TheType ChangeSetPoint(int8_t change);
+  [[nodiscard]] State::Type::TheType DetermineNextState();
   void ActivateCoolingRelays(Relay onRelay, Relay offRelay,
                              ReverseValveModeT onIfType);
   void EnterHeatingOrCooling(HeatModeT mode);
@@ -45,6 +45,11 @@ class Machine : public etl::hfsm {
   bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
   SerialPrintVisitor& Comms();
+
+  // New state management methods
+  void receive(const Event::Base& event);
+  void start(bool restart = false);
+  [[nodiscard]] State::Type::TheType get_state_id() const;
 
  private:
   struct StateChangeData {
@@ -58,4 +63,8 @@ class Machine : public etl::hfsm {
   SerialPrintVisitor V;
   uint8_t LastReadTemp{0};
   uint8_t LastCommTemp{0};
+
+  // State management
+  State::Type::TheType current_state_id_{State::Type::CoolableParent};
+  bool is_running_{false};
 };

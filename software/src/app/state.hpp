@@ -2,7 +2,10 @@
 
 #include <stdint.h>
 
+#include "event.hpp"
+
 namespace State {
+
 struct Type {
   enum TheType : uint8_t {
     CoolableParent = 0,
@@ -13,4 +16,9 @@ struct Type {
     COUNT,
   };
 };
+
+struct Base {
+  virtual State::Type::TheType handle_event(const Event::Base& event) = 0;
+};
+
 }  // namespace State

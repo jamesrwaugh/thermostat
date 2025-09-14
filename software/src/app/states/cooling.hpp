@@ -1,11 +1,12 @@
-#include <etl/hfsm.h>
-
 #include "machine.hpp"
 #include "state.hpp"
 
-class Cooling : public etl::fsm_state<Machine, Cooling, State::Type::Cooling> {
+class Cooling : public State::Base {
  public:
-  etl::fsm_state_id_t on_enter_state() override;
-  void on_exit_state() override;
-  etl::fsm_state_id_t on_event_unknown(const etl::imessage&);
+  Cooling(Machine& machine);
+  ~Cooling();
+  State::Type::TheType handle_event(const Event::Base& event) override;
+
+ private:
+  Machine& machine_;
 };

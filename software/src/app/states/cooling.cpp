@@ -2,18 +2,17 @@
 
 #include <driver_rs_wrapper.hpp>
 
-etl::fsm_state_id_t Cooling::on_enter_state() {
+Cooling::Cooling(Machine& machine) : machine_(machine) {
   DriverDisplayIsCooling();
-  get_fsm_context().EnterHeatingOrCooling(HeatModeT::Cooling);
-  get_fsm_context().ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
-                                          ReverseValveModeT::OnForCooling);
-  return No_State_Change;
+  machine_.EnterHeatingOrCooling(HeatModeT::Cooling);
+  machine_.ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
+                                 ReverseValveModeT::OnForCooling);
 }
 
-void Cooling::on_exit_state() {
-  get_fsm_context().ExitHeatingOrCooling();
+Cooling::~Cooling() {
+  machine_.ExitHeatingOrCooling();
 }
 
-etl::fsm_state_id_t Cooling::on_event_unknown(const etl::imessage&) {
-  return No_State_Change;
+State::Type::TheType Cooling::handle_event(const Event::Base& event) {
+  return State::Type::Cooling;  // Stay in cooling state
 }

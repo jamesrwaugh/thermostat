@@ -4,19 +4,18 @@
 
 #include "protos/ThermoSaveData_bp.h"
 
-etl::fsm_state_id_t Program::on_enter_state() {
-  DirtyData_ = get_fsm_context().SaveState();
-  return No_State_Change;
+Program::Program(Machine& machine) : machine_(machine) {
+  DirtyData_ = machine_.SaveState();
 }
 
-void Program::on_exit_state() {
+Program::~Program() {
   uint8_t buffer[BYTES_LENGTH_THERMO_SAVE_DATA];
   EncodeThermoSaveData(&DirtyData_, buffer);
   DriverWriteFlash(0, buffer, sizeof(buffer));
-  get_fsm_context().SetThermoSaveData(DirtyData_);
-  get_fsm_context().Comms()(DirtyData_);
+  machine_.SetThermoSaveData(DirtyData_);
+  machine_.Comms()(DirtyData_);
 }
 
-etl::fsm_state_id_t Program::on_event_unknown(const etl::imessage&) {
-  return No_State_Change;
+State::Type::TheType Program::handle_event(const Event::Base& event) {
+  return State::Type::Program;  // Stay in program state
 }

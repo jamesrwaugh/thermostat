@@ -2,18 +2,17 @@
 
 #include <driver_rs_wrapper.hpp>
 
-etl::fsm_state_id_t Heating::on_enter_state() {
+Heating::Heating(Machine& machine) : machine_(machine) {
   DriverDisplayIsHeating();
-  get_fsm_context().EnterHeatingOrCooling(HeatModeT::Heating);
-  get_fsm_context().ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
-                                          ReverseValveModeT::OnForHeating);
-  return No_State_Change;
+  machine_.EnterHeatingOrCooling(HeatModeT::Heating);
+  machine_.ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
+                                 ReverseValveModeT::OnForHeating);
 }
 
-void Heating::on_exit_state() {
-  get_fsm_context().ExitHeatingOrCooling();
+Heating::~Heating() {
+  machine_.ExitHeatingOrCooling();
 }
 
-etl::fsm_state_id_t Heating::on_event_unknown(const etl::imessage&) {
-  return No_State_Change;
+State::Type::TheType Heating::handle_event(const Event::Base& event) {
+  return State::Type::Heating;  // Stay in heating state
 }

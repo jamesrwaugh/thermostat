@@ -4,6 +4,11 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "coolable_parent.hpp"
+#include "cooling.hpp"
+#include "heating.hpp"
+#include "idle.hpp"
+#include "program.hpp"
 #include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
@@ -19,7 +24,7 @@ TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
   }
 }
 
-Machine::Machine() : etl::hfsm(0), LastReadTemp(0), LastCommTemp(0) {}
+Machine::Machine() : LastReadTemp(0), LastCommTemp(0) {}
 
 void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
   SaveData = raw;
@@ -70,15 +75,15 @@ void Machine::ReadTemperature() {
   return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
 }
 
-[[nodiscard]] etl::fsm_state_id_t Machine::ChangeSetPoint(int8_t change) {
+[[nodiscard]] State::Type::TheType Machine::ChangeSetPoint(int8_t change) {
   auto& setPoint = SaveData.Data.set_point;
 
   if (setPoint == 1 && change < 0) {
-    return etl::ifsm_state::No_State_Change;
+    return State::Type::CoolableParent;  // Stay in current state
   }
 
   if (setPoint == 100 && change > 0) {
-    return etl::ifsm_state::No_State_Change;
+    return State::Type::CoolableParent;  // Stay in current state
   }
 
   setPoint += change;
@@ -91,11 +96,11 @@ void Machine::ReadTemperature() {
   return DetermineNextState();
 }
 
-[[nodiscard]] etl::fsm_state_id_t Machine::DetermineNextState() {
+[[nodiscard]] State::Type::TheType Machine::DetermineNextState() {
   const auto& buttons = ButtonState();
 
   if (!HasChangeTimeoutPassed()) {
-    return etl::ifsm_state::No_State_Change;
+    return State::Type::CoolableParent;  // Stay in current state
   }
 
   const auto heatMode = buttons.HeatingState;
@@ -115,7 +120,7 @@ void Machine::ReadTemperature() {
     return State::Type::Cooling;
   }
 
-  return etl::ifsm_state::No_State_Change;
+  return State::Type::CoolableParent;  // Stay in current state
 }
 
 void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
@@ -237,4 +242,63 @@ void Machine::ReadAndApplySettings() {
   if (buttons.FanState == FanModeT::On) {
     DriverRelayOn(Relay::Fan);
   }
+}
+
+// New state management methods
+void Machine::receive(const Event::Base& event) {
+  if (!is_running_) {
+    return;
+  }
+
+  // Create the appropriate state object and handle the event
+  State::Type::TheType next_state = current_state_id_;
+
+  switch (current_state_id_) {
+    case State::Type::CoolableParent: {
+      CoolableParent state(*this);
+      next_state = state.handle_event(event);
+      break;
+    }
+    case State::Type::Idle: {
+      Idle state(*this);
+      next_state = state.handle_event(event);
+      break;
+    }
+    case State::Type::Heating: {
+      Heating state(*this);
+      next_state = state.handle_event(event);
+      break;
+    }
+    case State::Type::Cooling: {
+      Cooling state(*this);
+      next_state = state.handle_event(event);
+      break;
+    }
+    case State::Type::Program: {
+      Program state(*this);
+      next_state = state.handle_event(event);
+      break;
+    }
+    default:
+      break;
+  }
+
+  // Handle state transition
+  if (next_state != current_state_id_) {
+    current_state_id_ = next_state;
+  }
+}
+
+void Machine::start(bool restart) {
+  if (restart || !is_running_) {
+    is_running_ = true;
+    current_state_id_ = State::Type::CoolableParent;
+
+    // Initialize the starting state
+    CoolableParent state(*this);
+  }
+}
+
+State::Type::TheType Machine::get_state_id() const {
+  return current_state_id_;
 }

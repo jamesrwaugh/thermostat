@@ -5,7 +5,7 @@
 
 #include "data_types.hpp"
 
-#ifdef SIMULATED
+#if SIMULATED == 1
 #include "SimulatedGu7000/SimulatedGu7000.hpp"
 #else
 #include <Noritake_VFD_GU7000.h>
@@ -23,7 +23,7 @@ struct AvrDrivers {
     LowerLeft = 3,
   };
 
-#ifdef SIMULATED
+#if SIMULATED == 1
   SimulatedGu7000 Screen;
 #else
   Noritake_VFD_GU7000 Screen;

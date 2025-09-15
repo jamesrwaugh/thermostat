@@ -45,7 +45,7 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
-#ifdef SIMULATED
+#if SIMULATED == 1
   gDriver->Screen.DriverDisplayTemp(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
@@ -59,7 +59,7 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
-#ifdef SIMULATED
+#if SIMULATED == 1
   gDriver->Screen.DriverDisplaySetPoint(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
@@ -71,7 +71,7 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
 }
 
 void DriverDisplayIsHeating() {
-#ifdef SIMULATED
+#if SIMULATED == 1
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsHeating();
 #else
@@ -84,7 +84,7 @@ void DriverDisplayIsHeating() {
 }
 
 void DriverDisplayIsCooling() {
-#ifdef SIMULATED
+#if SIMULATED == 1
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsCooling();
 #else
@@ -97,7 +97,7 @@ void DriverDisplayIsCooling() {
 }
 
 void DriverDisplayIsIdle() {
-#ifdef SIMULATED
+#if SIMULATED == 1
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsIdle();
 #else

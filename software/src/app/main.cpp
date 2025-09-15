@@ -4,7 +4,6 @@
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
-#include "protos/ThermoCommEvent_bp.h"
 #include "state.hpp"
 #include "states/machine.hpp"
 
@@ -101,17 +100,14 @@ int main() {
 
   DriverInit(callbacks);
 
-  machine.start(true);
+  machine.start();
 
   uint8_t lastTenMsCount = 0;
 
-  auto v = SetPointChangedEvent{.new_set_point_f = 2};
-  machine.Comms()(v);
-  const char* message = "Hello, world!";
-  DriverWriteSerialPortS(message);
+  DriverWriteSerialPortS("Hello, world!");
 
-  State::Type lastState =
-      State::Type::COUNT;  // Invalid state to force initial update
+  // Invalid state to force initial update
+  State::Type lastState = State::Type::COUNT;
 
   while (true) {
     auto state = machine.get_state_id();

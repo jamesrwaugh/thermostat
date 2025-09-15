@@ -7,16 +7,7 @@
 #include "state.hpp"
 
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
-    : State::Base(stateId), machine_(machine) {
-  machine_.ResetStateChangeData();
-
-  machine_.ReadAndApplySettings();
-
-  DriverDisplaySetPoint(machine_.SaveState().set_point,
-                        machine_.SafeSaveState().TemperatureUnit());
-
-  machine_.ReadTemperature();
-}
+    : State::Base(stateId), machine_(machine) {}
 
 CoolableParent::~CoolableParent() {}
 

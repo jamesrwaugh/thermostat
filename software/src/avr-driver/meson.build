@@ -38,6 +38,7 @@ arv_driver = static_library(
     cpp_args: [
         '-DETL_NO_STL',
         '-fno-threadsafe-statics',
+        '-DSIMULATED=1',
     ],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',

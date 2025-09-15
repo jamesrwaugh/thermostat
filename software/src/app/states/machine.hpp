@@ -54,9 +54,8 @@ class Machine {
   void ReadAndApplySettings();
   SerialPrintVisitor& Comms();
 
-  // New state management methods
+  void start();
   void receive(const Event::Base& event);
-  void start(bool restart = false);
   [[nodiscard]] State::Type get_state_id() const;
 
  private:

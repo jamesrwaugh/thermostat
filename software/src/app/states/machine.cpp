@@ -244,16 +244,25 @@ void Machine::ReadAndApplySettings() {
   }
 }
 
+void Machine::start() {
+  ::new (CurrentState.get_address<void*>()) Idle(*this);
+
+  ResetStateChangeData();
+
+  ReadAndApplySettings();
+
+  DriverDisplaySetPoint(SaveState().set_point,
+                        SafeSaveState().TemperatureUnit());
+
+  ReadTemperature();
+}
+
 void Machine::receive(const Event::Base& event) {
-  auto newState = CurrentState.get_address<State::Base>()->handle_event(event);
+  auto newState = CurrentState.get_reference<State::Base>().handle_event(event);
 
   if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {
     SwitchState(newState);
   }
-}
-
-void Machine::start(bool restart) {
-  ::new (CurrentState.get_address<void*>()) Idle(*this);
 }
 
 State::Type Machine::get_state_id() const {

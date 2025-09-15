@@ -73,7 +73,7 @@ void writePort(const uint8_t data, const uint8_t busyPin) {
 void hardReset() {}
 
 void AvrDrivers::SetupScreen() {
-#ifdef SIMULATED
+#if SIMULATED == 1
 
 #else
   Screen.GU7000_init();

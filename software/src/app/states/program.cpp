@@ -2,9 +2,11 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "machine.hpp"
 #include "protos/ThermoSaveData_bp.h"
 
-Program::Program(Machine& machine) : machine_(machine) {
+Program::Program(Machine& machine)
+    : State::Base(State::Type::Program), machine_(machine) {
   DirtyData_ = machine_.SaveState();
 }
 
@@ -16,6 +18,6 @@ Program::~Program() {
   machine_.Comms()(DirtyData_);
 }
 
-State::Type::TheType Program::handle_event(const Event::Base& event) {
+State::Type Program::handle_event(const Event::Base& event) {
   return State::Type::Program;  // Stay in program state
 }

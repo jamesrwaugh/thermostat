@@ -3,9 +3,11 @@
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
+#include "machine.hpp"
 #include "state.hpp"
 
-CoolableParent::CoolableParent(Machine& machine) : machine_(machine) {
+CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
+    : State::Base(stateId), machine_(machine) {
   machine_.ResetStateChangeData();
 
   machine_.ReadAndApplySettings();
@@ -16,12 +18,9 @@ CoolableParent::CoolableParent(Machine& machine) : machine_(machine) {
   machine_.ReadTemperature();
 }
 
-CoolableParent::~CoolableParent() {
-  DriverRelayOff(Relay::Fan);
-  machine_.ResetStateChangeData();
-}
+CoolableParent::~CoolableParent() {}
 
-State::Type::TheType CoolableParent::handle_event(const Event::Base& event) {
+State::Type CoolableParent::handle_event(const Event::Base& event) {
   switch (event.id_) {
     case Event::Type::UpButtonPressed: {
       return machine_.ChangeSetPoint(1);
@@ -48,7 +47,7 @@ State::Type::TheType CoolableParent::handle_event(const Event::Base& event) {
         DriverRelayOff(Relay::Fan);
       }
 
-      return State::Type::CoolableParent;  // Stay in current state
+      return State::Type::NO_CHANGE;
     }
     case Event::Type::HeatModeChanged: {
       const auto& heatEvent = static_cast<const Event::HeatModeChanged&>(event);
@@ -62,6 +61,6 @@ State::Type::TheType CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::Idle;
     }
     default:
-      return State::Type::CoolableParent;  // Stay in current state
+      return State::Type::NO_CHANGE;
   }
 }

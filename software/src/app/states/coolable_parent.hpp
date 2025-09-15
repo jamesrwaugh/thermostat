@@ -1,13 +1,16 @@
+#pragma once
+
 #include "event.hpp"
-#include "machine.hpp"
 #include "state.hpp"
+
+class Machine;
 
 class CoolableParent : public State::Base {
  public:
-  CoolableParent(Machine& machine);
-  ~CoolableParent();
-  State::Type::TheType handle_event(const Event::Base& event) override;
+  CoolableParent(Machine& machine, State::Type stateId);
+  virtual ~CoolableParent();
+  State::Type handle_event(const Event::Base& event) override;
 
- private:
+ protected:
   Machine& machine_;
 };

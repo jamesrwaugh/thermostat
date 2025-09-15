@@ -1,6 +1,6 @@
 #include "machine.hpp"
 
-#include <etl/hfsm.h>
+#include <etl/placement_new.h>
 
 #include <driver_rs_wrapper.hpp>
 
@@ -75,15 +75,15 @@ void Machine::ReadTemperature() {
   return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
 }
 
-[[nodiscard]] State::Type::TheType Machine::ChangeSetPoint(int8_t change) {
+[[nodiscard]] State::Type Machine::ChangeSetPoint(int8_t change) {
   auto& setPoint = SaveData.Data.set_point;
 
   if (setPoint == 1 && change < 0) {
-    return State::Type::CoolableParent;  // Stay in current state
+    return State::Type::NO_CHANGE;  // Stay in current state
   }
 
   if (setPoint == 100 && change > 0) {
-    return State::Type::CoolableParent;  // Stay in current state
+    return State::Type::NO_CHANGE;  // Stay in current state
   }
 
   setPoint += change;
@@ -96,11 +96,11 @@ void Machine::ReadTemperature() {
   return DetermineNextState();
 }
 
-[[nodiscard]] State::Type::TheType Machine::DetermineNextState() {
+[[nodiscard]] State::Type Machine::DetermineNextState() {
   const auto& buttons = ButtonState();
 
   if (!HasChangeTimeoutPassed()) {
-    return State::Type::CoolableParent;  // Stay in current state
+    return State::Type::NO_CHANGE;
   }
 
   const auto heatMode = buttons.HeatingState;
@@ -120,7 +120,7 @@ void Machine::ReadTemperature() {
     return State::Type::Cooling;
   }
 
-  return State::Type::CoolableParent;  // Stay in current state
+  return State::Type::NO_CHANGE;
 }
 
 void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
@@ -244,61 +244,43 @@ void Machine::ReadAndApplySettings() {
   }
 }
 
-// New state management methods
 void Machine::receive(const Event::Base& event) {
-  if (!is_running_) {
-    return;
-  }
+  auto newState = CurrentState.get_address<State::Base>()->handle_event(event);
 
-  // Create the appropriate state object and handle the event
-  State::Type::TheType next_state = current_state_id_;
-
-  switch (current_state_id_) {
-    case State::Type::CoolableParent: {
-      CoolableParent state(*this);
-      next_state = state.handle_event(event);
-      break;
-    }
-    case State::Type::Idle: {
-      Idle state(*this);
-      next_state = state.handle_event(event);
-      break;
-    }
-    case State::Type::Heating: {
-      Heating state(*this);
-      next_state = state.handle_event(event);
-      break;
-    }
-    case State::Type::Cooling: {
-      Cooling state(*this);
-      next_state = state.handle_event(event);
-      break;
-    }
-    case State::Type::Program: {
-      Program state(*this);
-      next_state = state.handle_event(event);
-      break;
-    }
-    default:
-      break;
-  }
-
-  // Handle state transition
-  if (next_state != current_state_id_) {
-    current_state_id_ = next_state;
+  if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {
+    SwitchState(newState);
   }
 }
 
 void Machine::start(bool restart) {
-  if (restart || !is_running_) {
-    is_running_ = true;
-    current_state_id_ = State::Type::CoolableParent;
-
-    // Initialize the starting state
-    CoolableParent state(*this);
-  }
+  ::new (CurrentState.get_address<void*>()) Idle(*this);
 }
 
-State::Type::TheType Machine::get_state_id() const {
-  return current_state_id_;
+State::Type Machine::get_state_id() const {
+  return CurrentState.get_reference<State::Base>().StateId;
+}
+
+void Machine::SwitchState(State::Type new_state) {
+  State::Base* address = CurrentState.get_address<State::Base>();
+
+  address->~Base();
+
+  switch (new_state) {
+    case State::Type::Idle:
+      ::new (address) Idle(*this);
+      break;
+    case State::Type::Heating:
+      ::new (address) Heating(*this);
+      break;
+    case State::Type::Cooling:
+      ::new (address) Cooling(*this);
+      break;
+    case State::Type::Program:
+      ::new (address) Program(*this);
+      break;
+    case State::Type::NO_CHANGE:
+      break;
+    case State::Type::COUNT:
+      break;
+  }
 }

@@ -1,12 +1,13 @@
-#include "machine.hpp"
-#include "state.hpp"
+#pragma once
 
-class Idle : public State::Base {
+#include "state.hpp"
+#include "states/coolable_parent.hpp"
+
+class Machine;
+
+class Idle : public CoolableParent {
  public:
   Idle(Machine& machine);
-  ~Idle();
-  State::Type::TheType handle_event(const Event::Base& event) override;
-
- private:
-  Machine& machine_;
+  virtual ~Idle();
+  State::Type handle_event(const Event::Base& event) override;
 };

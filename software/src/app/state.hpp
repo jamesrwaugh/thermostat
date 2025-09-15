@@ -6,19 +6,20 @@
 
 namespace State {
 
-struct Type {
-  enum TheType : uint8_t {
-    CoolableParent = 0,
-    Idle,
-    Heating,
-    Cooling,
-    Program,
-    COUNT,
-  };
+enum class Type : uint8_t {
+  Idle = 0,
+  Heating,
+  Cooling,
+  Program,
+  COUNT,
+  NO_CHANGE = 0xFF,
 };
 
 struct Base {
-  virtual State::Type::TheType handle_event(const Event::Base& event) = 0;
+  Base(State::Type stateId) : StateId(stateId) {}
+  virtual State::Type handle_event(const Event::Base& event) = 0;
+  virtual ~Base() = default;
+  const State::Type StateId;
 };
 
 }  // namespace State

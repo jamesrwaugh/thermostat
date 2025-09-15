@@ -2,7 +2,10 @@
 
 #include <driver_rs_wrapper.hpp>
 
-Cooling::Cooling(Machine& machine) : machine_(machine) {
+#include "machine.hpp"
+
+Cooling::Cooling(Machine& machine)
+    : CoolableParent(machine, State::Type::Cooling) {
   DriverDisplayIsCooling();
   machine_.EnterHeatingOrCooling(HeatModeT::Cooling);
   machine_.ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
@@ -13,6 +16,6 @@ Cooling::~Cooling() {
   machine_.ExitHeatingOrCooling();
 }
 
-State::Type::TheType Cooling::handle_event(const Event::Base& event) {
-  return State::Type::Cooling;  // Stay in cooling state
+State::Type Cooling::handle_event(const Event::Base& event) {
+  return CoolableParent::handle_event(event);
 }

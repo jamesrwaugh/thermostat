@@ -2,7 +2,9 @@
 
 #include <driver_rs_wrapper.hpp>
 
-Idle::Idle(Machine& machine) : machine_(machine) {
+#include "machine.hpp"
+
+Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
   auto v = HeatingModeChangedEvent{.new_mode = HEATING_COMM_IDLE};
   machine_.Comms()(v);
   DriverDisplayIsIdle();
@@ -12,6 +14,6 @@ Idle::~Idle() {
   machine_.ResetStateChangeData();
 }
 
-State::Type::TheType Idle::handle_event(const Event::Base& event) {
-  return State::Type::Idle;  // Stay in idle state
+State::Type Idle::handle_event(const Event::Base& event) {
+  return CoolableParent::handle_event(event);
 }

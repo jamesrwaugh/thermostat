@@ -70,11 +70,8 @@ void PrintStateChange(const char* message) {
   DriverWriteSerialPortRaw((uint8_t*)"\r\n", 2);
 }
 
-void OnStateChange(State::Type::TheType state) {
+void OnStateChange(State::Type state) {
   switch (state) {
-    case State::Type::CoolableParent:
-      PrintStateChange("CP");
-      break;
     case State::Type::Idle:
       PrintStateChange("ID");
       break;
@@ -113,7 +110,7 @@ int main() {
   const char* message = "Hello, world!";
   DriverWriteSerialPortS(message);
 
-  State::Type::TheType lastState =
+  State::Type lastState =
       State::Type::COUNT;  // Invalid state to force initial update
 
   while (true) {

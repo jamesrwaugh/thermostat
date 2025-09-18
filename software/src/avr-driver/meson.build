@@ -48,5 +48,5 @@ arv_driver = static_library(
 
 avr_driver_dep = declare_dependency(
     link_with: arv_driver,
-    include_directories: ['c_api'],
+    include_directories: ['c_api', 'DS1307/src'],
 )

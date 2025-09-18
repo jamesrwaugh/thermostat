@@ -1,4 +1,5 @@
 #include <avr/interrupt.h>
+#include <driver_ds1307.h>
 #include <string.h>
 
 #include <driver_rs_wrapper.hpp>
@@ -100,7 +101,23 @@ int main() {
 
   DriverInit(callbacks);
 
+  ds1307_time_s time = {
+      .year = 2025,
+      .month = 9,
+      .week = 2,
+      .date = 16,
+      .hour = 6,
+      .minute = 37,
+      .second = 23,
+      .format = ds1307_format_t::DS1307_FORMAT_12H,
+      .am_pm = ds1307_am_pm_t::DS1307_PM,
+  };
+
+  DriverSetTime(time);
+
   machine.start();
+
+  DriverGetTime(time);
 
   uint8_t lastTenMsCount = 0;
 

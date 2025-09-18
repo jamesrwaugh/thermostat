@@ -136,4 +136,12 @@ uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length) {
 uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength) {
   return ds1307_read_ram(&gDriver->Rtc, address, buffer, maxLength);
 }
+
+bool DriverSetTime(ds1307_time_s& time) {
+  return ds1307_set_time(&gDriver->Rtc, &time) == 0;
+}
+
+bool DriverGetTime(ds1307_time_s& time) {
+  return ds1307_get_time(&gDriver->Rtc, &time) == 0;
+}
 }

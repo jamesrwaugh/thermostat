@@ -287,9 +287,11 @@ void Machine::SwitchState(State::Type new_state) {
     case State::Type::Program:
       ::new (address) Program(*this);
       break;
-    case State::Type::NO_CHANGE:
+    case State::Type::NO_CHANGE:  // Should never happen
+      ::new (address) Idle(*this);
       break;
-    case State::Type::COUNT:
+    case State::Type::COUNT:  // Should never happen
+      ::new (address) Idle(*this);
       break;
   }
 }

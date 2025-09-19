@@ -123,9 +123,14 @@ void HardwareSerial::_tx_udr_empty_irq(void) {
 
 // Public Methods //////////////////////////////////////////////////////////////
 
-void HardwareSerial::begin(unsigned long baud, uint8_t config) {
+void HardwareSerial::begin(uint8_t config) {
+  // We use constexpr to avoid the overhead of calculating the baud setting at
+  // runtime, which includes costly division. This saves around 210 (!) bytes of
+  // flash. Yes, we are that tight on space.
+  constexpr uint16_t baud_setting = (F_CPU / 4 / 9600 - 1) / 2;
+  // uint16_t baud_setting = (F_CPU / 4 / baud - 1) / 2;
+
   // Try u2x mode first
-  uint16_t baud_setting = (F_CPU / 4 / baud - 1) / 2;
   *_ucsra = 1 << U2X0;
 
   // hardcoded exception for 57600 for compatibility with the bootloader
@@ -133,10 +138,10 @@ void HardwareSerial::begin(unsigned long baud, uint8_t config) {
   // on the 8U2 on the Uno and Mega 2560. Also, The baud_setting cannot
   // be > 4095, so switch back to non-u2x mode if the baud rate is too
   // low.
-  if (((F_CPU == 16000000UL) && (baud == 57600)) || (baud_setting > 4095)) {
-    *_ucsra = 0;
-    baud_setting = (F_CPU / 8 / baud - 1) / 2;
-  }
+  // if (((F_CPU == 16000000UL) && (baud == 57600)) || (baud_setting > 4095)) {
+  //   *_ucsra = 0;
+  //   baud_setting = (F_CPU / 8 / baud - 1) / 2;
+  // }
 
   // assign the baud_setting, a.k.a. ubrr (USART Baud Rate Register)
   *_ubrrh = baud_setting >> 8;

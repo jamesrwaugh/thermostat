@@ -144,7 +144,7 @@ uint8_t AvrDrivers::SetupRTC() {
 }
 
 void AvrDrivers::SetupSerial() {
-  Serial_.begin(9600);
+  Serial_.begin();
 }
 
 struct DebounceState {

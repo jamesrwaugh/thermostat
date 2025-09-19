@@ -117,8 +117,8 @@ public:
   inline HardwareSerial(volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
                         volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
                         volatile uint8_t *ucsrc, volatile uint8_t *udr);
-  void begin(unsigned long baud) { begin(baud, SERIAL_8N1); }
-  void begin(unsigned long, uint8_t);
+  void begin() { begin( SERIAL_8N1); }
+  void begin( uint8_t);
   void end();
   virtual int available(void);
   virtual int peek(void);

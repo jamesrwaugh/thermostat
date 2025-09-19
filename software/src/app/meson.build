@@ -28,7 +28,14 @@ executable(
         bitproto_dep,
         bmodbus_dep,
     ],
-    cpp_args: ['-DETL_NO_STL', '-fno-threadsafe-statics'],
+    cpp_args: [
+        '-DETL_NO_STL',
+        '-fno-threadsafe-statics',
+        '-funsigned-char',
+        '-funsigned-bitfields',
+        '-fshort-enums',
+        '-mcall-prologues',
+    ],
     include_directories: sim_avr_avr_inc,
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',

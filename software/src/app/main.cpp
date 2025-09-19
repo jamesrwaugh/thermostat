@@ -1,4 +1,5 @@
 #include <avr/interrupt.h>
+#include <bmodbus.h>
 #include <driver_ds1307.h>
 #include <string.h>
 
@@ -14,53 +15,38 @@ volatile bool g10MillisecondPassed = false;
 void OnButtonPressed(Button b) {
   switch (b) {
     case Button::Up:
-      DriverWriteSerialPortS("Up");
       machine.receive(Event::UpButtonPressed());
       break;
     case Button::Down:
-      DriverWriteSerialPortS("DN");
       machine.receive(Event::DownButtonPressed());
       break;
     case Button::Select:
-      DriverWriteSerialPortS("SEL");
       machine.receive(Event::SelectButtonPressed());
       break;
     case Button::TempHeat:
-      DriverWriteSerialPortS("TH");
       machine.receive(Event::HeatModeChanged(HeatModeT::Heating));
       break;
     case Button::TempCold:
-      DriverWriteSerialPortS("TC");
       machine.receive(Event::HeatModeChanged(HeatModeT::Cooling));
       break;
     case Button::TempNone:
-      DriverWriteSerialPortS("TN");
       machine.receive(Event::HeatModeChanged(HeatModeT::None));
       break;
     case Button::FanAuto:
-      DriverWriteSerialPortS("FA");
       machine.receive(Event::FanModeChanged(FanModeT::Auto));
       break;
     case Button::FanOn:
-      DriverWriteSerialPortS("FO");
       machine.receive(Event::FanModeChanged(FanModeT::On));
       break;
     case Button::ReverseValveOnHeat:
-      DriverWriteSerialPortS("RVOH");
       machine.receive(
           Event::ReverseValveModeChanged(ReverseValveModeT::OnForHeating));
       break;
     case Button::ReverseValveOnCool:
-      DriverWriteSerialPortS("RVOCO");
       machine.receive(
           Event::ReverseValveModeChanged(ReverseValveModeT::OnForCooling));
       break;
   }
-}
-
-void OnSerialMessage(const char* message, uint16_t messageLen) {
-  (void)message;
-  (void)messageLen;
 }
 
 void PrintStateChange(const char* message) {
@@ -93,10 +79,74 @@ void OnStateChange(State::Type state) {
   }
 }
 
+uint16_t register_values[16] = {0};  // Example register values
+
+static int dispatch(uint8_t function, uint16_t address, uint16_t* data,
+                    uint8_t size) {
+  // Handle the request based on the function code
+  switch (function) {
+    case 0x03:  // Read Holding Registers
+    case 0x04:  // Read Input Registers
+      // Handle read input registers request
+      // memset(data, 0, size * 2); // Clear the data buffer
+      if (address == 0x1234) {
+        data[0] = 0xABCD;  // Example value for address 0x1234
+      } else if (address == 0x5678) {
+        data[0] = 0xEF01;  // Example value for address 0x5678
+      } else if (address < 16) {
+        for (uint8_t i = 0; i < size; i++) {
+          if (i + address < sizeof(register_values) / 2) {
+            data[i] = register_values[address + i];  // Copy register values
+          } else {
+            data[i] = 0;  // Fill with zero if out of bounds
+          }
+        }
+      }
+      break;
+    case 0x06:  // Write Single Register
+    case 0x10:  // Write Multiple Registers
+      // Handle write single/multiple registers request
+      if (address < 16) {
+        for (int i = 0; i < size; i++) {
+          if (i + address < sizeof(register_values) / 2) {
+            register_values[address + i] =
+                data[i];  // Store the value in the register
+          }
+        }
+      } else {
+        return 0;  // Invalid address
+      }
+      break;
+    default:
+      return 0;  // Unsupported function code
+  }
+  return 0;  // Success
+}
+
+void CheckModbus(modbus_client_t& mb, uint8_t tenMsCount) {
+  uint8_t byte;
+  if (DriverGetSerialByte(&byte)) {
+    bmodbus_client_next_byte(&mb, tenMsCount * 10000, byte);
+  }
+
+  modbus_request_t* request = bmodbus_client_get_request(&mb);
+
+  if (request) {
+    if (dispatch(request->function, request->address, request->data,
+                 request->size) == 0) {
+      modbus_uart_data_t* r = bmodbus_client_get_response(&mb);
+      DriverWriteSerialPortRaw(r->data, r->size);
+    } else {
+      request->result = -1;
+      modbus_uart_data_t* r = bmodbus_client_get_response(&mb);
+      DriverWriteSerialPortRaw(r->data, r->size);
+    }
+  }
+}
+
 int main() {
   AvrDriverCallbacks callbacks{
       .OnButtonPressed = OnButtonPressed,
-      .OnSerialMessage = OnSerialMessage,
   };
 
   DriverInit(callbacks);
@@ -109,7 +159,6 @@ int main() {
       .hour = 6,
       .minute = 37,
       .second = 23,
-      .format = ds1307_format_t::DS1307_FORMAT_12H,
       .am_pm = ds1307_am_pm_t::DS1307_PM,
   };
 
@@ -126,6 +175,9 @@ int main() {
   // Invalid state to force initial update
   State::Type lastState = State::Type::COUNT;
 
+  modbus_client_t mb;
+  bmodbus_client_init(&mb, INTERFRAME_DELAY_MICROSECONDS(9600), 34);
+
   while (true) {
     auto state = machine.get_state_id();
 
@@ -139,6 +191,8 @@ int main() {
       g10MillisecondPassed = false;
       lastTenMsCount += 1;
     }
+
+    CheckModbus(mb, lastTenMsCount);
 
     if (lastTenMsCount >= 10) {
       lastTenMsCount = 0;

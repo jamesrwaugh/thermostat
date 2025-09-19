@@ -32,6 +32,12 @@ bitproto_dep = declare_dependency(
     include_directories: ['submodules/bitproto/lib/c/'],
 )
 
+bmodbus_dep = declare_dependency(
+    sources: ['submodules/bmodbus/bmodbus.c'],
+    include_directories: ['submodules/bmodbus/'],
+    compile_args: ['-DBMODBUS_NO_MASTER'],
+)
+
 subdir('src/avr-driver')
 subdir('src/simulation')
 subdir('src/app')

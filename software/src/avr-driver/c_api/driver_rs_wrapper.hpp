@@ -11,7 +11,6 @@ extern "C" {
 
 struct AvrDriverCallbacks {
   void (*OnButtonPressed)(Button b);
-  void (*OnSerialMessage)(const char* message, uint16_t messageLen);
 };
 
 struct ThermoButtonState {
@@ -40,6 +39,7 @@ uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length);
 uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength);
 bool DriverSetTime(ds1307_time_s& time);
 bool DriverGetTime(ds1307_time_s& time);
+bool DriverGetSerialByte(uint8_t* byte);
 }
 
 #endif

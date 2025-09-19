@@ -7,3 +7,6 @@
 [submodule "software/src/avr-driver/DS1307"]
 	path = software/src/avr-driver/DS1307
 	url = git@github.com:squared-electronic/ds1307.git
+[submodule "software/submodules/bmodbus"]
+	path = software/submodules/bmodbus
+	url = git@github.com:squared-electronic/bmodbus.git

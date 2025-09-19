@@ -181,39 +181,30 @@ DebounceState TempNoneButton;
 
 void AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
-
-  if (UpButton.Add(pind & _BV(PIND3))) {
-    Callbacks_.OnButtonPressed(Button::Up);
-  }
-
-  if (DownButton.Add(pind & _BV(PIND2))) {
-    Callbacks_.OnButtonPressed(Button::Down);
-  }
-
-  if (SelectButton.Add(pind & _BV(PIND7))) {
-    Callbacks_.OnButtonPressed(Button::Select);
-  }
-
-  if (FanOnButton.Add(pind & _BV(PIND6))) {
-    Callbacks_.OnButtonPressed(Button::FanOn);
-  }
-
-  if (FanAutoButton.Add(!(pind & _BV(PIND6)))) {
-    Callbacks_.OnButtonPressed(Button::FanAuto);
-  }
-
-  if (TempHeatButton.Add(pind & _BV(PIND4))) {
-    Callbacks_.OnButtonPressed(Button::TempHeat);
-  }
-
-  if (TempCoolButton.Add(pind & _BV(PIND5))) {
-    Callbacks_.OnButtonPressed(Button::TempCold);
-  }
+  int8_t button = -1;
 
   bool tempNoneInput = !((pind & _BV(PIND4)) && (pind & _BV(PIND5)));
 
-  if (TempNoneButton.Add(tempNoneInput)) {
-    Callbacks_.OnButtonPressed(Button::TempNone);
+  if (UpButton.Add(pind & _BV(PIND3))) {
+    button = static_cast<int8_t>(Button::Up);
+  } else if (DownButton.Add(pind & _BV(PIND2))) {
+    button = static_cast<int8_t>(Button::Down);
+  } else if (SelectButton.Add(pind & _BV(PIND7))) {
+    button = static_cast<int8_t>(Button::Select);
+  } else if (FanOnButton.Add(pind & _BV(PIND6))) {
+    button = static_cast<int8_t>(Button::FanOn);
+  } else if (FanAutoButton.Add(!(pind & _BV(PIND6)))) {
+    button = static_cast<int8_t>(Button::FanAuto);
+  } else if (TempHeatButton.Add(pind & _BV(PIND4))) {
+    button = static_cast<int8_t>(Button::TempHeat);
+  } else if (TempCoolButton.Add(pind & _BV(PIND5))) {
+    button = static_cast<int8_t>(Button::TempCold);
+  } else if (TempNoneButton.Add(tempNoneInput)) {
+    button = static_cast<int8_t>(Button::TempNone);
+  }
+
+  if (button != -1) {
+    Callbacks_.OnButtonPressed(static_cast<Button>(button));
   }
 }
 

@@ -36,6 +36,15 @@ void DriverWriteSerialPortRawCh(char ch) {
   gDriver->Serial_.write(ch);
 }
 
+bool DriverGetSerialByte(uint8_t* byte) {
+  int8_t b = gDriver->Serial_.read();
+  if (b == -1) {
+    return false;
+  }
+  *byte = b;
+  return true;
+}
+
 uint8_t CelsiusToFreedom(uint8_t celsius) {
   uint16_t scratch = celsius;
   scratch = (scratch << 1) - (scratch >> 2) + (scratch >> 4) + 32;

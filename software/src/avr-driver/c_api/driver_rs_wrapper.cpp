@@ -58,7 +58,7 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
   gDriver->Screen.DriverDisplayTemp(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
+  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(displayTemp);
@@ -72,7 +72,7 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
   gDriver->Screen.DriverDisplaySetPoint(displayTemp, unit);
 #else
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
+  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(displayTemp);
@@ -85,7 +85,7 @@ void DriverDisplayIsHeating() {
   screen.DriverDisplayIsHeating();
 #else
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
+  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("HEAT");
@@ -98,7 +98,7 @@ void DriverDisplayIsCooling() {
   screen.DriverDisplayIsCooling();
 #else
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
+  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print("COOL");
@@ -111,7 +111,7 @@ void DriverDisplayIsIdle() {
   screen.DriverDisplayIsIdle();
 #else
   auto& screen = gDriver->Screen;
-  screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
+  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
 #endif
 }

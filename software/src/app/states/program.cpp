@@ -15,7 +15,6 @@ Program::~Program() {
   EncodeThermoSaveData(&DirtyData_, buffer);
   DriverWriteFlash(0, buffer, sizeof(buffer));
   machine_.SetThermoSaveData(DirtyData_);
-  machine_.Comms()(DirtyData_);
 }
 
 State::Type Program::handle_event(const Event::Base& event) {

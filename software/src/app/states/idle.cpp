@@ -5,8 +5,6 @@
 #include "machine.hpp"
 
 Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
-  auto v = HeatingModeChangedEvent{.new_mode = HEATING_COMM_IDLE};
-  machine_.Comms()(v);
   DriverDisplayIsIdle();
 }
 

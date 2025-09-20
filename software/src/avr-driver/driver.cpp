@@ -77,9 +77,9 @@ void AvrDrivers::SetupScreen() {
 
 #else
   Screen.GU7000_init();
-  Screen.GU7000_defineWindow(Gu7kWindowId::UpperRight, 58, 0, 58, 1);
-  Screen.GU7000_defineWindow(Gu7kWindowId::LowerRight, 58, 1, 58, 1);
-  Screen.GU7000_defineWindow(Gu7kWindowId::LowerLeft, 0, 1, 58, 1);
+  // Screen.GU7000_defineWindow(Gu7kWindowId::UpperRight, 58, 0, 58, 1);
+  // Screen.GU7000_defineWindow(Gu7kWindowId::LowerRight, 58, 1, 58, 1);
+  // Screen.GU7000_defineWindow(Gu7kWindowId::LowerLeft, 0, 1, 58, 1);
 #endif
 }
 

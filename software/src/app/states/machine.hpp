@@ -11,7 +11,6 @@
 #include "heating.hpp"
 #include "idle.hpp"
 #include "program.hpp"
-#include "protos/ThermoCommEvent_bp.h"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
@@ -21,13 +20,6 @@ class SafeThermoSaveData {
   SafeThermoSaveData(const ThermoSaveData& other);
   ThermoSaveData Data;
   TemperatureUnitT TemperatureUnit() const;
-};
-
-struct SerialPrintVisitor {
-  void operator()(TempChangedEvent& e);
-  void operator()(SetPointChangedEvent& e);
-  void operator()(HeatingModeChangedEvent& e);
-  void operator()(ThermoSaveData& e);
 };
 
 class Machine {
@@ -52,7 +44,6 @@ class Machine {
   void ReadTemperature();
   bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
-  SerialPrintVisitor& Comms();
 
   void start();
   void receive(const Event::Base& event);
@@ -69,7 +60,6 @@ class Machine {
   SafeThermoSaveData SaveData;
   ThermoButtonState ButtonData;
   StateChangeData ChData;
-  SerialPrintVisitor V;
   uint8_t LastReadTemp{0};
   uint8_t LastCommTemp{0};
 

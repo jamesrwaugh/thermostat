@@ -14,6 +14,7 @@ struct Type {
     UpButtonPressed = 0,
     DownButtonPressed,
     SelectButtonPressed,
+    HalfSecondPassed,
     SecondPassed,
     FanModeChanged,
     HeatModeChanged,
@@ -31,6 +32,10 @@ struct DownButtonPressed : Base {
 
 struct SelectButtonPressed : Base {
   SelectButtonPressed() : Base(Event::Type::SelectButtonPressed) {}
+};
+
+struct HalfSecondPassed : Base {
+  HalfSecondPassed() : Base(Event::Type::HalfSecondPassed) {}
 };
 
 struct SecondPassed : Base {

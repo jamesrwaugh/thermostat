@@ -12,8 +12,22 @@ class Program : public State::Base {
   State::Type handle_event(const Event::Base& event) override;
 
  private:
+  enum class Screen : uint8_t {
+    TempDisplayUnit = 0,
+  };
+
+  struct SelectionBox {
+    const uint8_t XPositionDots{0};
+    const uint8_t CharacterStride{0};
+    const char* CharacterSet{nullptr};
+    const uint8_t CharacterSetCount{0};
+    void Print();
+  };
+
   Machine& machine_;
-  enum class Screen { TempDisplayType = 0 };
   Screen Screen_;
   ThermoSaveData DirtyData_;
+  uint8_t SelectedCharacterIndex{0};
+  bool LineOn{false};
+  static SelectionBox Boxes[];
 };

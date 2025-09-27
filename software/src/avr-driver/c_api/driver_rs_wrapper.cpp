@@ -154,3 +154,7 @@ bool DriverGetTime(ds1307_time_s& time) {
   return ds1307_get_time(&gDriver->Rtc, &time) == 0;
 }
 }
+
+Noritake_VFD_GU7000& DriverGetScreenHandle() {
+  return gDriver->Screen;
+}

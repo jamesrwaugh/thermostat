@@ -50,7 +50,7 @@ void OnButtonPressed(Button b) {
 }
 
 void PrintStateChange(const char* message) {
-  const char* n = "New State --> ";
+  const char* n = "New --> ";
   DriverWriteSerialPortRaw((uint8_t*)n, strlen(n));
   DriverWriteSerialPortRaw((uint8_t*)message, strlen(message));
   DriverWriteSerialPortRaw((uint8_t*)"\r\n", 2);
@@ -176,7 +176,8 @@ int main() {
   State::Type lastState = State::Type::COUNT;
 
   modbus_client_t mb;
-  bmodbus_client_init(&mb, INTERFRAME_DELAY_MICROSECONDS(9600), 34);
+  constexpr uint32_t interFrameDelay = INTERFRAME_DELAY_MICROSECONDS(9600);
+  bmodbus_client_init(&mb, interFrameDelay, 34);
 
   while (true) {
     auto state = machine.get_state_id();

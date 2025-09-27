@@ -6,6 +6,7 @@
 #include "../data_types.hpp"
 
 struct ds1307_time_s;
+class Noritake_VFD_GU7000;
 
 extern "C" {
 
@@ -41,5 +42,7 @@ bool DriverSetTime(ds1307_time_s& time);
 bool DriverGetTime(ds1307_time_s& time);
 bool DriverGetSerialByte(uint8_t* byte);
 }
+
+Noritake_VFD_GU7000& DriverGetScreenHandle();
 
 #endif

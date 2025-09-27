@@ -11,7 +11,3 @@ Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
 Idle::~Idle() {
   machine_.ResetStateChangeData();
 }
-
-State::Type Idle::handle_event(const Event::Base& event) {
-  return CoolableParent::handle_event(event);
-}

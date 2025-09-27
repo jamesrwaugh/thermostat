@@ -15,7 +15,3 @@ Cooling::Cooling(Machine& machine)
 Cooling::~Cooling() {
   machine_.ExitHeatingOrCooling();
 }
-
-State::Type Cooling::handle_event(const Event::Base& event) {
-  return CoolableParent::handle_event(event);
-}

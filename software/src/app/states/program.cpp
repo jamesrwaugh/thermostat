@@ -1,5 +1,7 @@
 #include "program.hpp"
 
+#include <Noritake_VFD_GU7000.h>
+
 #include <driver_rs_wrapper.hpp>
 
 #include "event.hpp"
@@ -8,26 +10,24 @@
 
 enum class SelectionBoxE : uint8_t {
   TempUnitSelect = 0,
-  TimeSet = 1,
 };
 
-const char* gNumbersCharacterSet = "0123456789";
+constexpr const char* gTempSelectCharacterSet = "FC";
+constexpr const char* gNumbersCharacterSet = "0123456789";
 
-Program::SelectionBox Program::Boxes[] = {
-    [static_cast<uint8_t>(SelectionBoxE::TempUnitSelect)] =
-        {
-            .XPositionDots = 0,
-            .CharacterStride = 1,
-            .CharacterSet = "CF",
-            .CharacterSetCount = 2,
-        },
-    [static_cast<uint8_t>(SelectionBoxE::TimeSet)] =
-        {
-            .XPositionDots = 0,
-            .CharacterStride = 1,
-            .CharacterSet = "CF",
-            .CharacterSetCount = 2,
-        },
+constexpr Program::SelectionBox Boxes[] = {
+    {
+        .XPositionDots = 10,
+        .CharacterStride = 1,
+        .CharacterSet = gTempSelectCharacterSet,
+        .CharacterSetCount = 2,
+    },
+    {
+        .XPositionDots = 20,
+        .CharacterStride = 1,
+        .CharacterSet = gTempSelectCharacterSet,
+        .CharacterSetCount = 2,
+    },
 };
 
 Program::Program(Machine& machine)
@@ -47,7 +47,14 @@ State::Type Program::handle_event(const Event::Base& event) {
     LineOn = !LineOn;
   }
 
+  Boxes[0].Draw(SelectedCharacterIndex);
+  Boxes[1].Draw(SelectedCharacterIndex);
+
   return State::Type::NO_CHANGE;
 }
 
-void Program::SelectionBox::Print() {}
+void Program::SelectionBox::Draw(uint8_t characterIndex) const {
+  auto& s = DriverGetScreenHandle();
+  s.GU7000_setCursor(XPositionDots, 0);
+  s.print(CharacterSet[characterIndex * CharacterStride]);
+}

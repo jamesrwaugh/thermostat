@@ -58,3 +58,14 @@ void Program::SelectionBox::Draw(uint8_t characterIndex) const {
   s.GU7000_setCursor(XPositionDots, 0);
   s.print(CharacterSet[characterIndex * CharacterStride]);
 }
+
+const uint8_t gUnderlineImageData[5] = {
+    0b00000001, 0b00000001, 0b00000001, 0b00000001, 0b00000001,
+};
+
+void Program::EnterTemp(Noritake_VFD_GU7000& s) {
+  s.print("TEMP");
+  s.GU7000_drawImage(0, 16, 5, 8, gUnderlineImageData);
+  s.GU7000_setCursor(0, 1);
+  s.print(DirtyData_.temp_display_unit == TEMP_UNIT_FREEDOM ? "F" : "C");
+}

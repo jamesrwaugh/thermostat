@@ -20,9 +20,17 @@ class Program : public State::Base {
   };
 
  private:
+  // 112 x 16
+  // Temp Display Unit
+  // Date Set
+  // Time Set
   enum class Screen : uint8_t {
     TempDisplayUnit = 0,
+    DateSet = 1,
+    TimeSet = 2,
   };
+
+  void EnterTemp(Noritake_VFD_GU7000& s);
 
   Machine& machine_;
   Screen Screen_;

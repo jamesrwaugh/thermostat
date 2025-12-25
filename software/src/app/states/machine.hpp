@@ -42,7 +42,7 @@ class Machine {
   void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
   void ReadTemperature();
-  bool IsHeatingOrCoolingNow() const;
+  [[nodiscard]] bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
 
   void start();

@@ -6205,6 +6205,12 @@
 		(uuid "ca0dc365-79bf-4d15-bfdd-0426a9a26033")
 	)
 	(junction
+		(at 210.82 64.77)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cfef52eb-8fcb-48df-9ed1-3a413e66f153")
+	)
+	(junction
 		(at 135.89 77.47)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -7493,6 +7499,16 @@
 			(type default)
 		)
 		(uuid "bb508b0d-8848-4b39-8f04-2dbb8d873a3d")
+	)
+	(wire
+		(pts
+			(xy 210.82 63.5) (xy 210.82 64.77)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bb510e8c-6695-4258-aef7-3807b73ba02b")
 	)
 	(wire
 		(pts
@@ -9224,7 +9240,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_BarrelJack:BarrelJack_CUI_PJ-102AH_Horizontal"
+		(property "Footprint" "Connector_BarrelJack:BarrelJack_Wuerth_6941xx301002"
 			(at 110.49 34.036 0)
 			(effects
 				(font
@@ -9408,6 +9424,73 @@
 			(project ""
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "D1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 210.82 64.77 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2276cab1-480e-4a51-bc2b-70327a20e546")
+		(property "Reference" "#FLG01"
+			(at 208.915 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 207.01 64.7699 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 210.82 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 210.82 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 210.82 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "480c38c5-bd23-42b6-8240-a42b0b617b63")
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "#FLG01")
 					(unit 1)
 				)
 			)
@@ -9767,7 +9850,7 @@
 	)
 	(symbol
 		(lib_id "power:+BATT")
-		(at 205.74 63.5 0)
+		(at 210.82 63.5 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9775,7 +9858,7 @@
 		(dnp no)
 		(uuid "2e5cc75d-9b2e-4322-bef2-1d0927f43eff")
 		(property "Reference" "#PWR04"
-			(at 205.74 67.31 0)
+			(at 210.82 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9784,7 +9867,7 @@
 			)
 		)
 		(property "Value" "+BATT"
-			(at 210.312 61.976 0)
+			(at 215.392 61.976 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9792,7 +9875,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 205.74 63.5 0)
+			(at 210.82 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9801,7 +9884,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 63.5 0)
+			(at 210.82 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9810,7 +9893,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+BATT\""
-			(at 205.74 63.5 0)
+			(at 210.82 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11594,7 +11677,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 205.74 71.12 0)
+		(at 210.82 72.39 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11602,7 +11685,7 @@
 		(dnp no)
 		(uuid "7f83b539-5599-4e5a-a5e1-26c67abaec17")
 		(property "Reference" "#PWR03"
-			(at 205.74 77.47 0)
+			(at 210.82 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11611,7 +11694,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 210.566 71.628 0)
+			(at 215.646 72.898 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11619,7 +11702,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 205.74 71.12 0)
+			(at 210.82 72.39 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11628,7 +11711,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 205.74 71.12 0)
+			(at 210.82 72.39 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11637,7 +11720,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 205.74 71.12 0)
+			(at 210.82 72.39 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14054,7 +14137,7 @@
 	)
 	(symbol
 		(lib_id "Device:Battery_Cell")
-		(at 205.74 68.58 0)
+		(at 210.82 69.85 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -14063,7 +14146,7 @@
 		(fields_autoplaced yes)
 		(uuid "dd05531b-b24d-408a-9184-f45119dd3c62")
 		(property "Reference" "BT1"
-			(at 209.55 65.4684 0)
+			(at 214.63 66.7384 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14072,7 +14155,7 @@
 			)
 		)
 		(property "Value" "Battery_Cell"
-			(at 209.55 68.0084 0)
+			(at 214.63 69.2784 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14081,7 +14164,7 @@
 			)
 		)
 		(property "Footprint" "Battery:BatteryHolder_Keystone_1058_1x2032"
-			(at 205.74 67.056 90)
+			(at 210.82 68.326 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14090,7 +14173,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 205.74 67.056 90)
+			(at 210.82 68.326 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14099,7 +14182,7 @@
 			)
 		)
 		(property "Description" "Single-cell battery"
-			(at 205.74 68.58 0)
+			(at 210.82 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)

@@ -4,6 +4,20 @@
 meson setup --wipe --cross-file avr-cross-compile.txt builddir -Dbuild.pkg_config_path=/usr/local/lib/pkgconfig
 ```
 
+# Software Go
+
+## Read Fuses
+
+```
+avrdude -p atmega644p -c usbtiny -U hfuse:r:-:h -U lfuse:r:-:h
+```
+
+## Go
+
+```
+avrdude -p atmega644p -c usbtiny -U flash:w:./builddir/src/app-screen/thermo-screen-app
+```
+
 # Simulator Bugs Hall of Fame
 
 In line with tradition, we pay respects, and list difficult bugs that would have been very difficult to solve on real hardware, but were found using the simulator.

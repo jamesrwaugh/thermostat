@@ -1,9 +1,11 @@
 #include <Noritake_VFD_GU7000.h>
+#include <avr/io.h>
 #include <stdint.h>
 
 #include <driver_rs_wrapper.hpp>
 
 #include "ThermoSaveData_bp.h"
+#include "twi_master.h"
 
 // 112 x 16
 // Temp Display Unit
@@ -21,21 +23,57 @@ const uint8_t gUnderlineImageData[5] = {
 
 void EnterTemp(Noritake_VFD_GU7000& s) {
   s.print("TEMP");
-  s.GU7000_drawImage(0, 16, 5, 8, gUnderlineImageData);
-  s.GU7000_setCursor(0, 1);
+  // s.GU7000_drawImage(0, 16, 5, 8, gUnderlineImageData);
+  s.GU7000_setCursor(0, 8);
   s.print("C");
 }
 
 class Program {};
 
+struct AutoTwi final {
+  static constexpr uint8_t Gu7000SlaveAddr_ = 0x50;
+
+  AutoTwi() {
+    tw_master_setup_transmit(Gu7000SlaveAddr_);
+  }
+
+  ~AutoTwi() {
+    tw_master_end_transmit();
+  }
+};
+
+void setup() {
+  // initialize twi prescaler and bit rate (250k)
+  // Set prescaler value of 1
+  TWSR &= ~_BV(TWPS0);
+  TWSR &= ~_BV(TWPS1);
+  TWBR = ((F_CPU / 50000) - 16) / 2;
+
+  // Screen Busy
+  // -> Input
+  DDRB &= ~_BV(DDB1);
+  PORTB &= ~_BV(PORTB1);
+}
+
 int main() {
+  setup();
+
   ThermoSaveData data;
   data.magic = THERMO_STATE_DATA_MAGIC;
   data.set_point = 39;
   data.temp_display_unit = TEMP_UNIT_FREEDOM;
 
   Noritake_VFD_GU7000 s(1);
-  EnterTemp(s);
+
+  {
+    AutoTwi twi;
+    s.GU7000_init();
+  }
+
+  {
+    AutoTwi twi;
+    EnterTemp(s);
+  }
 
   return 0;
 }

@@ -1,6 +1,7 @@
 src = files(
     '../app/protos/ThermoSaveData_bp.c',
     'main.cpp',
+    'twi_master.c',
 )
 
 executable(
@@ -10,9 +11,7 @@ executable(
         avr_driver_dep,
         bitproto_dep,
     ],
-    include_directories: [
-        '../app/protos'
-    ],
+    include_directories: ['../app/protos'],
     cpp_args: [
         '-DETL_NO_STL',
         '-fno-threadsafe-statics',

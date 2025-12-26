@@ -28,60 +28,103 @@ const uint8_t gBlankImageData[5] = {
 
 DebounceState TimeButton;
 
+struct ScreenCBox {
+  static constexpr uint8_t CharDotWidth = 5;
+  static constexpr uint8_t CharDotHeight = 7;
+  static Noritake_VFD_GU7000* Screen_;
+  const char* CharSet;
+  const uint8_t CharSetLength;
+  const uint8_t xPositionChars;
+  uint8_t CharIndex{0};
+
+  ScreenCBox(uint8_t xPositionChars, const char* set, uint8_t count)
+      : CharSet{set}, CharSetLength{count}, xPositionChars{xPositionChars} {}
+
+  void Up() {
+    if (CharIndex < CharSetLength - 1) {
+      CharIndex += 1;
+    } else {
+      CharIndex = 0;
+    }
+    Draw();
+  }
+
+  void Down() {
+    if (CharIndex > 0) {
+      CharIndex -= 1;
+    } else {
+      CharIndex = CharSetLength - 1;
+    }
+    Draw();
+  }
+
+  void Draw() const {
+    AutoTwi t;
+    Screen_->print(xPositionChars * CharDotWidth, 0, CharSet[CharIndex]);
+  }
+
+  void DrawIndicator() const {
+    DrawIndicator(true);
+  }
+
+  void DrawIndicator(bool on) const {
+    AutoTwi t;
+    Screen_->GU7000_drawImage(xPositionChars * CharDotWidth, CharDotHeight,
+                              CharDotWidth, CharDotHeight,
+                              on ? gUnderlineImageData : gBlankImageData);
+  }
+};
+
+Noritake_VFD_GU7000* ScreenCBox::Screen_ = nullptr;
+
+ScreenCBox TempScreenBoxes[1] = {
+    ScreenCBox(0, "CF", 2),
+};
+
 class ScreenC {
  public:
-  ScreenC(Noritake_VFD_GU7000& c) : S_(c) {
-    S_.print("TEMP");
+  ScreenC(Noritake_VFD_GU7000& s, const char* title, ScreenCBox* boxes,
+          uint8_t boxesCount)
+      : S_(s), Chars{boxes}, CharCount{boxesCount} {
+    AutoTwi t;
+    S_.print(title);
     S_.GU7000_setCursor(0, 8);
-    S_.print("C");
-    S_.GU7000_drawImage(1, 8, 5, 8, gUnderlineImageData);
+    for (uint8_t i = 0; i < CharCount; ++i) {
+      Chars[i].Draw();
+    }
   }
 
   ~ScreenC() {
+    AutoTwi t;
     S_.GU7000_clearScreen();
   }
 
   void OnUpPressed() {
     if (Locked_) {
-      AutoTwi t;
-      if (CharIndex < CharSetLength - 1) {
-        CharIndex += 1;
-      } else {
-        CharIndex = 0;
-      }
-      S_.print(CharDotWidth * CharIndex, 0, CharSet[CharIndex]);
+      Chars[CursorPosition].Up();
     } else {
-      if (CursorPosition < CharCount) {
-        AutoTwi t;
+      if (CursorPosition < CharCount - 1) {
         CursorPosition += 1;
-        DrawIndicatorAtCursor();
+        Chars[CursorPosition].DrawIndicator();
       }
     }
   }
 
   void OnDownPressed() {
     if (Locked_) {
-      AutoTwi t;
-      if (CharIndex > 0) {
-        CharIndex -= 1;
-      } else {
-        CharIndex = CharSetLength - 1;
-      }
-      S_.print(CharDotWidth * CharIndex, 0, CharSet[CharIndex]);
+      Chars[CursorPosition].Down();
     } else {
       if (CursorPosition > 0) {
-        AutoTwi t;
         CursorPosition -= 1;
-        DrawIndicatorAtCursor();
+        Chars[CursorPosition].DrawIndicator();
       }
     }
   }
 
   void OnEnterPressed() {
     if (!Locked_) {
-      AutoTwi t;
       Locked_ = true;
-      DrawIndicatorAtCursor();
+      Chars[CursorPosition].DrawIndicator();
     } else {
       Locked_ = false;
     }
@@ -90,32 +133,16 @@ class ScreenC {
   void OnHalfSecondPassed() {
     if (!Locked_) {
       ShowIndicator_ = !ShowIndicator_;
-      DrawIndicatorAtCursor(ShowIndicator_);
+      Chars[CursorPosition].DrawIndicator(ShowIndicator_);
     }
-  }
-
-  void DrawIndicatorAtCursor() {
-    DrawIndicatorAtCursor(true);
-  }
-
-  void DrawIndicatorAtCursor(bool on) {
-    AutoTwi t;
-    S_.GU7000_drawImage(CursorPosition * CharDotWidth, CharDotHeight,
-                        CharDotWidth, CharDotHeight,
-                        on ? gUnderlineImageData : gBlankImageData);
   }
 
  private:
   Noritake_VFD_GU7000& S_;
-  static constexpr uint8_t CharCount = 1;
-  static constexpr uint8_t CharSetLength = 2;
-  static constexpr uint8_t CharDotWidth = 5;
-  static constexpr uint8_t CharDotHeight = 5;
-  char Buffer[CharCount];
-  const char CharSet[CharSetLength] = {'C', 'F'};
+  ScreenCBox* const Chars;
+  const uint8_t CharCount;
   bool ShowIndicator_{false};
   uint8_t CursorPosition{0};
-  uint8_t CharIndex{0};
   bool Locked_{false};
 };
 
@@ -131,7 +158,9 @@ int main() {
 
   Noritake_VFD_GU7000 s(1);
 
-  ScreenC c(s);
+  ScreenCBox::Screen_ = &s;
+
+  ScreenC c(s, "TEMP", TempScreenBoxes, 1);
 
   {
     AutoTwi twi;
@@ -140,7 +169,7 @@ int main() {
 
   {
     AutoTwi twi;
-    c.EnterTemp();
+    // c.EnterTemp();
   }
 
   while (1) {

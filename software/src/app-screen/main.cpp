@@ -49,10 +49,12 @@ class ScreenC {
       } else {
         CharIndex = 0;
       }
-      S_.print(5 * CharIndex, 0, CharSet[CharIndex]);
+      S_.print(CharDotWidth * CharIndex, 0, CharSet[CharIndex]);
     } else {
-      if (CursorPosition < 5) {
+      if (CursorPosition < CharCount) {
+        AutoTwi t;
         CursorPosition += 1;
+        DrawIndicatorAtCursor();
       }
     }
   }
@@ -65,31 +67,51 @@ class ScreenC {
       } else {
         CharIndex = CharSetLength - 1;
       }
-      S_.print(5 * CharIndex, 0, CharSet[CharIndex]);
+      S_.print(CharDotWidth * CharIndex, 0, CharSet[CharIndex]);
     } else {
       if (CursorPosition > 0) {
+        AutoTwi t;
         CursorPosition -= 1;
+        DrawIndicatorAtCursor();
       }
     }
   }
 
   void OnEnterPressed() {
-    if (CursorPosition > 0) {
-      CursorPosition -= 1;
+    if (!Locked_) {
+      AutoTwi t;
+      Locked_ = true;
+      DrawIndicatorAtCursor();
+    } else {
+      Locked_ = false;
     }
   }
 
   void OnHalfSecondPassed() {
-    ShowIndicator_ = !ShowIndicator_;
-    S_.GU7000_drawImage(1, 8, 5, 8,
-                        ShowIndicator_ ? gUnderlineImageData : gBlankImageData);
+    if (!Locked_) {
+      ShowIndicator_ = !ShowIndicator_;
+      DrawIndicatorAtCursor(ShowIndicator_);
+    }
+  }
+
+  void DrawIndicatorAtCursor() {
+    DrawIndicatorAtCursor(true);
+  }
+
+  void DrawIndicatorAtCursor(bool on) {
+    AutoTwi t;
+    S_.GU7000_drawImage(CursorPosition * CharDotWidth, CharDotHeight,
+                        CharDotWidth, CharDotHeight,
+                        on ? gUnderlineImageData : gBlankImageData);
   }
 
  private:
   Noritake_VFD_GU7000& S_;
   static constexpr uint8_t CharCount = 1;
-  char Buffer[CharCount];
   static constexpr uint8_t CharSetLength = 2;
+  static constexpr uint8_t CharDotWidth = 5;
+  static constexpr uint8_t CharDotHeight = 5;
+  char Buffer[CharCount];
   const char CharSet[CharSetLength] = {'C', 'F'};
   bool ShowIndicator_{false};
   uint8_t CursorPosition{0};

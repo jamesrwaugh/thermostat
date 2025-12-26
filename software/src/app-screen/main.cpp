@@ -1,12 +1,12 @@
 #include <Noritake_VFD_GU7000.h>
 #include <avr/io.h>
 #include <stdint.h>
+#include <util/delay.h>
 
 #include <driver_rs_wrapper.hpp>
 
 #include "ThermoSaveData_bp.h"
-#include "twi_master.h"
-#include "util/delay.h"
+#include "utils.hpp"
 
 // 112 x 16
 // Temp Display Unit
@@ -19,52 +19,97 @@ enum class Screen : uint8_t {
 };
 
 const uint8_t gUnderlineImageData[5] = {
-    0b00000001, 0b00000001, 0b00000001, 0b00000001, 0b00000001,
+    0b0000'0001, 0b0000'0001, 0b0000'0001, 0b0000'0001, 0b0000'0001,
 };
 
-void EnterTemp(Noritake_VFD_GU7000& s) {
-  s.print("TEMP");
-  s.GU7000_setCursor(0, 8);
-  s.print("C");
-  s.GU7000_drawImage(1, 8, 5, 8, gUnderlineImageData);
-}
-
-class Program {};
-
-struct AutoTwi final {
-  static constexpr uint8_t Gu7000SlaveAddr_ = 0x50;
-
-  AutoTwi() {
-    tw_master_setup_transmit(Gu7000SlaveAddr_);
-  }
-
-  ~AutoTwi() {
-    tw_master_end_transmit();
-  }
+const uint8_t gBlankImageData[5] = {
+    0b0000'0000, 0b0000'0000, 0b0000'0000, 0b0000'0000, 0b0000'0000,
 };
 
-void setup() {
-  // initialize twi prescaler and bit rate (250k)
-  // Set prescaler value of 1
-  TWSR &= ~_BV(TWPS0);
-  TWSR &= ~_BV(TWPS1);
-  TWBR = ((F_CPU / 250000) - 16) / 2;
+DebounceState TimeButton;
 
-  // Screen Busy
-  // -> Input
-  DDRB &= ~_BV(DDB1);
-  PORTB &= ~_BV(PORTB1);
-}
+class ScreenC {
+ public:
+  ScreenC(Noritake_VFD_GU7000& c) : S_(c) {
+    S_.print("TEMP");
+    S_.GU7000_setCursor(0, 8);
+    S_.print("C");
+    S_.GU7000_drawImage(1, 8, 5, 8, gUnderlineImageData);
+  }
+
+  ~ScreenC() {
+    S_.GU7000_clearScreen();
+  }
+
+  void OnUpPressed() {
+    if (Locked_) {
+      AutoTwi t;
+      if (CharIndex < CharSetLength - 1) {
+        CharIndex += 1;
+      } else {
+        CharIndex = 0;
+      }
+      S_.print(5 * CharIndex, 0, CharSet[CharIndex]);
+    } else {
+      if (CursorPosition < 5) {
+        CursorPosition += 1;
+      }
+    }
+  }
+
+  void OnDownPressed() {
+    if (Locked_) {
+      AutoTwi t;
+      if (CharIndex > 0) {
+        CharIndex -= 1;
+      } else {
+        CharIndex = CharSetLength - 1;
+      }
+      S_.print(5 * CharIndex, 0, CharSet[CharIndex]);
+    } else {
+      if (CursorPosition > 0) {
+        CursorPosition -= 1;
+      }
+    }
+  }
+
+  void OnEnterPressed() {
+    if (CursorPosition > 0) {
+      CursorPosition -= 1;
+    }
+  }
+
+  void OnHalfSecondPassed() {
+    ShowIndicator_ = !ShowIndicator_;
+    S_.GU7000_drawImage(1, 8, 5, 8,
+                        ShowIndicator_ ? gUnderlineImageData : gBlankImageData);
+  }
+
+ private:
+  Noritake_VFD_GU7000& S_;
+  static constexpr uint8_t CharCount = 1;
+  char Buffer[CharCount];
+  static constexpr uint8_t CharSetLength = 2;
+  const char CharSet[CharSetLength] = {'C', 'F'};
+  bool ShowIndicator_{false};
+  uint8_t CursorPosition{0};
+  uint8_t CharIndex{0};
+  bool Locked_{false};
+};
 
 int main() {
   setup();
 
   ThermoSaveData data;
-  data.magic = THERMO_STATE_DATA_MAGIC;
-  data.set_point = 39;
-  data.temp_display_unit = TEMP_UNIT_FREEDOM;
+  {
+    data.magic = THERMO_STATE_DATA_MAGIC;
+    data.set_point = 39;
+    data.temp_display_unit = TEMP_UNIT_FREEDOM;
+  }
 
   Noritake_VFD_GU7000 s(1);
+
+  ScreenC c(s);
 
   {
     AutoTwi twi;
@@ -73,16 +118,22 @@ int main() {
 
   {
     AutoTwi twi;
-    EnterTemp(s);
+    c.EnterTemp();
   }
 
   while (1) {
+    uint8_t pind = PIND;
+
     AutoTwi twi;
     _delay_ms(500);
     s.GU7000_setCursor(0, 8);
     s.print("C");
     _delay_ms(500);
     s.GU7000_drawImage(0, 7, 5, 8, gUnderlineImageData);
+
+    if (TimeButton.Add(pind & _BV(PIND1))) {
+      c.OnHalfSecondPassed();
+    }
   }
 
   return 0;

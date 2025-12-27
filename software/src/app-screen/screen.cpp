@@ -66,13 +66,15 @@ void ScreenBox::DrawIndicator() const {
 
 void ScreenBox::DrawIndicator(bool on) const {
   AutoTwi t;
-  Screen_->GU7000_drawImage(xPositionDots(), CharDotHeight, ImageWidth, 8,
+  Screen_->GU7000_drawImage(xPositionDots() + 1, CharDotHeight, ImageWidth, 8,
                             on ? gArrowImageData : gBlankImageData);
 }
 
 void ScreenBox::Draw() const {
   AutoTwi t;
+  // Screen_->GU7000_setCursor(xPosChars, 0);
   Screen_->print(xPositionDots(), 0, CharSet[CharIndex]);
+  // Screen_->print(CharSet[CharIndex]);
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
@@ -80,7 +82,7 @@ uint8_t ScreenBox::GetCurrentIndex() const {
 }
 
 uint8_t ScreenBox::xPositionDots() const {
-  return xPosChars * (CharDotWidth + 3);
+  return xPosChars * (CharDotWidth);
 }
 
 // ================================================================ //
@@ -106,7 +108,7 @@ ScreenC::~ScreenC() {
 }
 
 void ScreenC::InitBoxes(ScreenBoxStorage* s) {
-  ::new (GetBoxP(0)) ScreenBox(0, "CF", 2, 0);
+  ::new (GetBoxP(0)) ScreenBox(0, "CF", 2, 1);
   ::new (GetBoxP(1)) ScreenBox(1, "A$C#", 4, 0);
   ::new (GetBoxP(2)) ScreenBox(2, "123", 3, 2);
 }
@@ -121,6 +123,7 @@ void ScreenC::OnUpPressed() {
     CurrentBox().Up();
   } else {
     if (CursorPosition < BoxesCount_ - 1) {
+      CurrentBox().DrawIndicator(false);
       CursorPosition += 1;
       CurrentBox().DrawIndicator();
     }
@@ -132,6 +135,7 @@ void ScreenC::OnDownPressed() {
     CurrentBox().Down();
   } else {
     if (CursorPosition > 0) {
+      CurrentBox().DrawIndicator(false);
       CursorPosition -= 1;
       CurrentBox().DrawIndicator();
     }

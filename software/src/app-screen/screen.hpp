@@ -28,7 +28,7 @@ class ScreenBox {
   static constexpr uint8_t CharDotHeight = 7;
   const char* const CharSet;
   const uint8_t CharSetLength;
-  const uint8_t xPositionChars;
+  const uint8_t xPosChars;
   uint8_t CharIndex{0};
 };
 
@@ -50,6 +50,7 @@ class ScreenC {
   void OnHalfSecondPassed();
   ScreenBox& CurrentBox() const;
   ScreenBox& GetBox(uint8_t i) const;
+  inline ScreenBox* GetBoxP(uint8_t i) const;
 
  public:
   static Noritake_VFD_GU7000* Screen_;

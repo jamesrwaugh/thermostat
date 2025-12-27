@@ -1,4 +1,5 @@
 #include <Noritake_VFD_GU7000.h>
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -6,9 +7,6 @@
 
 #include "Serial/HardwareSerial.h"
 #include "ThermoSaveData_bp.h"
-#include "avr/interrupt.h"
-#include "avr/iom644p.h"
-#include "avr/sfr_defs.h"
 #include "screen.hpp"
 #include "utils.hpp"
 

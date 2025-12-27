@@ -7,12 +7,28 @@
 #include "ThermoSaveData_bp.h"
 #include "utils.hpp"
 
-const uint8_t gUnderlineImageData[5] = {
-    0b0000'0001, 0b0000'0001, 0b0000'0001, 0b0000'0001, 0b0000'0001,
+constexpr uint8_t ImageWidth = 6;
+
+const uint8_t gArrowImageData[ImageWidth] = {
+    // clang-format off
+    0b0001'0000, 
+    0b0011'0000, 
+    0b0111'1100, 
+    0b0011'0000, 
+    0b0001'0000,
+    0b0000'0000,
+    // clang-format on
 };
 
-const uint8_t gBlankImageData[5] = {
-    0b0000'0000, 0b0000'0000, 0b0000'0000, 0b0000'0000, 0b0000'0000,
+const uint8_t gBlankImageData[ImageWidth] = {
+    // clang-format off
+    0b0000'0000, 
+    0b0000'0000, 
+    0b0000'0000, 
+    0b0000'0000, 
+    0b0000'0000,    
+    0b0000'0000,
+    // clang-format on
 };
 
 // ================================================================ //
@@ -23,7 +39,7 @@ ScreenBox::ScreenBox(uint8_t xPositionChars, const char* charSet,
                      uint8_t charSetCount, uint8_t initialIndex)
     : CharSet{charSet},
       CharSetLength{charSetCount},
-      xPositionChars{xPositionChars},
+      xPosChars{static_cast<uint8_t>((16 - charSetCount) + xPositionChars)},
       CharIndex{initialIndex} {}
 
 void ScreenBox::Up() {
@@ -50,13 +66,13 @@ void ScreenBox::DrawIndicator() const {
 
 void ScreenBox::DrawIndicator(bool on) const {
   AutoTwi t;
-  Screen_->GU7000_drawImage(xPositionDots(), CharDotHeight, CharDotWidth, 8,
-                            on ? gUnderlineImageData : gBlankImageData);
+  Screen_->GU7000_drawImage(xPositionDots(), CharDotHeight, ImageWidth, 8,
+                            on ? gArrowImageData : gBlankImageData);
 }
 
 void ScreenBox::Draw() const {
   AutoTwi t;
-  Screen_->print(xPositionDots(), CharDotHeight, CharSet[CharIndex]);
+  Screen_->print(xPositionDots(), 0, CharSet[CharIndex]);
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
@@ -64,7 +80,7 @@ uint8_t ScreenBox::GetCurrentIndex() const {
 }
 
 uint8_t ScreenBox::xPositionDots() const {
-  return xPositionChars * (CharDotWidth + 3);
+  return xPosChars * (CharDotWidth + 3);
 }
 
 // ================================================================ //
@@ -90,9 +106,9 @@ ScreenC::~ScreenC() {
 }
 
 void ScreenC::InitBoxes(ScreenBoxStorage* s) {
-  ::new (s[0].get_address<ScreenBox>()) ScreenBox(0, "CF", 2, 0);
-  ::new (s[1].get_address<ScreenBox>()) ScreenBox(1, "A$C#", 4, 0);
-  ::new (s[2].get_address<ScreenBox>()) ScreenBox(2, "123", 3, 2);
+  ::new (GetBoxP(0)) ScreenBox(0, "CF", 2, 0);
+  ::new (GetBoxP(1)) ScreenBox(1, "A$C#", 4, 0);
+  ::new (GetBoxP(2)) ScreenBox(2, "123", 3, 2);
 }
 
 void ScreenC::ReadBoxes() {
@@ -144,4 +160,8 @@ ScreenBox& ScreenC::CurrentBox() const {
 
 ScreenBox& ScreenC::GetBox(uint8_t i) const {
   return Boxes_[i].get_reference<ScreenBox>();
+}
+
+inline ScreenBox* ScreenC::GetBoxP(uint8_t i) const {
+  return Boxes_[i].get_address<ScreenBox>();
 }

@@ -44,15 +44,15 @@ void ScreenBox::Down() {
   Draw();
 }
 
+void ScreenBox::DrawIndicator() const {
+  DrawIndicator(true);
+}
+
 void ScreenBox::DrawIndicator(bool on) const {
   AutoTwi t;
   Screen_->GU7000_drawImage(xPositionChars * CharDotWidth, CharDotHeight,
                             CharDotWidth, CharDotHeight,
                             on ? gUnderlineImageData : gBlankImageData);
-}
-
-void ScreenBox::DrawIndicator() const {
-  DrawIndicator(true);
 }
 
 void ScreenBox::Draw() const {
@@ -70,7 +70,7 @@ Noritake_VFD_GU7000* ScreenC::Screen_ = nullptr;
 
 ScreenC::ScreenC(const char* title, ThermoSaveData& s,
                  ScreenBoxStorage* boxStorage)
-    : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{1} {
+    : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{3} {
   InitBoxes(boxStorage);
   AutoTwi t;
   Screen_->print(title);
@@ -87,9 +87,9 @@ ScreenC::~ScreenC() {
 }
 
 void ScreenC::InitBoxes(ScreenBoxStorage* s) {
-  auto* address = s[0].get_address<ScreenBox>();
-  ::new (address) ScreenBox(
-      0, "CF", 2, SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
+  ::new (s[0].get_address<ScreenBox>()) ScreenBox(0, "CF", 2, 0);
+  ::new (s[1].get_address<ScreenBox>()) ScreenBox(1, "A$C#", 4, 0);
+  ::new (s[2].get_address<ScreenBox>()) ScreenBox(2, "123", 3, 2);
 }
 
 void ScreenC::ReadBoxes() {

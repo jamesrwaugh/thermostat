@@ -8,6 +8,7 @@
 #include "utils.hpp"
 
 constexpr uint8_t ImageWidth = 6;
+constexpr uint8_t ScreenWithInChars = 16;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
@@ -35,11 +36,13 @@ const uint8_t gBlankImageData[ImageWidth] = {
 
 Noritake_VFD_GU7000* ScreenBox::Screen_ = nullptr;
 
-ScreenBox::ScreenBox(uint8_t xPositionChars, const char* charSet,
-                     uint8_t charSetCount, uint8_t initialIndex)
+ScreenBox::ScreenBox(uint8_t groupOrder, uint8_t groupCount,
+                     const char* charSet, uint8_t charSetCount,
+                     uint8_t initialIndex)
     : CharSet{charSet},
       CharSetLength{charSetCount},
-      xPosChars{static_cast<uint8_t>((16 - charSetCount) + xPositionChars)},
+      xPosChars{
+          static_cast<uint8_t>((ScreenWithInChars - groupCount) + groupOrder)},
       CharIndex{initialIndex} {}
 
 void ScreenBox::Up() {
@@ -92,7 +95,7 @@ Noritake_VFD_GU7000* ScreenC::Screen_ = nullptr;
 ScreenC::ScreenC(const char* title, ThermoSaveData& s,
                  ScreenBoxStorage* boxStorage)
     : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{3} {
-  InitBoxes(boxStorage);
+  InitBoxes();
   AutoTwi t;
   Screen_->GU7000_setCursor(0, 0);
   Screen_->print(title);
@@ -107,10 +110,10 @@ ScreenC::~ScreenC() {
   ReadBoxes();
 }
 
-void ScreenC::InitBoxes(ScreenBoxStorage* s) {
-  ::new (GetBoxP(0)) ScreenBox(0, "CF", 2, 1);
-  ::new (GetBoxP(1)) ScreenBox(1, "A$C#", 4, 0);
-  ::new (GetBoxP(2)) ScreenBox(2, "123", 3, 2);
+void ScreenC::InitBoxes() {
+  ::new (GetBoxP(0)) ScreenBox(0, BoxesCount_, "CF", 2, 1);
+  ::new (GetBoxP(1)) ScreenBox(1, BoxesCount_, "A$C#", 4, 0);
+  ::new (GetBoxP(2)) ScreenBox(2, BoxesCount_, "123", 3, 2);
 }
 
 void ScreenC::ReadBoxes() {

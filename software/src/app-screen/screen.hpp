@@ -12,8 +12,8 @@ class ScreenBox {
  public:
   static Noritake_VFD_GU7000* Screen_;
 
-  ScreenBox(uint8_t xPositionChars, const char* charSet, uint8_t charSetCount,
-            uint8_t initialIndex);
+  ScreenBox(uint8_t groupOrder, uint8_t groupCount, const char* charSet,
+            uint8_t charSetCount, uint8_t initialIndex);
 
   void Up();
   void Down();
@@ -42,7 +42,7 @@ class ScreenC {
   ScreenC(const char* title, ThermoSaveData& s, ScreenBoxStorage* boxStorage);
   ~ScreenC();
 
-  void InitBoxes(ScreenBoxStorage* s);
+  void InitBoxes();
   void ReadBoxes();
   void OnUpPressed();
   void OnDownPressed();

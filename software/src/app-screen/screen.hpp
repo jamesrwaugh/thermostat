@@ -39,11 +39,11 @@ typedef etl::aligned_storage<sizeof(ScreenBox), alignof(ScreenBox)>::type
 
 class ScreenC {
  public:
-  ScreenC(const char* title, ThermoSaveData& s, ScreenBoxStorage* boxStorage);
+  ScreenC(const char* title, ThermoSaveData& s, ScreenBoxStorage* boxStorage,
+          uint8_t boxesCount);
   ~ScreenC();
 
-  void InitBoxes();
-  void ReadBoxes();
+  void InitDisplay();
   void OnUpPressed();
   void OnDownPressed();
   void OnSelectPressed();
@@ -55,11 +55,20 @@ class ScreenC {
  public:
   static Noritake_VFD_GU7000* Screen_;
 
- private:
+ protected:
   ThermoSaveData& SaveData_;
   ScreenBoxStorage* const Boxes_;
   const uint8_t BoxesCount_;
+
+ private:
+  const char* const Title;
   bool ShowIndicator_{false};
   uint8_t CursorPosition{0};
   bool Locked_{false};
+};
+
+class TempScreen : public ScreenC {
+ public:
+  TempScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage);
+  ~TempScreen();
 };

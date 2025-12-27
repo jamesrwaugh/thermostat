@@ -70,11 +70,7 @@ void SetupInputTimer() {
   TIMSK1 |= _BV(OCIE1A);
 }
 
-int main() {
-  setup();
-  SetupInputTimer();
-  sei();
-
+void mainLoop() {
   ThermoSaveData data;
   data.magic = THERMO_STATE_DATA_MAGIC;
   data.set_point = 39;
@@ -82,18 +78,8 @@ int main() {
 
   ScreenBoxStorage Boxes[5];
 
-  Noritake_VFD_GU7000 gu7k(1);
-
-  ScreenBox::Screen_ = &gu7k;
-  ScreenC::Screen_ = &gu7k;
-
-  {
-    AutoTwi twi;
-    gu7k.GU7000_init();
-    gu7k.GU7000_clearScreen();
-  }
-
-  ScreenC tempScreen("TEMP", data, Boxes);
+  TempScreen tempScreen(data, Boxes);
+  tempScreen.InitDisplay();
 
   DebounceState UpButton;
   DebounceState DownButton;
@@ -102,8 +88,6 @@ int main() {
 
   bool ledOn = false;
   uint8_t ledCount = 0;
-
-  Serial.begin();
 
   while (1) {
     uint8_t pina = PINA;
@@ -137,6 +121,27 @@ int main() {
       }
     }
   }
+}
+
+int main() {
+  setup();
+  SetupInputTimer();
+  sei();
+
+  Noritake_VFD_GU7000 gu7k(1);
+
+  ScreenBox::Screen_ = &gu7k;
+  ScreenC::Screen_ = &gu7k;
+
+  {
+    AutoTwi twi;
+    gu7k.GU7000_init();
+    gu7k.GU7000_clearScreen();
+  }
+
+  Serial.begin();
+
+  mainLoop();
 
   return 0;
 }
@@ -144,3 +149,5 @@ int main() {
 ISR(TIMER1_COMPA_vect) {
   g10MillisecondPassed = true;
 }
+
+void operator delete(void*, unsigned int) {}

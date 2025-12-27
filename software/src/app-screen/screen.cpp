@@ -27,7 +27,7 @@ const uint8_t gBlankImageData[ImageWidth] = {
     0b0000'0000, 
     0b0000'0000, 
     0b0000'0000, 
-    0b0000'0000,    
+    0b0000'0000, 
     0b0000'0000,
     // clang-format on
 };
@@ -93,12 +93,13 @@ uint8_t ScreenBox::xPositionDots() const {
 Noritake_VFD_GU7000* ScreenC::Screen_ = nullptr;
 
 ScreenC::ScreenC(const char* title, ThermoSaveData& s,
-                 ScreenBoxStorage* boxStorage)
-    : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{3} {
-  InitBoxes();
+                 ScreenBoxStorage* boxStorage, uint8_t boxesCount)
+    : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{boxesCount}, Title{title} {}
+
+void ScreenC::InitDisplay() {
   AutoTwi t;
   Screen_->GU7000_setCursor(0, 0);
-  Screen_->print(title);
+  Screen_->print(Title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
   }
@@ -107,18 +108,6 @@ ScreenC::ScreenC(const char* title, ThermoSaveData& s,
 ScreenC::~ScreenC() {
   AutoTwi t;
   Screen_->GU7000_clearScreen();
-  ReadBoxes();
-}
-
-void ScreenC::InitBoxes() {
-  ::new (GetBoxP(0)) ScreenBox(0, BoxesCount_, "CF", 2, 1);
-  ::new (GetBoxP(1)) ScreenBox(1, BoxesCount_, "A$C#", 4, 0);
-  ::new (GetBoxP(2)) ScreenBox(2, BoxesCount_, "123", 3, 2);
-}
-
-void ScreenC::ReadBoxes() {
-  SaveData_.temp_display_unit =
-      GetBox(0).GetCurrentIndex() == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
 }
 
 void ScreenC::OnUpPressed() {
@@ -171,4 +160,18 @@ ScreenBox& ScreenC::GetBox(uint8_t i) const {
 
 inline ScreenBox* ScreenC::GetBoxP(uint8_t i) const {
   return Boxes_[i].get_address<ScreenBox>();
+}
+
+// ================================================================ //
+
+TempScreen::TempScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
+    : ScreenC("TEMP", s, boxStorage, 3) {
+  ::new (GetBoxP(0)) ScreenBox(0, BoxesCount_, "CF", 2, 1);
+  ::new (GetBoxP(1)) ScreenBox(1, BoxesCount_, "A$C#", 4, 0);
+  ::new (GetBoxP(2)) ScreenBox(2, BoxesCount_, "123", 3, 2);
+}
+
+TempScreen::~TempScreen() {
+  SaveData_.temp_display_unit =
+      GetBox(0).GetCurrentIndex() == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
 }

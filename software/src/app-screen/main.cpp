@@ -92,6 +92,7 @@ void mainLoop() {
 
   bool ledOn = false;
   uint8_t ledCount = 0;
+  uint8_t halfSecondCount = 0;
 
   while (1) {
     uint8_t pina = PINA;
@@ -108,9 +109,6 @@ void mainLoop() {
       } else if (SelectButton.Add(pina & _BV(PINA2))) {
         tempScreen.OnSelectPressed();
         Serial.print("Select");
-      } else if (TimeButton.Add(pina & _BV(PINA3))) {
-        tempScreen.OnHalfSecondPassed();
-        Serial.print("Time");
       }
 
       ledCount += 1;
@@ -122,6 +120,12 @@ void mainLoop() {
         } else {
           PORTB &= ~_BV(PB0);
         }
+      }
+
+      halfSecondCount += 1;
+      if (halfSecondCount > 50) {
+        halfSecondCount = 0;
+        tempScreen.OnHalfSecondPassed();
       }
     }
   }

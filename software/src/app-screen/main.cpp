@@ -78,6 +78,10 @@ void mainLoop() {
 
   ScreenBoxStorage Boxes[5];
 
+  {
+    TempScreen tempScreen(data, Boxes);
+  }
+
   TempScreen tempScreen(data, Boxes);
   tempScreen.InitDisplay();
 

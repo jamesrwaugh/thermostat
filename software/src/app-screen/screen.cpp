@@ -7,7 +7,7 @@
 #include "ThermoSaveData_bp.h"
 #include "utils.hpp"
 
-constexpr uint8_t ImageWidth = 6;
+constexpr uint8_t ImageWidth = 7;
 constexpr uint8_t ScreenWithInChars = 16;
 
 const uint8_t gArrowImageData[ImageWidth] = {
@@ -17,6 +17,7 @@ const uint8_t gArrowImageData[ImageWidth] = {
     0b0111'1100, 
     0b0011'0000, 
     0b0001'0000,
+    0b0000'0000,
     0b0000'0000,
     // clang-format on
 };
@@ -28,6 +29,7 @@ const uint8_t gBlankImageData[ImageWidth] = {
     0b0000'0000, 
     0b0000'0000, 
     0b0000'0000, 
+    0b0000'0000,
     0b0000'0000,
     // clang-format on
 };
@@ -74,10 +76,12 @@ void ScreenBox::DrawIndicator(bool on) const {
 }
 
 void ScreenBox::Draw() const {
+  Draw(true);
+}
+
+void ScreenBox::Draw(bool on) const {
   AutoTwi t;
-  // Screen_->GU7000_setCursor(xPosChars, 0);
-  Screen_->print(xPositionDots(), 0, CharSet[CharIndex]);
-  // Screen_->print(CharSet[CharIndex]);
+  Screen_->print(xPositionDots(), 0, on ? CharSet[CharIndex] : ' ');
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
@@ -113,11 +117,13 @@ ScreenC::~ScreenC() {
 void ScreenC::OnUpPressed() {
   if (Locked_) {
     CurrentBox().Up();
+    HasEditedCurrentBox_ = true;
   } else {
     if (CursorPosition < BoxesCount_ - 1) {
       CurrentBox().DrawIndicator(false);
       CursorPosition += 1;
       CurrentBox().DrawIndicator();
+      HasEditedCurrentBox_ = false;
     }
   }
 }
@@ -125,11 +131,13 @@ void ScreenC::OnUpPressed() {
 void ScreenC::OnDownPressed() {
   if (Locked_) {
     CurrentBox().Down();
+    HasEditedCurrentBox_ = true;
   } else {
     if (CursorPosition > 0) {
       CurrentBox().DrawIndicator(false);
       CursorPosition -= 1;
       CurrentBox().DrawIndicator();
+      HasEditedCurrentBox_ = false;
     }
   }
 }
@@ -144,9 +152,13 @@ void ScreenC::OnSelectPressed() {
 }
 
 void ScreenC::OnHalfSecondPassed() {
+  ShowIndicator_ = !ShowIndicator_;
   if (!Locked_) {
-    ShowIndicator_ = !ShowIndicator_;
     CurrentBox().DrawIndicator(ShowIndicator_);
+  } else {
+    if (!HasEditedCurrentBox_) {
+      CurrentBox().Draw(ShowIndicator_);
+    }
   }
 }
 

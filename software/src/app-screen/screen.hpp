@@ -17,6 +17,7 @@ class ScreenBox {
 
   void Up();
   void Down();
+  void Draw(bool on) const;
   void Draw() const;
   void DrawIndicator() const;
   void DrawIndicator(bool on) const;
@@ -65,6 +66,7 @@ class ScreenC {
   bool ShowIndicator_{false};
   uint8_t CursorPosition{0};
   bool Locked_{false};
+  bool HasEditedCurrentBox_{false};
 };
 
 class TempScreen : public ScreenC {

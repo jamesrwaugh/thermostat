@@ -50,19 +50,21 @@ void ScreenBox::DrawIndicator() const {
 
 void ScreenBox::DrawIndicator(bool on) const {
   AutoTwi t;
-  Screen_->GU7000_drawImage(xPositionChars * CharDotWidth, CharDotHeight,
-                            CharDotWidth, CharDotHeight,
+  Screen_->GU7000_drawImage(xPositionDots(), CharDotHeight, CharDotWidth, 8,
                             on ? gUnderlineImageData : gBlankImageData);
 }
 
 void ScreenBox::Draw() const {
   AutoTwi t;
-  Screen_->print(xPositionChars * CharDotWidth, CharDotHeight,
-                 CharSet[CharIndex]);
+  Screen_->print(xPositionDots(), CharDotHeight, CharSet[CharIndex]);
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
   return CharIndex;
+}
+
+uint8_t ScreenBox::xPositionDots() const {
+  return xPositionChars * (CharDotWidth + 3);
 }
 
 // ================================================================ //
@@ -74,6 +76,7 @@ ScreenC::ScreenC(const char* title, ThermoSaveData& s,
     : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{3} {
   InitBoxes(boxStorage);
   AutoTwi t;
+  Screen_->GU7000_setCursor(0, 0);
   Screen_->print(title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();

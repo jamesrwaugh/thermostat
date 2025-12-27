@@ -13,7 +13,7 @@ project(
 
 add_project_arguments(
     [
-        '-mmcu=atmega88p',
+        '-mmcu=atmega644p',
         '-DF_CPU=7372800',
         '-Wimplicit-fallthrough',
     ],

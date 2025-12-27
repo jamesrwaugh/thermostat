@@ -1,5 +1,8 @@
 src = files(
     '../app/protos/ThermoSaveData_bp.c',
+    'Serial/HardwareSerial.cpp',
+    'Serial/HardwareSerial.cpp',
+    'Serial/Print.cpp',
     'main.cpp',
     'screen.cpp',
     'twi_master.c',

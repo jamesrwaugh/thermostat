@@ -26,5 +26,5 @@ c_args = [
 [host_machine]
 system = 'baremetal'
 cpu_family = 'avr'
-cpu = 'atmega88p'
+cpu = 'atmega644p'
 endian = 'none'

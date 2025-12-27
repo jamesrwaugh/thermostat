@@ -23,6 +23,7 @@ class ScreenBox {
   uint8_t GetCurrentIndex() const;
 
  private:
+  uint8_t xPositionDots() const;
   static constexpr uint8_t CharDotWidth = 5;
   static constexpr uint8_t CharDotHeight = 7;
   const char* const CharSet;

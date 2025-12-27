@@ -57,7 +57,8 @@ void ScreenBox::DrawIndicator(bool on) const {
 
 void ScreenBox::Draw() const {
   AutoTwi t;
-  Screen_->print(xPositionChars * CharDotWidth, 0, CharSet[CharIndex]);
+  Screen_->print(xPositionChars * CharDotWidth, CharDotHeight,
+                 CharSet[CharIndex]);
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
@@ -74,7 +75,6 @@ ScreenC::ScreenC(const char* title, ThermoSaveData& s,
   InitBoxes(boxStorage);
   AutoTwi t;
   Screen_->print(title);
-  Screen_->GU7000_setCursor(0, 8);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
   }

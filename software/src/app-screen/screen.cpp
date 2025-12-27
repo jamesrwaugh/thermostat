@@ -12,11 +12,11 @@ constexpr uint8_t ScreenWithInChars = 16;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
-    0b0001'0000, 
-    0b0011'0000, 
-    0b0111'1100, 
-    0b0011'0000, 
-    0b0001'0000,
+    0b0000'1000, 
+    0b0001'1000, 
+    0b0011'1110, 
+    0b0001'1000, 
+    0b0000'1000,
     0b0000'0000,
     0b0000'0000,
     // clang-format on
@@ -107,6 +107,7 @@ void ScreenC::InitDisplay() {
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
   }
+  CurrentBox().DrawIndicator();
 }
 
 ScreenC::~ScreenC() {

@@ -1,0 +1,63 @@
+#pragma once
+
+#include <etl/alignment.h>
+#include <stdint.h>
+
+// ================================================================ //
+
+class Noritake_VFD_GU7000;
+struct ThermoSaveData;
+
+class ScreenBox {
+ public:
+  static Noritake_VFD_GU7000* Screen_;
+
+  ScreenBox(uint8_t xPositionChars, const char* charSet, uint8_t charSetCount,
+            uint8_t initialIndex);
+
+  void Up();
+  void Down();
+  void Draw() const;
+  void DrawIndicator() const;
+  void DrawIndicator(bool on) const;
+  uint8_t GetCurrentIndex() const;
+
+ private:
+  static constexpr uint8_t CharDotWidth = 5;
+  static constexpr uint8_t CharDotHeight = 7;
+  const char* const CharSet;
+  const uint8_t CharSetLength;
+  const uint8_t xPositionChars;
+  uint8_t CharIndex{0};
+};
+
+// ================================================================ //
+
+typedef etl::aligned_storage<sizeof(ScreenBox), alignof(ScreenBox)>::type
+    ScreenBoxStorage;
+
+class ScreenC {
+ public:
+  ScreenC(const char* title, ThermoSaveData& s, ScreenBoxStorage* boxStorage);
+  ~ScreenC();
+
+  void InitBoxes(ScreenBoxStorage* s);
+  void ReadBoxes();
+  void OnUpPressed();
+  void OnDownPressed();
+  void OnSelectPressed();
+  void OnHalfSecondPassed();
+  ScreenBox& CurrentBox() const;
+  ScreenBox& GetBox(uint8_t i) const;
+
+ public:
+  static Noritake_VFD_GU7000* Screen_;
+
+ private:
+  ThermoSaveData& SaveData_;
+  ScreenBoxStorage* const Boxes_;
+  const uint8_t BoxesCount_;
+  bool ShowIndicator_{false};
+  uint8_t CursorPosition{0};
+  bool Locked_{false};
+};

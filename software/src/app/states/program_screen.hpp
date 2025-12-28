@@ -14,8 +14,8 @@ class ScreenBox {
  public:
   static Noritake_VFD_GU7000* Screen_;
 
-  ScreenBox(uint8_t groupOrder, uint8_t groupCount, const char* charSet,
-            uint8_t charSetCount, uint8_t initialIndex);
+  ScreenBox(uint8_t xPosChars, const char* charSet, uint8_t charSetCount,
+            uint8_t initialIndex);
 
   void Up();
   void Down();
@@ -37,8 +37,20 @@ class ScreenBox {
 
 // ================================================================ //
 
+struct StaticScreenBox {
+  StaticScreenBox(uint8_t xPosChars, char Character);
+  const uint8_t xPosChars;
+  const char Character;
+};
+
+// ================================================================ //
+
 typedef etl::aligned_storage<sizeof(ScreenBox), alignof(ScreenBox)>::type
     ScreenBoxStorage;
+
+typedef etl::aligned_storage<sizeof(StaticScreenBox),
+                             alignof(StaticScreenBox)>::type
+    StaticScreenBoxStorage;
 
 class ProgramScreenState : public State::Base {
  public:
@@ -59,11 +71,19 @@ class ProgramScreenState : public State::Base {
 
  protected:
   ThermoSaveData& SaveData_;
-  ScreenBoxStorage Boxes_[10];
-  const uint8_t BoxesCount_;
+  ScreenBoxStorage Boxes_[8];
+  uint8_t BoxesCount_{0};
+  StaticScreenBoxStorage Statics_[5];
+  uint8_t StaticsCount_{0};
+
+ protected:
+  const ScreenBox& CurrentBox() const;
   ScreenBox& CurrentBox();
+  const ScreenBox& GetBox(uint8_t i) const;
   ScreenBox& GetBox(uint8_t i);
   ScreenBox* GetBoxP(uint8_t i);
+  uint8_t GetBoxIndex(uint8_t i) const;
+  void AddStatic(uint8_t xPosChars, char Character);
 
  private:
   const char* const Title;

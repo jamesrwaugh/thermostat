@@ -4,9 +4,6 @@
 #include <etl/placement_new.h>
 #include <stdint.h>
 
-#include "ThermoSaveData_bp.h"
-#include "utils.hpp"
-
 constexpr uint8_t ImageWidth = 7;
 constexpr uint8_t ScreenWidthInChars = 16;
 

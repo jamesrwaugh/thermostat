@@ -8,7 +8,6 @@
 #include "state.hpp"
 
 constexpr uint8_t ImageWidth = 7;
-constexpr uint8_t ScreenWidthInChars = 16;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
@@ -38,13 +37,11 @@ const uint8_t gBlankImageData[ImageWidth] = {
 
 Noritake_VFD_GU7000* ScreenBox::Screen_ = nullptr;
 
-ScreenBox::ScreenBox(uint8_t groupOrder, uint8_t groupCount,
-                     const char* charSet, uint8_t charSetCount,
-                     uint8_t initialIndex)
+ScreenBox::ScreenBox(uint8_t xPosChars, const char* charSet,
+                     uint8_t charSetCount, uint8_t initialIndex)
     : CharSet{charSet},
       CharSetLength{charSetCount},
-      xPosChars{
-          static_cast<uint8_t>((ScreenWidthInChars - groupCount) + groupOrder)},
+      xPosChars{xPosChars},
       CharIndex{initialIndex} {}
 
 void ScreenBox::Up() {
@@ -91,6 +88,11 @@ uint8_t ScreenBox::GetCurrentIndex() const {
 uint8_t ScreenBox::xPositionDots() const {
   return xPosChars * CharDotWidth;
 }
+
+// ================================================================ //
+
+StaticScreenBox::StaticScreenBox(uint8_t xPosChars, char character)
+    : xPosChars{xPosChars}, Character{character} {}
 
 // ================================================================ //
 
@@ -202,8 +204,16 @@ void ProgramScreenState::OnHalfSecondPassed() {
   }
 }
 
+const ScreenBox& ProgramScreenState::CurrentBox() const {
+  return GetBox(CursorPosition);
+}
+
 ScreenBox& ProgramScreenState::CurrentBox() {
   return GetBox(CursorPosition);
+}
+
+const ScreenBox& ProgramScreenState::GetBox(uint8_t i) const {
+  return Boxes_[i].get_reference<ScreenBox>();
 }
 
 ScreenBox& ProgramScreenState::GetBox(uint8_t i) {
@@ -214,28 +224,36 @@ inline ScreenBox* ProgramScreenState::GetBoxP(uint8_t i) {
   return Boxes_[i].get_address<ScreenBox>();
 }
 
+uint8_t ProgramScreenState::GetBoxIndex(uint8_t i) const {
+  return GetBox(i).GetCurrentIndex();
+}
+
+void ProgramScreenState::AddStatic(uint8_t xPosChars, char character) {
+  ::new (&Statics_[StaticsCount_]) StaticScreenBox(xPosChars, character);
+  StaticsCount_ += 1;
+}
+
 // ================================================================ //
 
 TempScreen::TempScreen(ThermoSaveData& s)
     : ProgramScreenState("Units", s, 1, State::Type::Idle,
                          State::Type::ProgramDate) {
-  ::new (GetBoxP(0))
-      ScreenBox(0, BoxesCount_, "CF", 2,
-                SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
+  ::new (GetBoxP(0)) ScreenBox(
+      15, "CF", 2, SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
 }
 
 TempScreen::~TempScreen() {
   SaveData_.temp_display_unit =
-      GetBox(0).GetCurrentIndex() == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
+      GetBoxIndex(0) == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
 }
 
 // ================================================================ //
 
-constexpr const char* DigitsCharSet = "0123456789";
-constexpr uint8_t DigitsCharSetLen = 10;
+constexpr const char* Digits = "0123456789";
+constexpr uint8_t DigitsSetLen = 10;
 
 DateScreen::DateScreen(ThermoSaveData& s)
-    : ProgramScreenState("Date", s, 8, State::Type::ProgramTime,
+    : ProgramScreenState("Date", s, 6, State::Type::ProgramTime,
                          State::Type::Idle) {
   const auto& date = s.date;
 
@@ -246,37 +264,38 @@ DateScreen::DateScreen(ThermoSaveData& s)
   uint8_t dayTens = (date.day / 10);
   uint8_t dayOnes = (date.day % 10);
 
-  // Year
-  ::new (GetBoxP(0))
-      ScreenBox(0, BoxesCount_, DigitsCharSet, DigitsCharSetLen, 2);
-  ::new (GetBoxP(1))
-      ScreenBox(1, BoxesCount_, DigitsCharSet, DigitsCharSetLen, 0);
-  ::new (GetBoxP(2))
-      ScreenBox(2, BoxesCount_, DigitsCharSet, DigitsCharSetLen, yearTens);
-  ::new (GetBoxP(3))
-      ScreenBox(3, BoxesCount_, DigitsCharSet, DigitsCharSetLen, yearOnes);
+  // Year Tens and Ones
+  ::new (GetBoxP(0)) ScreenBox(8, Digits, DigitsSetLen, yearTens);
+  ::new (GetBoxP(1)) ScreenBox(9, Digits, DigitsSetLen, yearOnes);
 
   // Month
-  ::new (GetBoxP(4))
-      ScreenBox(4, BoxesCount_, DigitsCharSet, DigitsCharSetLen, monthTens);
-  ::new (GetBoxP(5))
-      ScreenBox(5, BoxesCount_, DigitsCharSet, DigitsCharSetLen, monthOnes);
+  ::new (GetBoxP(2)) ScreenBox(11, Digits, DigitsSetLen, monthTens);
+  ::new (GetBoxP(3)) ScreenBox(12, Digits, DigitsSetLen, monthOnes);
 
   // Days
-  ::new (GetBoxP(6))
-      ScreenBox(6, BoxesCount_, DigitsCharSet, DigitsCharSetLen, dayTens);
-  ::new (GetBoxP(7))
-      ScreenBox(7, BoxesCount_, DigitsCharSet, DigitsCharSetLen, dayOnes);
+  ::new (GetBoxP(4)) ScreenBox(14, Digits, DigitsSetLen, dayTens);
+  ::new (GetBoxP(5)) ScreenBox(15, Digits, DigitsSetLen, dayOnes);
+
+  // Separators and year "20XX"
+  AddStatic(10, '-');
+  AddStatic(13, '-');
+  AddStatic(6, '2');
+  AddStatic(7, '0');
 }
 
 DateScreen::~DateScreen() {
-  //
+  SaveData_.date.year = GetBoxIndex(0) * 10 + GetBoxIndex(1);
+  SaveData_.date.month = GetBoxIndex(2) * 10 + GetBoxIndex(3);
+  SaveData_.date.day = GetBoxIndex(4) * 10 + GetBoxIndex(5);
 }
 
 // ================================================================ //
 
+constexpr const char* AmPm = "AP";
+constexpr uint8_t AmPmLen = 2;
+
 TimeScreen::TimeScreen(ThermoSaveData& s)
-    : ProgramScreenState("Time", s, 6, State::Type::ProgramDate,
+    : ProgramScreenState("Time", s, 7, State::Type::ProgramDate,
                          State::Type::Idle) {
   const auto& time = s.time;
 
@@ -286,26 +305,31 @@ TimeScreen::TimeScreen(ThermoSaveData& s)
   uint8_t minuteOnes = (time.minute % 10);
   uint8_t secondTens = (time.second / 10);
   uint8_t secondOnes = (time.second % 10);
+  uint8_t amPmIdx = (time.am_pm == TIME_AM ? 0 : 1);
 
   // Hour
-  ::new (GetBoxP(0))
-      ScreenBox(0, BoxesCount_, DigitsCharSet, DigitsCharSetLen, hourTens);
-  ::new (GetBoxP(1))
-      ScreenBox(1, BoxesCount_, DigitsCharSet, DigitsCharSetLen, hourOnes);
+  ::new (GetBoxP(0)) ScreenBox(6, Digits, DigitsSetLen, hourTens);
+  ::new (GetBoxP(1)) ScreenBox(7, Digits, DigitsSetLen, hourOnes);
 
   // Minute
-  ::new (GetBoxP(2))
-      ScreenBox(2, BoxesCount_, DigitsCharSet, DigitsCharSetLen, minuteTens);
-  ::new (GetBoxP(3))
-      ScreenBox(3, BoxesCount_, DigitsCharSet, DigitsCharSetLen, minuteOnes);
+  ::new (GetBoxP(2)) ScreenBox(9, Digits, DigitsSetLen, minuteTens);
+  ::new (GetBoxP(3)) ScreenBox(10, Digits, DigitsSetLen, minuteOnes);
 
   // Second
-  ::new (GetBoxP(4))
-      ScreenBox(4, BoxesCount_, DigitsCharSet, DigitsCharSetLen, secondTens);
-  ::new (GetBoxP(5))
-      ScreenBox(5, BoxesCount_, DigitsCharSet, DigitsCharSetLen, secondOnes);
+  ::new (GetBoxP(4)) ScreenBox(12, Digits, DigitsSetLen, secondTens);
+  ::new (GetBoxP(5)) ScreenBox(13, Digits, DigitsSetLen, secondOnes);
+
+  // AM/PM
+  ::new (GetBoxP(6)) ScreenBox(15, AmPm, AmPmLen, amPmIdx);
+
+  // Separators
+  AddStatic(8, ':');
+  AddStatic(11, ':');
 }
 
 TimeScreen::~TimeScreen() {
-  //
+  SaveData_.time.hour = GetBoxIndex(0) * 10 + GetBoxIndex(1);
+  SaveData_.time.minute = GetBoxIndex(2) * 10 + GetBoxIndex(3);
+  SaveData_.time.second = GetBoxIndex(4) * 10 + GetBoxIndex(5);
+  SaveData_.time.am_pm = GetBoxIndex(6) == 0 ? TIME_AM : TIME_PM;
 }

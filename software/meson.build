@@ -41,4 +41,3 @@ bmodbus_dep = declare_dependency(
 subdir('src/avr-driver')
 subdir('src/simulation')
 subdir('src/app')
-subdir('src/app-screen')

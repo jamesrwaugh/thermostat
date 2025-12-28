@@ -9,6 +9,8 @@
 
 etl::optional<AvrDrivers> gDriver;
 
+uint8_t AutoTwi::instanceCount_ = 0;
+
 AvrDrivers::AvrDrivers(const AvrDriverCallbacks& callbacks)
     : Screen(19), Serial_(Serial), Callbacks_(callbacks) {}
 

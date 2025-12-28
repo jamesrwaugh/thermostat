@@ -10,7 +10,9 @@ enum class Type : uint8_t {
   Idle = 0,
   Heating,
   Cooling,
-  Program,
+  ProgramTemp,
+  ProgramDate,
+  ProgramTime,
   COUNT,
   NO_CHANGE = 0xFF,
 };

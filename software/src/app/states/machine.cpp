@@ -8,7 +8,7 @@
 #include "cooling.hpp"
 #include "heating.hpp"
 #include "idle.hpp"
-#include "program.hpp"
+#include "program_screen.hpp"
 #include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
@@ -221,8 +221,14 @@ void Machine::SwitchState(State::Type new_state) {
     case State::Type::Cooling:
       ::new (address) Cooling(*this);
       break;
-    case State::Type::Program:
-      ::new (address) Program(*this);
+    case State::Type::ProgramTemp:
+      ::new (address) TempScreen(SaveState());
+      break;
+    case State::Type::ProgramDate:
+      ::new (address) DateScreen(SaveState());
+      break;
+    case State::Type::ProgramTime:
+      ::new (address) TimeScreen(SaveState());
       break;
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);

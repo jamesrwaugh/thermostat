@@ -6,6 +6,7 @@
 #include <etl/optional.h>
 
 #include "driver.hpp"
+#include "twi_master.h"
 
 extern "C" {
 
@@ -157,4 +158,18 @@ bool DriverGetTime(ds1307_time_s& time) {
 
 Noritake_VFD_GU7000& DriverGetScreenHandle() {
   return gDriver->Screen;
+}
+
+AutoTwi::AutoTwi() {
+  if (instanceCount_ == 0) {
+    tw_master_setup_transmit(Gu7000SlaveAddr_);
+  }
+  instanceCount_ += 1;
+}
+
+AutoTwi::~AutoTwi() {
+  instanceCount_ -= 1;
+  if (instanceCount_ == 0) {
+    tw_master_end_transmit();
+  }
 }

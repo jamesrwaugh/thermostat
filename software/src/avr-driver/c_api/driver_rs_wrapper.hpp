@@ -45,4 +45,11 @@ bool DriverGetSerialByte(uint8_t* byte);
 
 Noritake_VFD_GU7000& DriverGetScreenHandle();
 
+struct AutoTwi final {
+  static uint8_t instanceCount_;
+  static constexpr uint8_t Gu7000SlaveAddr_ = 0x50;
+  AutoTwi();
+  ~AutoTwi();
+};
+
 #endif

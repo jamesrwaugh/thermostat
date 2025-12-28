@@ -5,7 +5,7 @@ src = files(
     'states/heating.cpp',
     'states/idle.cpp',
     'states/machine.cpp',
-    'states/program.cpp',
+    'states/program_screen.cpp',
     'main.cpp',
     'sim.c',
 )
@@ -38,6 +38,6 @@ executable(
     include_directories: sim_avr_avr_inc,
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
-        '-mmcu=atmega88p',
+        '-mmcu=atmega168p',
     ],
 )

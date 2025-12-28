@@ -20,7 +20,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return machine_.ChangeSetPoint(-1);
     }
     case Event::Type::SelectButtonPressed: {
-      return State::Type::Program;
+      return State::Type::ProgramTemp;
     }
     case Event::Type::SecondPassed: {
       machine_.ReadTemperature();

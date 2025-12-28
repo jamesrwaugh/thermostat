@@ -67,8 +67,14 @@ void OnStateChange(State::Type state) {
     case State::Type::Cooling:
       PrintStateChange("C");
       break;
-    case State::Type::Program:
-      PrintStateChange("P");
+    case State::Type::ProgramTemp:
+      PrintStateChange("PT");
+      break;
+    case State::Type::ProgramDate:
+      PrintStateChange("PD");
+      break;
+    case State::Type::ProgramTime:
+      PrintStateChange("PTI");
       break;
     case State::Type::COUNT:
       PrintStateChange("?");

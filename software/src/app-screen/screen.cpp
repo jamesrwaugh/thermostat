@@ -107,11 +107,18 @@ ScreenC::ScreenC(const char* title, ThermoSaveData& s,
       PrevScreen_{prevScreen} {}
 
 void ScreenC::InitDisplay() {
+  InitDisplay(false);
+}
+
+void ScreenC::InitDisplay(bool startOnEndBox) {
   AutoTwi t;
   Screen_->GU7000_setCursor(0, 0);
   Screen_->print(Title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
+  }
+  if (startOnEndBox) {
+    CursorPosition = BoxesCount_ - 1;
   }
   CurrentBox().DrawIndicator();
 }
@@ -192,7 +199,7 @@ inline ScreenBox* ScreenC::GetBoxP(uint8_t i) const {
 // ================================================================ //
 
 TempScreen::TempScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
-    : ScreenC("Units", s, boxStorage, 3, ScreenT::NO_CHANGE, ScreenT::DateSet) {
+    : ScreenC("Units", s, boxStorage, 1, ScreenT::NO_CHANGE, ScreenT::DateSet) {
   ::new (GetBoxP(0))
       ScreenBox(0, BoxesCount_, "CF", 2,
                 s.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
@@ -210,7 +217,7 @@ constexpr uint8_t DigitsCharSetLen = 10;
 
 DateScreen::DateScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
     : ScreenC("Date", s, boxStorage, 8, ScreenT::TempDisplayUnit,
-              ScreenT::DateSet) {
+              ScreenT::TimeSet) {
   const auto& date = s.date;
 
   uint8_t yearTens = (date.year / 10);
@@ -250,7 +257,7 @@ DateScreen::~DateScreen() {
 // ================================================================ //
 
 TimeScreen::TimeScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
-    : ScreenC("Time", s, boxStorage, 8, ScreenT::DateSet, ScreenT::NO_CHANGE) {
+    : ScreenC("Time", s, boxStorage, 6, ScreenT::DateSet, ScreenT::NO_CHANGE) {
   const auto& time = s.time;
 
   uint8_t hourTens = (time.hour / 10);

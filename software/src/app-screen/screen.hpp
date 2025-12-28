@@ -54,6 +54,7 @@ class ScreenC {
   ~ScreenC();
 
   void InitDisplay();
+  void InitDisplay(bool startOnEndBox);
   [[nodiscard]] ScreenT OnUpPressed();
   [[nodiscard]] ScreenT OnDownPressed();
   void OnSelectPressed();

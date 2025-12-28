@@ -73,10 +73,11 @@ class ProgramMachine {
   }
 
   void CheckInput() {
-    auto newScreen = ScreenHandleInput();
+    bool wasBack = false;
+    auto newScreen = ScreenHandleInput(wasBack);
 
     if (newScreen != ScreenT::NO_CHANGE) {
-      SwitchScreen(newScreen);
+      SwitchScreen(newScreen, wasBack);
     }
   }
 
@@ -85,13 +86,14 @@ class ProgramMachine {
   }
 
  private:
-  ScreenT ScreenHandleInput() {
+  ScreenT ScreenHandleInput(bool& wasBack) {
     uint8_t pina = PINA;
     auto& screen = Screen.get_reference<ScreenC>();
 
     if (UpButton.Add(pina & _BV(PINA0))) {
       return screen.OnUpPressed();
     } else if (DownButton.Add(pina & _BV(PINA1))) {
+      wasBack = true;
       return screen.OnDownPressed();
     } else if (SelectButton.Add(pina & _BV(PINA2))) {
       screen.OnSelectPressed();
@@ -100,7 +102,7 @@ class ProgramMachine {
     return ScreenT::NO_CHANGE;
   }
 
-  void SwitchScreen(ScreenT newScreen) {
+  void SwitchScreen(ScreenT newScreen, bool wasBack) {
     ScreenC* address = Screen.get_address<ScreenC>();
 
     address->~ScreenC();
@@ -121,7 +123,7 @@ class ProgramMachine {
         break;
     }
 
-    address->InitDisplay();
+    address->InitDisplay(wasBack);
   }
 
   static constexpr size_t ScreensMaxSize =

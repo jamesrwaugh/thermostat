@@ -67,6 +67,11 @@ class ProgramMachine {
  public:
   ProgramMachine(ThermoSaveData& saveData) : SaveData_(saveData) {}
 
+  void Start() {
+    ::new (Screen.get_address<ScreenC>()) TempScreen(SaveData_, Boxes);
+    Screen.get_reference<ScreenC>().InitDisplay();
+  }
+
   void CheckInput() {
     auto newScreen = ScreenHandleInput();
 
@@ -155,6 +160,8 @@ void mainLoop() {
   bool ledOn = false;
   uint8_t ledCount = 0;
   uint8_t halfSecondCount = 0;
+
+  machine.Start();
 
   while (1) {
     if (g10MillisecondPassed) {

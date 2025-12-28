@@ -1,6 +1,9 @@
 #include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <etl/alignment.h>
+#include <etl/largest.h>
+#include <etl/placement_new.h>
 #include <util/delay.h>
 
 #include <driver_rs_wrapper.hpp>
@@ -9,16 +12,6 @@
 #include "ThermoSaveData_bp.h"
 #include "screen.hpp"
 #include "utils.hpp"
-
-// 112 x 16
-// Temp Display Unit
-// Date Set
-// Time Set
-enum class Screen : uint8_t {
-  TempDisplayUnit = 0,
-  DateSet = 1,
-  TimeSet = 2,
-};
 
 uint8_t AutoTwi::instanceCount_ = 0;
 
@@ -70,46 +63,102 @@ void SetupInputTimer() {
   TIMSK1 |= _BV(OCIE1A);
 }
 
+class ProgramMachine {
+ public:
+  ProgramMachine(ThermoSaveData& saveData) : SaveData_(saveData) {}
+
+  void CheckInput() {
+    auto newScreen = ScreenHandleInput();
+
+    if (newScreen != ScreenT::NO_CHANGE) {
+      SwitchScreen(newScreen);
+    }
+  }
+
+  void OnHalfSecondPassed() {
+    Screen.get_reference<ScreenC>().OnHalfSecondPassed();
+  }
+
+ private:
+  ScreenT ScreenHandleInput() {
+    uint8_t pina = PINA;
+    auto& screen = Screen.get_reference<ScreenC>();
+
+    if (UpButton.Add(pina & _BV(PINA0))) {
+      return screen.OnUpPressed();
+    } else if (DownButton.Add(pina & _BV(PINA1))) {
+      return screen.OnDownPressed();
+    } else if (SelectButton.Add(pina & _BV(PINA2))) {
+      screen.OnSelectPressed();
+    }
+
+    return ScreenT::NO_CHANGE;
+  }
+
+  void SwitchScreen(ScreenT newScreen) {
+    ScreenC* address = Screen.get_address<ScreenC>();
+
+    address->~ScreenC();
+
+    switch (newScreen) {
+      case ScreenT::TempDisplayUnit:
+        ::new (address) TempScreen(SaveData_, Boxes);
+        break;
+      case ScreenT::DateSet:
+        ::new (address) DateScreen(SaveData_, Boxes);
+        break;
+      case ScreenT::TimeSet:
+        ::new (address) TimeScreen(SaveData_, Boxes);
+        break;
+      case ScreenT::NO_CHANGE:
+        // Should never happen
+        ::new (address) TempScreen(SaveData_, Boxes);
+        break;
+    }
+
+    address->InitDisplay();
+  }
+
+  static constexpr size_t ScreensMaxSize =
+      etl::largest<TempScreen, DateScreen, TimeScreen>::size;
+
+  static constexpr size_t ScreensAlignment =
+      etl::largest<TempScreen, DateScreen, TimeScreen>::alignment;
+
+  typedef etl::aligned_storage<ScreensMaxSize, ScreensAlignment>::type
+      ScreensStorage;
+
+  ThermoSaveData& SaveData_;
+  ScreensStorage Screen;
+  ScreenBoxStorage Boxes[10];
+  DebounceState UpButton;
+  DebounceState DownButton;
+  DebounceState SelectButton;
+  DebounceState TimeButton;
+};
+
 void mainLoop() {
   ThermoSaveData data;
   data.magic = THERMO_STATE_DATA_MAGIC;
   data.set_point = 39;
   data.temp_display_unit = TEMP_UNIT_FREEDOM;
+  data.date.year = 25;
+  data.date.month = 9;
+  data.date.day = 16;
+  data.time.hour = 6;
+  data.time.minute = 37;
+  data.time.second = 23;
+  data.time.am_pm = TIME_PM;
 
-  ScreenBoxStorage Boxes[5];
-
-  {
-    TempScreen tempScreen(data, Boxes);
-  }
-
-  TempScreen tempScreen(data, Boxes);
-  tempScreen.InitDisplay();
-
-  DebounceState UpButton;
-  DebounceState DownButton;
-  DebounceState SelectButton;
-  DebounceState TimeButton;
+  ProgramMachine machine(data);
 
   bool ledOn = false;
   uint8_t ledCount = 0;
   uint8_t halfSecondCount = 0;
 
   while (1) {
-    uint8_t pina = PINA;
-
     if (g10MillisecondPassed) {
       g10MillisecondPassed = false;
-
-      if (UpButton.Add(pina & _BV(PINA0))) {
-        tempScreen.OnUpPressed();
-        Serial.print("Up");
-      } else if (DownButton.Add(pina & _BV(PINA1))) {
-        tempScreen.OnDownPressed();
-        Serial.print("Down");
-      } else if (SelectButton.Add(pina & _BV(PINA2))) {
-        tempScreen.OnSelectPressed();
-        Serial.print("Select");
-      }
 
       ledCount += 1;
       if (ledCount > 100) {
@@ -122,10 +171,12 @@ void mainLoop() {
         }
       }
 
+      machine.CheckInput();
+
       halfSecondCount += 1;
       if (halfSecondCount > 50) {
         halfSecondCount = 0;
-        tempScreen.OnHalfSecondPassed();
+        machine.OnHalfSecondPassed();
       }
     }
   }

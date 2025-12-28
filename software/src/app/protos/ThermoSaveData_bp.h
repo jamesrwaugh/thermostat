@@ -23,14 +23,50 @@ typedef uint8_t TempDisplayUnit; // 1bit
 #define TEMP_UNIT_FREEDOM 0
 #define TEMP_UNIT_CELSIUS 1
 
+typedef uint8_t TimeAmPm; // 1bit
+
+#define TIME_AM 0
+#define TIME_PM 1
+
+// Number of bytes to encode struct Time
+#define BYTES_LENGTH_TIME 3
+
+struct Time {
+    uint8_t hour; // 5bit
+    uint8_t minute; // 8bit
+    uint8_t second; // 8bit
+    TimeAmPm am_pm; // 1bit
+};
+
+// Number of bytes to encode struct Date
+#define BYTES_LENGTH_DATE 3
+
+struct Date {
+    uint8_t year; // 8bit
+    uint8_t month; // 4bit
+    uint8_t day; // 5bit
+};
+
 // Number of bytes to encode struct ThermoSaveData
-#define BYTES_LENGTH_THERMO_SAVE_DATA 4
+#define BYTES_LENGTH_THERMO_SAVE_DATA 8
 
 struct ThermoSaveData {
     uint16_t magic; // 16bit
     uint8_t set_point; // 8bit
     TempDisplayUnit temp_display_unit; // 1bit
+    struct Date date; // 17bit
+    struct Time time; // 22bit
 };
+
+// Encode struct Time to given buffer s.
+int EncodeTime(struct Time *m, unsigned char *s);
+// Decode struct Time from given buffer s.
+int DecodeTime(struct Time *m, unsigned char *s);
+
+// Encode struct Date to given buffer s.
+int EncodeDate(struct Date *m, unsigned char *s);
+// Decode struct Date from given buffer s.
+int DecodeDate(struct Date *m, unsigned char *s);
 
 // Encode struct ThermoSaveData to given buffer s.
 int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s);

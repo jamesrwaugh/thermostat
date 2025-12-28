@@ -8,7 +8,7 @@
 #include "utils.hpp"
 
 constexpr uint8_t ImageWidth = 7;
-constexpr uint8_t ScreenWithInChars = 16;
+constexpr uint8_t ScreenWidthInChars = 16;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
@@ -44,7 +44,7 @@ ScreenBox::ScreenBox(uint8_t groupOrder, uint8_t groupCount,
     : CharSet{charSet},
       CharSetLength{charSetCount},
       xPosChars{
-          static_cast<uint8_t>((ScreenWithInChars - groupCount) + groupOrder)},
+          static_cast<uint8_t>((ScreenWidthInChars - groupCount) + groupOrder)},
       CharIndex{initialIndex} {}
 
 void ScreenBox::Up() {
@@ -89,7 +89,7 @@ uint8_t ScreenBox::GetCurrentIndex() const {
 }
 
 uint8_t ScreenBox::xPositionDots() const {
-  return xPosChars * (CharDotWidth);
+  return xPosChars * CharDotWidth;
 }
 
 // ================================================================ //
@@ -97,8 +97,14 @@ uint8_t ScreenBox::xPositionDots() const {
 Noritake_VFD_GU7000* ScreenC::Screen_ = nullptr;
 
 ScreenC::ScreenC(const char* title, ThermoSaveData& s,
-                 ScreenBoxStorage* boxStorage, uint8_t boxesCount)
-    : SaveData_{s}, Boxes_{boxStorage}, BoxesCount_{boxesCount}, Title{title} {}
+                 ScreenBoxStorage* boxStorage, uint8_t boxesCount,
+                 ScreenT prevScreen, ScreenT nextScreen)
+    : SaveData_{s},
+      Boxes_{boxStorage},
+      BoxesCount_{boxesCount},
+      Title{title},
+      NextScreen_{nextScreen},
+      PrevScreen_{prevScreen} {}
 
 void ScreenC::InitDisplay() {
   AutoTwi t;
@@ -115,7 +121,7 @@ ScreenC::~ScreenC() {
   Screen_->GU7000_clearScreen();
 }
 
-void ScreenC::OnUpPressed() {
+ScreenT ScreenC::OnUpPressed() {
   if (Locked_) {
     CurrentBox().Up();
     HasEditedCurrentBox_ = true;
@@ -125,11 +131,15 @@ void ScreenC::OnUpPressed() {
       CursorPosition += 1;
       CurrentBox().DrawIndicator();
       HasEditedCurrentBox_ = false;
+    } else {
+      return NextScreen_;
     }
   }
+
+  return ScreenT::NO_CHANGE;
 }
 
-void ScreenC::OnDownPressed() {
+ScreenT ScreenC::OnDownPressed() {
   if (Locked_) {
     CurrentBox().Down();
     HasEditedCurrentBox_ = true;
@@ -139,8 +149,12 @@ void ScreenC::OnDownPressed() {
       CursorPosition -= 1;
       CurrentBox().DrawIndicator();
       HasEditedCurrentBox_ = false;
+    } else {
+      return PrevScreen_;
     }
   }
+
+  return ScreenT::NO_CHANGE;
 }
 
 void ScreenC::OnSelectPressed() {
@@ -178,13 +192,93 @@ inline ScreenBox* ScreenC::GetBoxP(uint8_t i) const {
 // ================================================================ //
 
 TempScreen::TempScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
-    : ScreenC("TEMP", s, boxStorage, 3) {
-  ::new (GetBoxP(0)) ScreenBox(0, BoxesCount_, "CF", 2, 1);
-  ::new (GetBoxP(1)) ScreenBox(1, BoxesCount_, "A$C#", 4, 0);
-  ::new (GetBoxP(2)) ScreenBox(2, BoxesCount_, "123", 3, 2);
+    : ScreenC("Units", s, boxStorage, 3, ScreenT::NO_CHANGE, ScreenT::DateSet) {
+  ::new (GetBoxP(0))
+      ScreenBox(0, BoxesCount_, "CF", 2,
+                s.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
 }
 
 TempScreen::~TempScreen() {
   SaveData_.temp_display_unit =
       GetBox(0).GetCurrentIndex() == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
+}
+
+// ================================================================ //
+
+constexpr const char* DigitsCharSet = "0123456789";
+constexpr uint8_t DigitsCharSetLen = 10;
+
+DateScreen::DateScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
+    : ScreenC("Date", s, boxStorage, 8, ScreenT::TempDisplayUnit,
+              ScreenT::DateSet) {
+  const auto& date = s.date;
+
+  uint8_t yearTens = (date.year / 10);
+  uint8_t yearOnes = (date.year % 10);
+  uint8_t monthTens = (date.month / 10);
+  uint8_t monthOnes = (date.month % 10);
+  uint8_t dayTens = (date.day / 10);
+  uint8_t dayOnes = (date.day % 10);
+
+  // Year
+  ::new (GetBoxP(0))
+      ScreenBox(0, BoxesCount_, DigitsCharSet, DigitsCharSetLen, 2);
+  ::new (GetBoxP(1))
+      ScreenBox(1, BoxesCount_, DigitsCharSet, DigitsCharSetLen, 0);
+  ::new (GetBoxP(2))
+      ScreenBox(2, BoxesCount_, DigitsCharSet, DigitsCharSetLen, yearTens);
+  ::new (GetBoxP(3))
+      ScreenBox(3, BoxesCount_, DigitsCharSet, DigitsCharSetLen, yearOnes);
+
+  // Month
+  ::new (GetBoxP(4))
+      ScreenBox(4, BoxesCount_, DigitsCharSet, DigitsCharSetLen, monthTens);
+  ::new (GetBoxP(5))
+      ScreenBox(5, BoxesCount_, DigitsCharSet, DigitsCharSetLen, monthOnes);
+
+  // Days
+  ::new (GetBoxP(6))
+      ScreenBox(6, BoxesCount_, DigitsCharSet, DigitsCharSetLen, dayTens);
+  ::new (GetBoxP(7))
+      ScreenBox(7, BoxesCount_, DigitsCharSet, DigitsCharSetLen, dayOnes);
+}
+
+DateScreen::~DateScreen() {
+  //
+}
+
+// ================================================================ //
+
+TimeScreen::TimeScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage)
+    : ScreenC("Time", s, boxStorage, 8, ScreenT::DateSet, ScreenT::NO_CHANGE) {
+  const auto& time = s.time;
+
+  uint8_t hourTens = (time.hour / 10);
+  uint8_t hourOnes = (time.hour % 10);
+  uint8_t minuteTens = (time.minute / 10);
+  uint8_t minuteOnes = (time.minute % 10);
+  uint8_t secondTens = (time.second / 10);
+  uint8_t secondOnes = (time.second % 10);
+
+  // Hour
+  ::new (GetBoxP(0))
+      ScreenBox(0, BoxesCount_, DigitsCharSet, DigitsCharSetLen, hourTens);
+  ::new (GetBoxP(1))
+      ScreenBox(1, BoxesCount_, DigitsCharSet, DigitsCharSetLen, hourOnes);
+
+  // Minute
+  ::new (GetBoxP(2))
+      ScreenBox(2, BoxesCount_, DigitsCharSet, DigitsCharSetLen, minuteTens);
+  ::new (GetBoxP(3))
+      ScreenBox(3, BoxesCount_, DigitsCharSet, DigitsCharSetLen, minuteOnes);
+
+  // Second
+  ::new (GetBoxP(4))
+      ScreenBox(4, BoxesCount_, DigitsCharSet, DigitsCharSetLen, secondTens);
+  ::new (GetBoxP(5))
+      ScreenBox(5, BoxesCount_, DigitsCharSet, DigitsCharSetLen, secondOnes);
+}
+
+TimeScreen::~TimeScreen() {
+  //
 }

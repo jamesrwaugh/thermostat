@@ -5,6 +5,15 @@
 
 // ================================================================ //
 
+enum class ScreenT : uint8_t {
+  NO_CHANGE = 0,
+  TempDisplayUnit = 1,
+  DateSet = 2,
+  TimeSet = 3,
+};
+
+// ================================================================ //
+
 class Noritake_VFD_GU7000;
 struct ThermoSaveData;
 
@@ -41,12 +50,12 @@ typedef etl::aligned_storage<sizeof(ScreenBox), alignof(ScreenBox)>::type
 class ScreenC {
  public:
   ScreenC(const char* title, ThermoSaveData& s, ScreenBoxStorage* boxStorage,
-          uint8_t boxesCount);
+          uint8_t boxesCount, ScreenT prevScreen, ScreenT nextScreen);
   ~ScreenC();
 
   void InitDisplay();
-  void OnUpPressed();
-  void OnDownPressed();
+  [[nodiscard]] ScreenT OnUpPressed();
+  [[nodiscard]] ScreenT OnDownPressed();
   void OnSelectPressed();
   void OnHalfSecondPassed();
   ScreenBox& CurrentBox() const;
@@ -67,10 +76,30 @@ class ScreenC {
   uint8_t CursorPosition{0};
   bool Locked_{false};
   bool HasEditedCurrentBox_{false};
+  const ScreenT NextScreen_;
+  const ScreenT PrevScreen_;
 };
+
+// ================================================================ //
 
 class TempScreen : public ScreenC {
  public:
   TempScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage);
   ~TempScreen();
+};
+
+// ================================================================ //
+
+class DateScreen : public ScreenC {
+ public:
+  DateScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage);
+  ~DateScreen();
+};
+
+// ================================================================ //
+
+class TimeScreen : public ScreenC {
+ public:
+  TimeScreen(ThermoSaveData& s, ScreenBoxStorage* boxStorage);
+  ~TimeScreen();
 };

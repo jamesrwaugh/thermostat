@@ -7,8 +7,28 @@ enum TempDisplayUnit : uint1 {
     TEMP_UNIT_CELSIUS = 1
 }
 
+enum TimeAmPm : uint1 {
+    TIME_AM = 0
+    TIME_PM = 1
+}
+
+message Time {
+    uint5 hour = 1
+    uint8 minute = 2
+    uint8 second = 3
+    TimeAmPm am_pm = 4
+}
+
+message Date {
+    uint8 year = 1
+    uint4 month = 2
+    uint5 day = 3
+}
+
 message ThermoSaveData {
     uint16 magic = 1
     uint8 set_point = 2
     TempDisplayUnit temp_display_unit = 3
+    Date date = 4
+    Time time = 5
 }

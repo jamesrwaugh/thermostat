@@ -2,11 +2,58 @@
 
 #include "ThermoSaveData_bp.h"
 
+int EncodeTime(struct Time *m, unsigned char *s) {
+    s[0] = (((unsigned char *)&((*m).hour))[0] ) & 31;
+    s[0] |= (((unsigned char *)&((*m).minute))[0] << 5) & 224;
+    s[1] = (((unsigned char *)&((*m).minute))[0] >> 3) & 31;
+    s[1] |= (((unsigned char *)&((*m).second))[0] << 5) & 224;
+    s[2] = (((unsigned char *)&((*m).second))[0] >> 3) & 31;
+    s[2] |= (((unsigned char *)&((*m).am_pm))[0] << 5) & 32;
+    return 0;
+}
+
+int DecodeTime(struct Time *m, unsigned char *s) {
+    ((unsigned char *)&((*m).hour))[0] = (s[0] ) & 31;
+    ((unsigned char *)&((*m).minute))[0] = (s[0] >> 5) & 7;
+    ((unsigned char *)&((*m).minute))[0] |= (s[1] << 3) & 248;
+    ((unsigned char *)&((*m).second))[0] = (s[1] >> 5) & 7;
+    ((unsigned char *)&((*m).second))[0] |= (s[2] << 3) & 248;
+    ((unsigned char *)&((*m).am_pm))[0] = (s[2] >> 5) & 1;
+    return 0;
+}
+
+int EncodeDate(struct Date *m, unsigned char *s) {
+    s[0] = (((unsigned char *)&((*m).year))[0] ) & 255;
+    s[1] = (((unsigned char *)&((*m).month))[0] ) & 15;
+    s[1] |= (((unsigned char *)&((*m).day))[0] << 4) & 240;
+    s[2] = (((unsigned char *)&((*m).day))[0] >> 4) & 1;
+    return 0;
+}
+
+int DecodeDate(struct Date *m, unsigned char *s) {
+    ((unsigned char *)&((*m).year))[0] = (s[0] ) & 255;
+    ((unsigned char *)&((*m).month))[0] = (s[1] ) & 15;
+    ((unsigned char *)&((*m).day))[0] = (s[1] >> 4) & 15;
+    ((unsigned char *)&((*m).day))[0] |= (s[2] << 4) & 16;
+    return 0;
+}
+
 int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     s[0] = (((unsigned char *)&((*m).magic))[0] ) & 255;
     s[1] = (((unsigned char *)&((*m).magic))[1] ) & 255;
     s[2] = (((unsigned char *)&((*m).set_point))[0] ) & 255;
     s[3] = (((unsigned char *)&((*m).temp_display_unit))[0] ) & 1;
+    s[3] |= (((unsigned char *)&((*m).date.year))[0] << 1) & 254;
+    s[4] = (((unsigned char *)&((*m).date.year))[0] >> 7) & 1;
+    s[4] |= (((unsigned char *)&((*m).date.month))[0] << 1) & 30;
+    s[4] |= (((unsigned char *)&((*m).date.day))[0] << 5) & 224;
+    s[5] = (((unsigned char *)&((*m).date.day))[0] >> 3) & 3;
+    s[5] |= (((unsigned char *)&((*m).time.hour))[0] << 2) & 124;
+    s[5] |= (((unsigned char *)&((*m).time.minute))[0] << 7) & 128;
+    s[6] = (((unsigned char *)&((*m).time.minute))[0] >> 1) & 127;
+    s[6] |= (((unsigned char *)&((*m).time.second))[0] << 7) & 128;
+    s[7] = (((unsigned char *)&((*m).time.second))[0] >> 1) & 127;
+    s[7] |= (((unsigned char *)&((*m).time.am_pm))[0] << 7) & 128;
     return 0;
 }
 
@@ -15,5 +62,16 @@ int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     ((unsigned char *)&((*m).magic))[1] = (s[1] ) & 255;
     ((unsigned char *)&((*m).set_point))[0] = (s[2] ) & 255;
     ((unsigned char *)&((*m).temp_display_unit))[0] = (s[3] ) & 1;
+    ((unsigned char *)&((*m).date.year))[0] = (s[3] >> 1) & 127;
+    ((unsigned char *)&((*m).date.year))[0] |= (s[4] << 7) & 128;
+    ((unsigned char *)&((*m).date.month))[0] = (s[4] >> 1) & 15;
+    ((unsigned char *)&((*m).date.day))[0] = (s[4] >> 5) & 7;
+    ((unsigned char *)&((*m).date.day))[0] |= (s[5] << 3) & 24;
+    ((unsigned char *)&((*m).time.hour))[0] = (s[5] >> 2) & 31;
+    ((unsigned char *)&((*m).time.minute))[0] = (s[5] >> 7) & 1;
+    ((unsigned char *)&((*m).time.minute))[0] |= (s[6] << 1) & 254;
+    ((unsigned char *)&((*m).time.second))[0] = (s[6] >> 7) & 1;
+    ((unsigned char *)&((*m).time.second))[0] |= (s[7] << 1) & 254;
+    ((unsigned char *)&((*m).time.am_pm))[0] = (s[7] >> 7) & 1;
     return 0;
 }

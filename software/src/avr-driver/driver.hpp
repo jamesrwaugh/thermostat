@@ -3,6 +3,7 @@
 #include <etl/optional.h>
 #include <tmp116.h>
 
+#include "ThermoSaveData_bp.h"
 #include "data_types.hpp"
 
 #if SIMULATED == 1
@@ -32,6 +33,8 @@ struct AvrDrivers {
   void ReadStateNow(ThermoButtonState* out) const;
   void RelayOn(Relay r) const;
   void RelayOff(Relay r) const;
+  bool SaveData(const ThermoSaveData& data) const;
+  bool LoadData(ThermoSaveData& data) const;
 
  private:
   const AvrDriverCallbacks& Callbacks_;
@@ -42,6 +45,8 @@ struct AvrDrivers {
   uint8_t SetupRTC();
   void SetupTemp();
   void SetupSerial();
+  bool WriteFlash(uint16_t address, const uint8_t* data, uint8_t length) const;
+  bool ReadFlash(uint16_t address, uint8_t* buffer, uint8_t maxLength) const;
 };
 
 extern etl::optional<AvrDrivers> gDriver;

@@ -7,6 +7,7 @@ main_src = files(
 )
 
 drivers_src = files(
+    '47L04/47Lxx.cpp',
     'DS1307/src/driver_ds1307.c',
     'GU7000/Noritake_VFD_GU7000.cpp',
     'I2C/twi/twi_master.c',
@@ -19,6 +20,7 @@ drivers_include = include_directories(
     'GU7000',
     'I2C/twi',
     'TMP116',
+    '47L04',
     'Serial',
 )
 
@@ -33,7 +35,7 @@ arv_driver = static_library(
     main_src,
     drivers_src,
     pic: false,
-    dependencies: [etl_dep],
+    dependencies: [etl_dep, protos_dep],
     include_directories: [drivers_include],
     cpp_args: [
         '-DETL_NO_STL',

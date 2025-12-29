@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ThermoSaveData_bp.h>
 #include <etl/alignment.h>
 #include <etl/largest.h>
 
@@ -11,7 +12,6 @@
 #include "heating.hpp"
 #include "idle.hpp"
 #include "program_screen.hpp"
-#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
 class SafeThermoSaveData {
@@ -51,6 +51,7 @@ class Machine {
 
  private:
   void SwitchState(State::Type new_state);
+  void SaveProgrammingSettings();
 
   struct StateChangeData {
     static constexpr uint8_t MaxStateChangeTimeoutSec = 10;

@@ -1,5 +1,4 @@
 src = files(
-    'protos/ThermoSaveData_bp.c',
     'states/coolable_parent.cpp',
     'states/cooling.cpp',
     'states/heating.cpp',
@@ -24,8 +23,8 @@ executable(
     dependencies: [
         etl_dep,
         avr_driver_dep,
-        bitproto_dep,
         bmodbus_dep,
+        protos_dep,
     ],
     cpp_args: [
         '-DETL_NO_STL',

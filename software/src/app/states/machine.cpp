@@ -1,5 +1,7 @@
 #include "machine.hpp"
 
+#include <ThermoSaveData_bp.h>
+#include <driver_ds1307.h>
 #include <etl/placement_new.h>
 
 #include <driver_rs_wrapper.hpp>
@@ -9,7 +11,6 @@
 #include "heating.hpp"
 #include "idle.hpp"
 #include "program_screen.hpp"
-#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
 TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
@@ -162,13 +163,10 @@ SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
 }
 
 void Machine::ReadAndApplySettings() {
-  uint8_t rtcDataBuf[BYTES_LENGTH_THERMO_SAVE_DATA];
-  DriverReadFlash(0, rtcDataBuf, sizeof(rtcDataBuf));
-
   ThermoSaveData data;
-  DecodeThermoSaveData(&data, rtcDataBuf);
+  const bool loadSuccess = DriverLoadData(data);
 
-  if (data.magic == THERMO_STATE_DATA_MAGIC) {
+  if (loadSuccess) {
     SetThermoSaveData(data);
   }
 
@@ -209,6 +207,16 @@ State::Type Machine::get_state_id() const {
 void Machine::SwitchState(State::Type new_state) {
   State::Base* address = CurrentState.get_address<State::Base>();
 
+  const auto prevState = address->StateId;
+
+  const bool WasProgramming = prevState == State::Type::ProgramTemp ||
+                              prevState == State::Type::ProgramDate ||
+                              prevState == State::Type::ProgramTime;
+
+  if (WasProgramming && new_state == State::Type::Idle) {
+    SaveProgrammingSettings();
+  }
+
   address->~Base();
 
   switch (new_state) {
@@ -236,5 +244,28 @@ void Machine::SwitchState(State::Type new_state) {
     case State::Type::COUNT:  // Should never happen
       ::new (address) Idle(*this);
       break;
+  }
+}
+
+void Machine::SaveProgrammingSettings() {
+  const auto prevState = get_state_id();
+
+  if (prevState == State::Type::ProgramTemp ||
+      prevState == State::Type::ProgramDate ||
+      prevState == State::Type::ProgramTime) {
+    const auto& saveData = SaveState();
+    DriverSaveData(saveData);
+    ds1307_time_s time{
+        .year = saveData.date.year,
+        .month = saveData.date.month,
+        .week = saveData.date.day,
+        .date = saveData.date.day,
+        .hour = saveData.time.hour,
+        .minute = saveData.time.minute,
+        .second = saveData.time.second,
+        .am_pm = saveData.time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
+                                                : ds1307_am_pm_t::DS1307_PM,
+    };
+    DriverSetTime(time);
   }
 }

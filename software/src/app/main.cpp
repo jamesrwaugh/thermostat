@@ -56,35 +56,6 @@ void PrintStateChange(const char* message) {
   DriverWriteSerialPortRaw((uint8_t*)"\r\n", 2);
 }
 
-void OnStateChange(State::Type state) {
-  switch (state) {
-    case State::Type::Idle:
-      PrintStateChange("ID");
-      break;
-    case State::Type::Heating:
-      PrintStateChange("H");
-      break;
-    case State::Type::Cooling:
-      PrintStateChange("C");
-      break;
-    case State::Type::ProgramTemp:
-      PrintStateChange("PT");
-      break;
-    case State::Type::ProgramDate:
-      PrintStateChange("PD");
-      break;
-    case State::Type::ProgramTime:
-      PrintStateChange("PTI");
-      break;
-    case State::Type::COUNT:
-      PrintStateChange("?");
-      break;
-    default:
-      PrintStateChange("?");
-      break;
-  }
-}
-
 uint16_t register_values[16] = {0};  // Example register values
 
 static int dispatch(uint8_t function, uint16_t address, uint16_t* data,
@@ -141,8 +112,6 @@ int main() {
   uint8_t lastHalfSecondCount = 0;
   uint8_t lastSecondCount = 0;
 
-  DriverWriteSerialPortS("Hello, world!");
-
   // Invalid state to force initial update
   State::Type lastState = State::Type::COUNT;
 
@@ -155,7 +124,7 @@ int main() {
 
     if (lastState != state) {
       lastState = state;
-      OnStateChange(state);
+      // OnStateChange(state);
     }
 
     if (g10MillisecondPassed) {

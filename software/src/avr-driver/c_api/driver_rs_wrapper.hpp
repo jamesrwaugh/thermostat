@@ -1,6 +1,7 @@
 #ifndef RS_DRIVER_H
 #define RS_DRIVER_H
 
+#include <ThermoSaveData_bp.h>
 #include <stdint.h>
 
 #include "../data_types.hpp"
@@ -36,11 +37,12 @@ void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes);
 void DriverWriteSerialPortS(const char* message);
 void DriverMcuSleep();
 void DriverPollInput();
-uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length);
-uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength);
-bool DriverSetTime(ds1307_time_s& time);
+bool DriverSetTime(const ds1307_time_s& time);
+bool DriverSetTimeFromSaveData(const Time& time, const Date& date);
 bool DriverGetTime(ds1307_time_s& time);
 bool DriverGetSerialByte(uint8_t* byte);
+bool DriverSaveData(const ThermoSaveData& data);
+bool DriverLoadData(ThermoSaveData& data);
 }
 
 Noritake_VFD_GU7000& DriverGetScreenHandle();

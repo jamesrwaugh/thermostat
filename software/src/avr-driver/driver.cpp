@@ -79,9 +79,6 @@ void AvrDrivers::SetupScreen() {
 
 #else
   Screen.GU7000_init();
-  // Screen.GU7000_defineWindow(Gu7kWindowId::UpperRight, 58, 0, 58, 1);
-  // Screen.GU7000_defineWindow(Gu7kWindowId::LowerRight, 58, 1, 58, 1);
-  // Screen.GU7000_defineWindow(Gu7kWindowId::LowerLeft, 0, 1, 58, 1);
 #endif
 }
 
@@ -226,19 +223,15 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
 void AvrDrivers::RelayOn(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      // PC0
       PORTC |= _BV(PORTC0);
       break;
     case Relay::Compressor:
-      // PB2
       PORTB |= _BV(PORTB2);
       break;
     case Relay::Heat:
-      // PC1
       PORTC |= _BV(PORTC1);
       break;
     case Relay::ReversingValve:
-      // PC2
       PORTC |= _BV(PORTC2);
       break;
   }
@@ -247,19 +240,15 @@ void AvrDrivers::RelayOn(Relay r) const {
 void AvrDrivers::RelayOff(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      // PC0
       PORTC &= ~_BV(PORTC0);
       break;
     case Relay::Compressor:
-      // PB2
       PORTB &= ~_BV(PORTB2);
       break;
     case Relay::Heat:
-      // PC1
       PORTC &= ~_BV(PORTC1);
       break;
     case Relay::ReversingValve:
-      // PC2
       PORTC &= ~_BV(PORTC2);
       break;
   }
@@ -267,4 +256,38 @@ void AvrDrivers::RelayOff(Relay r) const {
 
 void AvrDrivers::SetupTemp() {
   TempSensor.Init();
+}
+
+constexpr uint16_t FlashSaveDataAddress = 0;
+
+bool AvrDrivers::SaveData(const ThermoSaveData& data) const {
+  uint8_t buffer[BYTES_LENGTH_THERMO_SAVE_DATA];
+  EncodeThermoSaveData(&const_cast<ThermoSaveData&>(data), buffer);
+  return WriteFlash(FlashSaveDataAddress, buffer,
+                    BYTES_LENGTH_THERMO_SAVE_DATA);
+}
+
+bool AvrDrivers::LoadData(ThermoSaveData& data) const {
+  uint8_t buffer[BYTES_LENGTH_THERMO_SAVE_DATA];
+
+  if (!ReadFlash(FlashSaveDataAddress, buffer, BYTES_LENGTH_THERMO_SAVE_DATA)) {
+    return false;
+  }
+
+  DecodeThermoSaveData(&data, buffer);
+  return data.magic == THERMO_STATE_DATA_MAGIC;
+}
+
+bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,
+                            uint8_t length) const {
+  uint8_t err = ds1307_write_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
+                                 const_cast<uint8_t*>(data), length);
+  return err == 0;
+}
+
+bool AvrDrivers::ReadFlash(uint16_t address, uint8_t* buffer,
+                           uint8_t maxLength) const {
+  uint8_t err = ds1307_read_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
+                                buffer, maxLength);
+  return err == 0;
 }

@@ -38,6 +38,7 @@ bmodbus_dep = declare_dependency(
     compile_args: ['-DBMODBUS_NO_MASTER'],
 )
 
+subdir('src/protos')
 subdir('src/avr-driver')
 subdir('src/simulation')
 subdir('src/app')

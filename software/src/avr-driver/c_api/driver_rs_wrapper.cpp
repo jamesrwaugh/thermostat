@@ -4,6 +4,7 @@
 #include <avr/sleep.h>
 #include <driver_ds1307.h>
 #include <etl/optional.h>
+#include <time.h>
 
 #include "driver.hpp"
 #include "twi_master.h"
@@ -44,6 +45,14 @@ bool DriverGetSerialByte(uint8_t* byte) {
   }
   *byte = b;
   return true;
+}
+
+bool DriverSaveData(const ThermoSaveData& data) {
+  return gDriver->SaveData(data);
+}
+
+bool DriverLoadData(ThermoSaveData& data) {
+  return gDriver->LoadData(data);
 }
 
 uint8_t CelsiusToFreedom(uint8_t celsius) {
@@ -139,16 +148,25 @@ void DriverPollInput() {
   gDriver->ReadInput();
 }
 
-uint8_t DriverWriteFlash(uint8_t address, uint8_t* data, uint8_t length) {
-  return ds1307_write_ram(&gDriver->Rtc, address, data, length);
+bool DriverSetTime(const ds1307_time_s& time) {
+  return ds1307_set_time(&gDriver->Rtc, const_cast<ds1307_time_s*>(&time)) == 0;
 }
 
-uint8_t DriverReadFlash(uint8_t address, uint8_t* buffer, uint8_t maxLength) {
-  return ds1307_read_ram(&gDriver->Rtc, address, buffer, maxLength);
-}
-
-bool DriverSetTime(ds1307_time_s& time) {
-  return ds1307_set_time(&gDriver->Rtc, &time) == 0;
+bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
+  ds1307_time_s timeStruct{
+      .year = date.year,
+      .month = date.month,
+      .week = date.day,
+      .date = date.day,
+      .hour = time.hour,
+      .minute = time.minute,
+      .second = time.second,
+      .am_pm = time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
+                                     : ds1307_am_pm_t::DS1307_PM,
+  };
+  week_date s;
+  iso_week_date_r(date.year, date.day, &s);
+  return DriverSetTime(timeStruct);
 }
 
 bool DriverGetTime(ds1307_time_s& time) {

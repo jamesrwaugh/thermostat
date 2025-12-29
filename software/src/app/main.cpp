@@ -137,7 +137,9 @@ int main() {
 
   DriverGetTime(time);
 
-  uint8_t lastTenMsCount = 0;
+  uint32_t lastTenMsCount = 0;
+  uint8_t lastHalfSecondCount = 0;
+  uint8_t lastSecondCount = 0;
 
   DriverWriteSerialPortS("Hello, world!");
 
@@ -160,12 +162,19 @@ int main() {
       DriverPollInput();
       g10MillisecondPassed = false;
       lastTenMsCount += 1;
+      lastHalfSecondCount += 1;
+      lastSecondCount += 1;
     }
 
     CheckModbus(mb, lastTenMsCount);
 
-    if (lastTenMsCount >= 10) {
-      lastTenMsCount = 0;
+    if (lastHalfSecondCount >= 50) {
+      lastHalfSecondCount = 0;
+      machine.receive(Event::HalfSecondPassed());
+    }
+
+    if (lastSecondCount >= 100) {
+      lastSecondCount = 0;
       machine.receive(Event::SecondPassed());
     }
 

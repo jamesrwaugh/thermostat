@@ -17,12 +17,6 @@ struct ThermoButtonState;
 struct AvrDrivers {
   AvrDrivers(const AvrDriverCallbacks& callbacks);
 
-  enum Gu7kWindowId {
-    UpperRight = 1,
-    LowerRight = 2,
-    LowerLeft = 3,
-  };
-
 #if SIMULATED == 1
   SimulatedGu7000 Screen;
 #else

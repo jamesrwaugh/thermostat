@@ -15,7 +15,7 @@ class ScreenBox {
   static Noritake_VFD_GU7000* Screen_;
 
   ScreenBox(uint8_t xPosChars, const char* charSet, uint8_t charSetCount,
-            uint8_t initialIndex);
+            uint8_t initialIndex, uint8_t stride);
 
   void Up();
   void Down();
@@ -33,6 +33,7 @@ class ScreenBox {
   const uint8_t CharSetLength;
   const uint8_t xPosChars;
   uint8_t CharIndex{0};
+  const uint8_t Stride;
 };
 
 // ================================================================ //

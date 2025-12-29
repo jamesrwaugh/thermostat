@@ -16,7 +16,7 @@ extern "C" {
 
 #define BITPROTO_OPTIMIZATION_MODE 1
 
-#define THERMO_STATE_DATA_MAGIC 292
+#define THERMO_STATE_DATA_MAGIC 45
 
 typedef uint8_t TempDisplayUnit; // 1bit
 
@@ -45,16 +45,17 @@ struct Date {
     uint8_t year; // 8bit
     uint8_t month; // 4bit
     uint8_t day; // 5bit
+    uint8_t day_of_week; // 4bit
 };
 
 // Number of bytes to encode struct ThermoSaveData
 #define BYTES_LENGTH_THERMO_SAVE_DATA 8
 
 struct ThermoSaveData {
-    uint16_t magic; // 16bit
+    uint8_t magic; // 8bit
     uint8_t set_point; // 8bit
     TempDisplayUnit temp_display_unit; // 1bit
-    struct Date date; // 17bit
+    struct Date date; // 21bit
     struct Time time; // 22bit
 };
 

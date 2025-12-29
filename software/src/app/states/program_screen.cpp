@@ -1,10 +1,10 @@
 #include "program_screen.hpp"
 
 #include <Noritake_VFD_GU7000.h>
+#include <ThermoSaveData_bp.h>
 #include <etl/placement_new.h>
 #include <stdint.h>
 
-#include "protos/ThermoSaveData_bp.h"
 #include "state.hpp"
 
 constexpr uint8_t ImageWidth = 7;
@@ -38,11 +38,12 @@ const uint8_t gBlankImageData[ImageWidth] = {
 Noritake_VFD_GU7000* ScreenBox::Screen_ = nullptr;
 
 ScreenBox::ScreenBox(uint8_t xPosChars, const char* charSet,
-                     uint8_t charSetCount, uint8_t initialIndex)
+                     uint8_t charSetCount, uint8_t initialIndex, uint8_t stride)
     : CharSet{charSet},
       CharSetLength{charSetCount},
       xPosChars{xPosChars},
-      CharIndex{initialIndex} {}
+      CharIndex{initialIndex},
+      Stride{stride} {}
 
 void ScreenBox::Up() {
   if (CharIndex < CharSetLength - 1) {
@@ -78,7 +79,10 @@ void ScreenBox::Draw() const {
 
 void ScreenBox::Draw(bool on) const {
   AutoTwi t;
-  Screen_->print(xPositionDots(), 0, on ? CharSet[CharIndex] : ' ');
+  for (uint8_t i = 0; i < Stride; ++i) {
+    Screen_->print(xPositionDots() + i * CharDotWidth, 0,
+                   on ? CharSet[CharIndex + i] : ' ');
+  }
 }
 
 uint8_t ScreenBox::GetCurrentIndex() const {
@@ -239,7 +243,7 @@ TempScreen::TempScreen(ThermoSaveData& s)
     : ProgramScreenState("Units", s, 1, State::Type::Idle,
                          State::Type::ProgramDate) {
   ::new (GetBoxP(0)) ScreenBox(
-      15, "CF", 2, SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1);
+      15, "CF", 2, SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1, 1);
 }
 
 TempScreen::~TempScreen() {
@@ -252,8 +256,13 @@ TempScreen::~TempScreen() {
 constexpr const char* Digits = "0123456789";
 constexpr uint8_t DigitsSetLen = 10;
 
+constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
+constexpr uint8_t DaysOfWeekSetLen = 12;
+
+// Date 01/22/25 Su
+
 DateScreen::DateScreen(ThermoSaveData& s)
-    : ProgramScreenState("Date", s, 6, State::Type::ProgramTime,
+    : ProgramScreenState("Date", s, 7, State::Type::ProgramTime,
                          State::Type::Idle) {
   const auto& date = s.date;
 
@@ -263,30 +272,33 @@ DateScreen::DateScreen(ThermoSaveData& s)
   uint8_t monthOnes = (date.month % 10);
   uint8_t dayTens = (date.day / 10);
   uint8_t dayOnes = (date.day % 10);
+  uint8_t dayOfWeek = (date.day_of_week);
 
   // Year Tens and Ones
-  ::new (GetBoxP(0)) ScreenBox(8, Digits, DigitsSetLen, yearTens);
-  ::new (GetBoxP(1)) ScreenBox(9, Digits, DigitsSetLen, yearOnes);
+  ::new (GetBoxP(0)) ScreenBox(5, Digits, DigitsSetLen, yearTens, 1);
+  ::new (GetBoxP(1)) ScreenBox(6, Digits, DigitsSetLen, yearOnes, 1);
 
   // Month
-  ::new (GetBoxP(2)) ScreenBox(11, Digits, DigitsSetLen, monthTens);
-  ::new (GetBoxP(3)) ScreenBox(12, Digits, DigitsSetLen, monthOnes);
+  ::new (GetBoxP(2)) ScreenBox(8, Digits, DigitsSetLen, monthTens, 1);
+  ::new (GetBoxP(3)) ScreenBox(9, Digits, DigitsSetLen, monthOnes, 1);
 
   // Days
-  ::new (GetBoxP(4)) ScreenBox(14, Digits, DigitsSetLen, dayTens);
-  ::new (GetBoxP(5)) ScreenBox(15, Digits, DigitsSetLen, dayOnes);
+  ::new (GetBoxP(4)) ScreenBox(11, Digits, DigitsSetLen, dayTens, 1);
+  ::new (GetBoxP(5)) ScreenBox(12, Digits, DigitsSetLen, dayOnes, 1);
 
-  // Separators and year "20XX"
+  // Days of Week
+  ::new (GetBoxP(6)) ScreenBox(14, DaysOfWeek, DaysOfWeekSetLen, dayOfWeek, 2);
+
+  // Separators
   AddStatic(10, '-');
   AddStatic(13, '-');
-  AddStatic(6, '2');
-  AddStatic(7, '0');
 }
 
 DateScreen::~DateScreen() {
   SaveData_.date.year = GetBoxIndex(0) * 10 + GetBoxIndex(1);
   SaveData_.date.month = GetBoxIndex(2) * 10 + GetBoxIndex(3);
   SaveData_.date.day = GetBoxIndex(4) * 10 + GetBoxIndex(5);
+  SaveData_.date.day_of_week = GetBoxIndex(6);
 }
 
 // ================================================================ //
@@ -308,19 +320,19 @@ TimeScreen::TimeScreen(ThermoSaveData& s)
   uint8_t amPmIdx = (time.am_pm == TIME_AM ? 0 : 1);
 
   // Hour
-  ::new (GetBoxP(0)) ScreenBox(6, Digits, DigitsSetLen, hourTens);
-  ::new (GetBoxP(1)) ScreenBox(7, Digits, DigitsSetLen, hourOnes);
+  ::new (GetBoxP(0)) ScreenBox(6, Digits, DigitsSetLen, hourTens, 1);
+  ::new (GetBoxP(1)) ScreenBox(7, Digits, DigitsSetLen, hourOnes, 1);
 
   // Minute
-  ::new (GetBoxP(2)) ScreenBox(9, Digits, DigitsSetLen, minuteTens);
-  ::new (GetBoxP(3)) ScreenBox(10, Digits, DigitsSetLen, minuteOnes);
+  ::new (GetBoxP(2)) ScreenBox(9, Digits, DigitsSetLen, minuteTens, 1);
+  ::new (GetBoxP(3)) ScreenBox(10, Digits, DigitsSetLen, minuteOnes, 1);
 
   // Second
-  ::new (GetBoxP(4)) ScreenBox(12, Digits, DigitsSetLen, secondTens);
-  ::new (GetBoxP(5)) ScreenBox(13, Digits, DigitsSetLen, secondOnes);
+  ::new (GetBoxP(4)) ScreenBox(12, Digits, DigitsSetLen, secondTens, 1);
+  ::new (GetBoxP(5)) ScreenBox(13, Digits, DigitsSetLen, secondOnes, 1);
 
   // AM/PM
-  ::new (GetBoxP(6)) ScreenBox(15, AmPm, AmPmLen, amPmIdx);
+  ::new (GetBoxP(6)) ScreenBox(15, AmPm, AmPmLen, amPmIdx, 1);
 
   // Separators
   AddStatic(8, ':');

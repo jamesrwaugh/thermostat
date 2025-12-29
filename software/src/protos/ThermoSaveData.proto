@@ -1,6 +1,6 @@
 proto ThermoSaveData
 
-const THERMO_STATE_DATA_MAGIC = 0x0124
+const THERMO_STATE_DATA_MAGIC = 45
 
 enum TempDisplayUnit : uint1 {
     TEMP_UNIT_FREEDOM = 0
@@ -23,10 +23,11 @@ message Date {
     uint8 year = 1
     uint4 month = 2
     uint5 day = 3
+    uint4 day_of_week = 4
 }
 
 message ThermoSaveData {
-    uint16 magic = 1
+    uint8 magic = 1
     uint8 set_point = 2
     TempDisplayUnit temp_display_unit = 3
     Date date = 4

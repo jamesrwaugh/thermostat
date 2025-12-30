@@ -74,8 +74,9 @@ typedef etl::aligned_storage<sizeof(StaticScreenBox),
 
 class ProgramScreenState : public State::Base {
  public:
-  ProgramScreenState(const char* title, ThermoSaveData& s, uint8_t boxesCount,
-                     State::Type prevState, State::Type nextState);
+  ProgramScreenState(State::Type stateId, const char* title, ThermoSaveData& s,
+                     uint8_t boxesCount, State::Type prevState,
+                     State::Type nextState);
   ~ProgramScreenState();
 
   void InitDisplay(bool startOnEndBox);

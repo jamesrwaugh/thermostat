@@ -126,11 +126,11 @@ StaticScreenBox::StaticScreenBox(uint8_t xPosChars, char character)
 
 Noritake_VFD_GU7000* ProgramScreenState::Screen_ = nullptr;
 
-ProgramScreenState::ProgramScreenState(const char* title, ThermoSaveData& s,
-                                       uint8_t boxesCount,
+ProgramScreenState::ProgramScreenState(State::Type stateId, const char* title,
+                                       ThermoSaveData& s, uint8_t boxesCount,
                                        State::Type prevState,
                                        State::Type nextState)
-    : State::Base(State::Type::ProgramTemp),
+    : State::Base(stateId),
       SaveData_{s},
       BoxesCount_{boxesCount},
       Title{title},
@@ -265,8 +265,8 @@ constexpr const char* CorFCharSet = "CF";
 constexpr uint8_t CorFLen = 2;
 
 TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState("Units", s, 1, State::Type::Idle,
-                         State::Type::ProgramDate) {
+    : ProgramScreenState(State::Type::ProgramTemp, "Units", s, 1,
+                         State::Type::Idle, State::Type::ProgramDate) {
   // Temp Unit C or F
   auto& tempUnit = s.temp_display_unit;
   ::new (GetBoxP(0)) CharSetScreenBox(15, &tempUnit, CorFCharSet, CorFLen, 1);
@@ -281,8 +281,8 @@ constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
 
 DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState("Date", s, 4, State::Type::ProgramTime,
-                         State::Type::Idle) {
+    : ProgramScreenState(State::Type::ProgramDate, "Date", s, 4,
+                         State::Type::ProgramTime, State::Type::Idle) {
   auto& date = s.date;
 
   // Year, Month, Day
@@ -308,8 +308,8 @@ constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;
 
 TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState("Time", s, 4, State::Type::ProgramDate,
-                         State::Type::Idle) {
+    : ProgramScreenState(State::Type::ProgramTime, "Time", s, 4,
+                         State::Type::ProgramDate, State::Type::Idle) {
   auto& time = s.time;
 
   // Hour, Minute, Second

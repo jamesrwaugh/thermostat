@@ -36,14 +36,11 @@ class ScreenBox {
   const uint8_t Max;
 };
 
-class DigitsScreenBox : public ScreenBox {
+class TwoDigitScreenBox : public ScreenBox {
  public:
-  DigitsScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
-                  uint8_t max, uint8_t maxWidth);
+  TwoDigitScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
+                    uint8_t max);
   void Draw(bool on) const override;
-
- private:
-  const uint8_t MaxWidth;
 };
 
 class CharSetScreenBox : public ScreenBox {

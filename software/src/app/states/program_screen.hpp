@@ -14,25 +14,47 @@ class ScreenBox {
  public:
   static Noritake_VFD_GU7000* Screen_;
 
-  ScreenBox(uint8_t xPosChars, const char* charSet, uint8_t charSetCount,
-            uint8_t initialIndex, uint8_t stride);
+  ScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min, uint8_t max);
 
   void Up();
   void Down();
-  void Draw(bool on) const;
   void Draw() const;
+  virtual void Draw(bool on) const = 0;
   void DrawIndicator() const;
   void DrawIndicator(bool on) const;
   uint8_t GetCurrentIndex() const;
 
- private:
+ protected:
+  uint8_t* const TargetData_;
   uint8_t xPositionDots() const;
   static constexpr uint8_t CharDotWidth = 7;
   static constexpr uint8_t CharDotHeight = 7;
+
+ private:
+  const uint8_t xPosChars;
+  const uint8_t Min;
+  const uint8_t Max;
+};
+
+class DigitsScreenBox : public ScreenBox {
+ public:
+  DigitsScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
+                  uint8_t max, uint8_t maxWidth);
+  void Draw(bool on) const override;
+
+ private:
+  const uint8_t MaxWidth;
+};
+
+class CharSetScreenBox : public ScreenBox {
+ public:
+  CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData, const char* charSet,
+                   uint8_t charSetLength, uint8_t stride);
+  void Draw(bool on) const override;
+
+ private:
   const char* const CharSet;
   const uint8_t CharSetLength;
-  const uint8_t xPosChars;
-  uint8_t CharIndex{0};
   const uint8_t Stride;
 };
 
@@ -44,10 +66,10 @@ struct StaticScreenBox {
   const char Character;
 };
 
-// ================================================================ //
-
 typedef etl::aligned_storage<sizeof(ScreenBox), alignof(ScreenBox)>::type
     ScreenBoxStorage;
+
+// ================================================================ //
 
 typedef etl::aligned_storage<sizeof(StaticScreenBox),
                              alignof(StaticScreenBox)>::type
@@ -72,7 +94,7 @@ class ProgramScreenState : public State::Base {
 
  protected:
   ThermoSaveData& SaveData_;
-  ScreenBoxStorage Boxes_[8];
+  ScreenBoxStorage Boxes_[5];
   uint8_t BoxesCount_{0};
   StaticScreenBoxStorage Statics_[5];
   uint8_t StaticsCount_{0};
@@ -98,24 +120,21 @@ class ProgramScreenState : public State::Base {
 
 // ================================================================ //
 
-class TempScreen : public ProgramScreenState {
+class TempScreen final : public ProgramScreenState {
  public:
   TempScreen(ThermoSaveData& s);
-  ~TempScreen();
 };
 
 // ================================================================ //
 
-class DateScreen : public ProgramScreenState {
+class DateScreen final : public ProgramScreenState {
  public:
   DateScreen(ThermoSaveData& s);
-  ~DateScreen();
 };
 
 // ================================================================ //
 
-class TimeScreen : public ProgramScreenState {
+class TimeScreen final : public ProgramScreenState {
  public:
   TimeScreen(ThermoSaveData& s);
-  ~TimeScreen();
 };

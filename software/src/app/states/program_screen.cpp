@@ -37,28 +37,26 @@ const uint8_t gBlankImageData[ImageWidth] = {
 
 Noritake_VFD_GU7000* ScreenBox::Screen_ = nullptr;
 
-ScreenBox::ScreenBox(uint8_t xPosChars, const char* charSet,
-                     uint8_t charSetCount, uint8_t initialIndex, uint8_t stride)
-    : CharSet{charSet},
-      CharSetLength{charSetCount},
-      xPosChars{xPosChars},
-      CharIndex{initialIndex},
-      Stride{stride} {}
+ScreenBox::ScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
+                     uint8_t max)
+    : TargetData_{targetData}, xPosChars{xPosChars}, Min{min}, Max{max} {}
 
 void ScreenBox::Up() {
-  if (CharIndex < CharSetLength - 1) {
-    CharIndex += 1;
+  uint8_t* data = TargetData_;
+  if (*data < Max) {
+    *data += 1;
   } else {
-    CharIndex = 0;
+    *data = Min;
   }
   Draw();
 }
 
 void ScreenBox::Down() {
-  if (CharIndex > 0) {
-    CharIndex -= 1;
+  uint8_t* data = TargetData_;
+  if (*data > Min) {
+    *data -= 1;
   } else {
-    CharIndex = CharSetLength - 1;
+    *data = Max;
   }
   Draw();
 }
@@ -77,20 +75,46 @@ void ScreenBox::Draw() const {
   Draw(true);
 }
 
-void ScreenBox::Draw(bool on) const {
+uint8_t ScreenBox::xPositionDots() const {
+  return xPosChars * CharDotWidth;
+}
+
+// ================================================================ //
+
+DigitsScreenBox::DigitsScreenBox(uint8_t xPosChars, uint8_t* targetData,
+                                 uint8_t min, uint8_t max, uint8_t maxWidth)
+    : ScreenBox(xPosChars, targetData, min, max), MaxWidth{maxWidth} {}
+
+void DigitsScreenBox::Draw(bool on) const {
   AutoTwi t;
-  for (uint8_t i = 0; i < Stride; ++i) {
-    Screen_->print(xPositionDots() + i * CharDotWidth, 0,
-                   on ? CharSet[CharIndex + i] : ' ');
+  const auto pos = xPositionDots();
+  if (on) {
+    const uint8_t tens = *TargetData_ / 10;
+    const uint8_t ones = *TargetData_ % 10;
+    Screen_->print(pos, 0, static_cast<char>('0' + tens));
+    Screen_->print(pos + CharDotWidth, 0, static_cast<char>('0' + ones));
+  } else {
+    for (uint8_t i = 0; i < MaxWidth; ++i) {
+      Screen_->print(pos + (i * CharDotWidth), 0, ' ');
+    }
   }
 }
 
-uint8_t ScreenBox::GetCurrentIndex() const {
-  return CharIndex;
-}
+// ================================================================ //
 
-uint8_t ScreenBox::xPositionDots() const {
-  return xPosChars * CharDotWidth;
+CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
+                                   const char* charSet, uint8_t charSetLength,
+                                   uint8_t stride)
+    : ScreenBox(xPosChars, targetData, 0, charSetLength - 1),
+      CharSet{charSet},
+      CharSetLength{charSetLength},
+      Stride{stride} {}
+
+void CharSetScreenBox::Draw(bool on) const {
+  AutoTwi t;
+  const auto pos = xPositionDots();
+  const char* charPtr = &CharSet[*TargetData_];
+  Screen_->print(pos, 0, charPtr, Stride);
 }
 
 // ================================================================ //
@@ -239,109 +263,67 @@ void ProgramScreenState::AddStatic(uint8_t xPosChars, char character) {
 
 // ================================================================ //
 
+constexpr const char* CorFCharSet = "CF";
+constexpr uint8_t CorFLen = 2;
+
 TempScreen::TempScreen(ThermoSaveData& s)
     : ProgramScreenState("Units", s, 1, State::Type::Idle,
                          State::Type::ProgramDate) {
-  ::new (GetBoxP(0)) ScreenBox(
-      15, "CF", 2, SaveData_.temp_display_unit == TEMP_UNIT_CELSIUS ? 0 : 1, 1);
-}
-
-TempScreen::~TempScreen() {
-  SaveData_.temp_display_unit =
-      GetBoxIndex(0) == 0 ? TEMP_UNIT_CELSIUS : TEMP_UNIT_FREEDOM;
+  auto& tempUnit = s.temp_display_unit;
+  ::new (GetBoxP(0)) CharSetScreenBox(15, &tempUnit, CorFCharSet, CorFLen, 1);
 }
 
 // ================================================================ //
-
-constexpr const char* Digits = "0123456789";
-constexpr uint8_t DigitsSetLen = 10;
 
 constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 12;
 
-// Date 01/22/25 Su
-
 DateScreen::DateScreen(ThermoSaveData& s)
-    : ProgramScreenState("Date", s, 7, State::Type::ProgramTime,
+    : ProgramScreenState("Date", s, 4, State::Type::ProgramTime,
                          State::Type::Idle) {
-  const auto& date = s.date;
+  auto& date = s.date;
 
-  uint8_t yearTens = (date.year / 10);
-  uint8_t yearOnes = (date.year % 10);
-  uint8_t monthTens = (date.month / 10);
-  uint8_t monthOnes = (date.month % 10);
-  uint8_t dayTens = (date.day / 10);
-  uint8_t dayOnes = (date.day % 10);
-  uint8_t dayOfWeek = (date.day_of_week);
+  // Year, Month, Day
+  ::new (GetBoxP(0)) DigitsScreenBox(5, &date.year, 0, 99, 2);
+  ::new (GetBoxP(1)) DigitsScreenBox(8, &date.month, 1, 12, 2);
+  ::new (GetBoxP(2)) DigitsScreenBox(11, &date.day, 1, 31, 2);
 
-  // Year Tens and Ones
-  ::new (GetBoxP(0)) ScreenBox(5, Digits, DigitsSetLen, yearTens, 1);
-  ::new (GetBoxP(1)) ScreenBox(6, Digits, DigitsSetLen, yearOnes, 1);
-
-  // Month
-  ::new (GetBoxP(2)) ScreenBox(8, Digits, DigitsSetLen, monthTens, 1);
-  ::new (GetBoxP(3)) ScreenBox(9, Digits, DigitsSetLen, monthOnes, 1);
-
-  // Days
-  ::new (GetBoxP(4)) ScreenBox(11, Digits, DigitsSetLen, dayTens, 1);
-  ::new (GetBoxP(5)) ScreenBox(12, Digits, DigitsSetLen, dayOnes, 1);
-
-  // Days of Week
-  ::new (GetBoxP(6)) ScreenBox(14, DaysOfWeek, DaysOfWeekSetLen, dayOfWeek, 2);
+  // Day of Week
+  ::new (GetBoxP(3))
+      CharSetScreenBox(14, &date.day_of_week, DaysOfWeek, DaysOfWeekSetLen, 2);
 
   // Separators
-  AddStatic(10, '-');
-  AddStatic(13, '-');
-}
-
-DateScreen::~DateScreen() {
-  SaveData_.date.year = GetBoxIndex(0) * 10 + GetBoxIndex(1);
-  SaveData_.date.month = GetBoxIndex(2) * 10 + GetBoxIndex(3);
-  SaveData_.date.day = GetBoxIndex(4) * 10 + GetBoxIndex(5);
-  SaveData_.date.day_of_week = GetBoxIndex(6);
+  AddStatic(7, '/');
+  AddStatic(10, '/');
 }
 
 // ================================================================ //
 
-constexpr const char* AmPm = "AP";
-constexpr uint8_t AmPmLen = 2;
+constexpr const char* AmPm = "AMPM";
+constexpr uint8_t AmPmLen = 4;
 
 TimeScreen::TimeScreen(ThermoSaveData& s)
-    : ProgramScreenState("Time", s, 7, State::Type::ProgramDate,
+    : ProgramScreenState("Time", s, 4, State::Type::ProgramDate,
                          State::Type::Idle) {
-  const auto& time = s.time;
+  auto& time = s.time;
 
-  uint8_t hourTens = (time.hour / 10);
-  uint8_t hourOnes = (time.hour % 10);
-  uint8_t minuteTens = (time.minute / 10);
-  uint8_t minuteOnes = (time.minute % 10);
-  uint8_t secondTens = (time.second / 10);
-  uint8_t secondOnes = (time.second % 10);
-  uint8_t amPmIdx = (time.am_pm == TIME_AM ? 0 : 1);
-
-  // Hour
-  ::new (GetBoxP(0)) ScreenBox(6, Digits, DigitsSetLen, hourTens, 1);
-  ::new (GetBoxP(1)) ScreenBox(7, Digits, DigitsSetLen, hourOnes, 1);
-
-  // Minute
-  ::new (GetBoxP(2)) ScreenBox(9, Digits, DigitsSetLen, minuteTens, 1);
-  ::new (GetBoxP(3)) ScreenBox(10, Digits, DigitsSetLen, minuteOnes, 1);
-
-  // Second
-  ::new (GetBoxP(4)) ScreenBox(12, Digits, DigitsSetLen, secondTens, 1);
-  ::new (GetBoxP(5)) ScreenBox(13, Digits, DigitsSetLen, secondOnes, 1);
+  // Hour, Minute, Second
+  ::new (GetBoxP(0)) DigitsScreenBox(5, &time.hour, 0, 11, 2);
+  ::new (GetBoxP(1)) DigitsScreenBox(8, &time.minute, 0, 59, 2);
+  ::new (GetBoxP(2)) DigitsScreenBox(11, &time.second, 0, 59, 2);
 
   // AM/PM
-  ::new (GetBoxP(6)) ScreenBox(15, AmPm, AmPmLen, amPmIdx, 1);
+  ::new (GetBoxP(3)) CharSetScreenBox(13, &time.am_pm, AmPm, AmPmLen, 2);
 
   // Separators
-  AddStatic(8, ':');
-  AddStatic(11, ':');
+  AddStatic(7, ':');
+  AddStatic(10, ':');
 }
 
-TimeScreen::~TimeScreen() {
-  SaveData_.time.hour = GetBoxIndex(0) * 10 + GetBoxIndex(1);
-  SaveData_.time.minute = GetBoxIndex(2) * 10 + GetBoxIndex(3);
-  SaveData_.time.second = GetBoxIndex(4) * 10 + GetBoxIndex(5);
-  SaveData_.time.am_pm = GetBoxIndex(6) == 0 ? TIME_AM : TIME_PM;
-}
+/*
+
+0123456789ABCDEF
+TIME 01:23:45 AM
+DATE 01/22/25 Su
+
+*/

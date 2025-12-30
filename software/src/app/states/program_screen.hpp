@@ -127,9 +127,6 @@ class TempScreen final : public ProgramScreenState {
 class DateScreen final : public ProgramScreenState {
  public:
   DateScreen(ThermoSaveData& s, bool startOnEndBox);
-
- private:
-  void InitBoxes(ThermoSaveData& s);
 };
 
 // ================================================================ //
@@ -137,7 +134,4 @@ class DateScreen final : public ProgramScreenState {
 class TimeScreen final : public ProgramScreenState {
  public:
   TimeScreen(ThermoSaveData& s, bool startOnEndBox);
-
- private:
-  void InitBoxes(ThermoSaveData& s);
 };

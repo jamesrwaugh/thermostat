@@ -78,7 +78,6 @@ class ProgramScreenState : public State::Base {
                      State::Type prevState, State::Type nextState);
   ~ProgramScreenState();
 
-  void InitDisplay();
   void InitDisplay(bool startOnEndBox);
   State::Type handle_event(const Event::Base& event) override;
   [[nodiscard]] State::Type OnUpPressed();
@@ -119,19 +118,25 @@ class ProgramScreenState : public State::Base {
 
 class TempScreen final : public ProgramScreenState {
  public:
-  TempScreen(ThermoSaveData& s);
+  TempScreen(ThermoSaveData& s, bool startOnEndBox);
 };
 
 // ================================================================ //
 
 class DateScreen final : public ProgramScreenState {
  public:
-  DateScreen(ThermoSaveData& s);
+  DateScreen(ThermoSaveData& s, bool startOnEndBox);
+
+ private:
+  void InitBoxes(ThermoSaveData& s);
 };
 
 // ================================================================ //
 
 class TimeScreen final : public ProgramScreenState {
  public:
-  TimeScreen(ThermoSaveData& s);
+  TimeScreen(ThermoSaveData& s, bool startOnEndBox);
+
+ private:
+  void InitBoxes(ThermoSaveData& s);
 };

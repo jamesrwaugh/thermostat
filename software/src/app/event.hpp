@@ -4,22 +4,20 @@
 
 namespace Event {
 
-struct Base {
-  Base(uint8_t id) : id_(id) {}
-  const uint8_t id_;
+enum class Type : uint8_t {
+  UpButtonPressed = 0,
+  DownButtonPressed,
+  SelectButtonPressed,
+  HalfSecondPassed,
+  SecondPassed,
+  FanModeChanged,
+  HeatModeChanged,
+  ReverseValveModeChanged
 };
 
-struct Type {
-  enum TheType : uint8_t {
-    UpButtonPressed = 0,
-    DownButtonPressed,
-    SelectButtonPressed,
-    HalfSecondPassed,
-    SecondPassed,
-    FanModeChanged,
-    HeatModeChanged,
-    ReverseValveModeChanged
-  };
+struct Base {
+  Base(Type id) : id_(id) {}
+  const Type id_;
 };
 
 struct UpButtonPressed : Base {

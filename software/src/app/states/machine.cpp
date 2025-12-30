@@ -196,7 +196,7 @@ void Machine::receive(const Event::Base& event) {
   auto newState = CurrentState.get_reference<State::Base>().handle_event(event);
 
   if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {
-    SwitchState(newState);
+    SwitchState(newState, event.id_);
   }
 }
 
@@ -204,18 +204,20 @@ State::Type Machine::get_state_id() const {
   return CurrentState.get_reference<State::Base>().StateId;
 }
 
-void Machine::SwitchState(State::Type new_state) {
+void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
   State::Base* address = CurrentState.get_address<State::Base>();
 
   const auto prevState = address->StateId;
 
-  const bool WasProgramming = prevState == State::Type::ProgramTemp ||
+  const bool wasProgramming = prevState == State::Type::ProgramTemp ||
                               prevState == State::Type::ProgramDate ||
                               prevState == State::Type::ProgramTime;
 
-  if (WasProgramming && new_state == State::Type::Idle) {
+  if (wasProgramming && new_state == State::Type::Idle) {
     SaveProgrammingSettings();
   }
+
+  const bool lastEventWasDown = lastEvent == Event::Type::DownButtonPressed;
 
   address->~Base();
 
@@ -230,13 +232,13 @@ void Machine::SwitchState(State::Type new_state) {
       ::new (address) Cooling(*this);
       break;
     case State::Type::ProgramTemp:
-      ::new (address) TempScreen(SaveState());
+      ::new (address) TempScreen(SaveState(), lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(SaveState());
+      ::new (address) DateScreen(SaveState(), lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(SaveState());
+      ::new (address) TimeScreen(SaveState(), lastEventWasDown);
       break;
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);

@@ -50,7 +50,7 @@ class Machine {
   [[nodiscard]] State::Type get_state_id() const;
 
  private:
-  void SwitchState(State::Type new_state);
+  void SwitchState(State::Type new_state, Event::Type lastEvent);
   void SaveProgrammingSettings();
 
   struct StateChangeData {

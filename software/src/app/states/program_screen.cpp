@@ -7,6 +7,8 @@
 
 #include "state.hpp"
 
+// ================================================================ //
+
 constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {
@@ -135,10 +137,6 @@ ProgramScreenState::ProgramScreenState(const char* title, ThermoSaveData& s,
       PrevState_{prevState},
       NextState_{nextState} {}
 
-void ProgramScreenState::InitDisplay() {
-  InitDisplay(false);
-}
-
 void ProgramScreenState::InitDisplay(bool startOnEndBox) {
   AutoTwi t;
   Screen_->GU7000_setCursor(0, 0);
@@ -163,6 +161,8 @@ State::Type ProgramScreenState::handle_event(const Event::Base& event) {
       break;
     case Event::Type::HalfSecondPassed:
       OnHalfSecondPassed();
+      break;
+    default:
       break;
   }
 
@@ -264,11 +264,15 @@ void ProgramScreenState::AddStatic(uint8_t xPosChars, char character) {
 constexpr const char* CorFCharSet = "CF";
 constexpr uint8_t CorFLen = 2;
 
-TempScreen::TempScreen(ThermoSaveData& s)
+TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
     : ProgramScreenState("Units", s, 1, State::Type::Idle,
                          State::Type::ProgramDate) {
+  // Temp Unit C or F
   auto& tempUnit = s.temp_display_unit;
   ::new (GetBoxP(0)) CharSetScreenBox(15, &tempUnit, CorFCharSet, CorFLen, 1);
+
+  // Init
+  InitDisplay(startOnEndBox);
 }
 
 // ================================================================ //
@@ -276,7 +280,7 @@ TempScreen::TempScreen(ThermoSaveData& s)
 constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
 
-DateScreen::DateScreen(ThermoSaveData& s)
+DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
     : ProgramScreenState("Date", s, 4, State::Type::ProgramTime,
                          State::Type::Idle) {
   auto& date = s.date;
@@ -293,6 +297,9 @@ DateScreen::DateScreen(ThermoSaveData& s)
   // Separators
   AddStatic(7, '/');
   AddStatic(10, '/');
+
+  // Init
+  InitDisplay(startOnEndBox);
 }
 
 // ================================================================ //
@@ -300,7 +307,7 @@ DateScreen::DateScreen(ThermoSaveData& s)
 constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;
 
-TimeScreen::TimeScreen(ThermoSaveData& s)
+TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
     : ProgramScreenState("Time", s, 4, State::Type::ProgramDate,
                          State::Type::Idle) {
   auto& time = s.time;
@@ -316,6 +323,9 @@ TimeScreen::TimeScreen(ThermoSaveData& s)
   // Separators
   AddStatic(7, ':');
   AddStatic(10, ':');
+
+  // Init
+  InitDisplay(startOnEndBox);
 }
 
 /*

@@ -282,7 +282,7 @@ constexpr uint8_t DaysOfWeekSetLen = 14;
 
 DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
     : ProgramScreenState(State::Type::ProgramDate, "Date", s, 4,
-                         State::Type::ProgramTime, State::Type::Idle) {
+                         State::Type::ProgramTemp, State::Type::ProgramTime) {
   auto& date = s.date;
 
   // Year, Month, Day

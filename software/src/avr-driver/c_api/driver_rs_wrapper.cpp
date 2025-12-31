@@ -156,7 +156,7 @@ bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
   ds1307_time_s timeStruct{
       .year = date.year,
       .month = date.month,
-      .week = date.day,
+      .week = date.day_of_week,
       .date = date.day,
       .hour = time.hour,
       .minute = time.minute,
@@ -164,8 +164,6 @@ bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
       .am_pm = time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
                                      : ds1307_am_pm_t::DS1307_PM,
   };
-  week_date s;
-  iso_week_date_r(date.year, date.day, &s);
   return DriverSetTime(timeStruct);
 }
 

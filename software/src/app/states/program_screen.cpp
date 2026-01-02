@@ -2,6 +2,7 @@
 
 #include <Noritake_VFD_GU7000.h>
 #include <ThermoSaveData_bp.h>
+#include <etl/algorithm.h>
 #include <etl/placement_new.h>
 #include <stdint.h>
 
@@ -102,10 +103,15 @@ void TwoDigitScreenBox::Draw(bool on) const {
 
 // ================================================================ //
 
+constexpr const char* FullScreenSpaceBuffer = "               ";
+constexpr int FullScreenSpaceBufferLen = 15;
+
 CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
                                    const char* charSet, uint8_t charSetLength,
                                    uint8_t stride)
-    : ScreenBox(xPosChars, targetData, 0, (charSetLength / stride) - 1),
+    : ScreenBox(
+          xPosChars, targetData, 0,
+          etl::min(FullScreenSpaceBufferLen, (charSetLength / stride) - 1)),
       CharSet{charSet},
       CharSetLength{charSetLength},
       Stride{stride} {}
@@ -113,8 +119,12 @@ CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
 void CharSetScreenBox::Draw(bool on) const {
   AutoTwi t;
   const auto pos = xPositionDots();
-  const char* charPtr = &CharSet[*TargetData_ * Stride];
-  Screen_->print(pos, 0, charPtr, Stride);
+  if (on) {
+    const char* charPtr = &CharSet[*TargetData_ * Stride];
+    Screen_->print(pos, 0, charPtr, Stride);
+  } else {
+    Screen_->print(pos, 0, FullScreenSpaceBuffer, Stride);
+  }
 }
 
 // ================================================================ //
@@ -318,7 +328,7 @@ TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
   ::new (GetBoxP(2)) TwoDigitScreenBox(11, &time.second, 0, 59);
 
   // AM/PM
-  ::new (GetBoxP(3)) CharSetScreenBox(13, &time.am_pm, AmPm, AmPmLen, 2);
+  ::new (GetBoxP(3)) CharSetScreenBox(14, &time.am_pm, AmPm, AmPmLen, 2);
 
   // Separators
   AddStatic(7, ':');

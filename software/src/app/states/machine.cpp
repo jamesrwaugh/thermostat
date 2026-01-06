@@ -76,11 +76,11 @@ void Machine::ReadTemperature() {
   auto& setPoint = SaveData.Data.set_point;
 
   if (setPoint == 1 && change < 0) {
-    return State::Type::NO_CHANGE;  // Stay in current state
+    return State::Type::NO_CHANGE;
   }
 
   if (setPoint == 100 && change > 0) {
-    return State::Type::NO_CHANGE;  // Stay in current state
+    return State::Type::NO_CHANGE;
   }
 
   setPoint += change;
@@ -250,24 +250,7 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
 }
 
 void Machine::SaveProgrammingSettings() {
-  const auto prevState = get_state_id();
-
-  if (prevState == State::Type::ProgramTemp ||
-      prevState == State::Type::ProgramDate ||
-      prevState == State::Type::ProgramTime) {
-    const auto& saveData = SaveState();
-    DriverSaveData(saveData);
-    ds1307_time_s time{
-        .year = saveData.date.year,
-        .month = saveData.date.month,
-        .week = saveData.date.day,
-        .date = saveData.date.day,
-        .hour = saveData.time.hour,
-        .minute = saveData.time.minute,
-        .second = saveData.time.second,
-        .am_pm = saveData.time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
-                                                : ds1307_am_pm_t::DS1307_PM,
-    };
-    DriverSetTime(time);
-  }
+  const auto& saveData = SaveState();
+  DriverSaveData(saveData);
+  DriverSetTimeFromSaveData(saveData.time, saveData.date);
 }

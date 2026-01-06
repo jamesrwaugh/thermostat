@@ -2,6 +2,7 @@
 
 #include <Noritake_VFD_GU7000.h>
 #include <ThermoSaveData_bp.h>
+#include <etl/algorithm.h>
 #include <etl/placement_new.h>
 #include <stdint.h>
 
@@ -9,6 +10,8 @@
 
 // ================================================================ //
 
+static constexpr uint8_t CharDotWidth = 7;
+static constexpr uint8_t CharDotHeight = 7;
 constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {
@@ -83,10 +86,6 @@ uint8_t ScreenBox::xPositionDots() const {
 
 // ================================================================ //
 
-TwoDigitScreenBox::TwoDigitScreenBox(uint8_t xPosChars, uint8_t* targetData,
-                                     uint8_t min, uint8_t max)
-    : ScreenBox(xPosChars, targetData, min, max) {}
-
 void TwoDigitScreenBox::Draw(bool on) const {
   AutoTwi t;
   const auto pos = xPositionDots();
@@ -102,10 +101,15 @@ void TwoDigitScreenBox::Draw(bool on) const {
 
 // ================================================================ //
 
+constexpr const char* FullScreenSpaceBuffer = "               ";
+constexpr int FullScreenSpaceBufferLen = 15;
+
 CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
                                    const char* charSet, uint8_t charSetLength,
                                    uint8_t stride)
-    : ScreenBox(xPosChars, targetData, 0, (charSetLength / stride) - 1),
+    : ScreenBox(
+          xPosChars, targetData, 0,
+          etl::min(FullScreenSpaceBufferLen, (charSetLength / stride) - 1)),
       CharSet{charSet},
       CharSetLength{charSetLength},
       Stride{stride} {}
@@ -113,8 +117,12 @@ CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
 void CharSetScreenBox::Draw(bool on) const {
   AutoTwi t;
   const auto pos = xPositionDots();
-  const char* charPtr = &CharSet[*TargetData_ * Stride];
-  Screen_->print(pos, 0, charPtr, Stride);
+  if (on) {
+    const char* charPtr = &CharSet[*TargetData_ * Stride];
+    Screen_->print(pos, 0, charPtr, Stride);
+  } else {
+    Screen_->print(pos, 0, FullScreenSpaceBuffer, Stride);
+  }
 }
 
 // ================================================================ //
@@ -143,6 +151,10 @@ void ProgramScreenState::InitDisplay(bool startOnEndBox) {
   Screen_->print(Title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
+  }
+  for (uint8_t i = 0; i < StaticsCount_; ++i) {
+    const auto& s = Statics_[i].get_reference<StaticScreenBox>();
+    Screen_->print(s.xPosChars * CharDotWidth, 0, s.Character);
   }
   if (startOnEndBox) {
     CursorPosition = BoxesCount_ - 1;
@@ -282,7 +294,7 @@ constexpr uint8_t DaysOfWeekSetLen = 14;
 
 DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
     : ProgramScreenState(State::Type::ProgramDate, "Date", s, 4,
-                         State::Type::ProgramTime, State::Type::Idle) {
+                         State::Type::ProgramTemp, State::Type::ProgramTime) {
   auto& date = s.date;
 
   // Year, Month, Day
@@ -318,7 +330,7 @@ TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
   ::new (GetBoxP(2)) TwoDigitScreenBox(11, &time.second, 0, 59);
 
   // AM/PM
-  ::new (GetBoxP(3)) CharSetScreenBox(13, &time.am_pm, AmPm, AmPmLen, 2);
+  ::new (GetBoxP(3)) CharSetScreenBox(14, &time.am_pm, AmPm, AmPmLen, 2);
 
   // Separators
   AddStatic(7, ':');

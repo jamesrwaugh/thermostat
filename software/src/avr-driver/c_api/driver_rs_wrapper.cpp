@@ -5,9 +5,9 @@
 #include <driver_ds1307.h>
 #include <etl/optional.h>
 #include <time.h>
+#include <twi_master.h>
 
 #include "driver.hpp"
-#include "twi_master.h"
 
 extern "C" {
 
@@ -67,6 +67,7 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
 #if SIMULATED == 1
   gDriver->Screen.DriverDisplayTemp(displayTemp, unit);
 #else
+  AutoTwi t;
   auto& screen = gDriver->Screen;
   // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
   screen.GU7000_clearScreen();
@@ -81,8 +82,8 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
 #if SIMULATED == 1
   gDriver->Screen.DriverDisplaySetPoint(displayTemp, unit);
 #else
+  AutoTwi t;
   auto& screen = gDriver->Screen;
-  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::UpperRight);
   screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
   screen.print(displayTemp);
@@ -94,6 +95,7 @@ void DriverDisplayIsHeating() {
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsHeating();
 #else
+  AutoTwi t;
   auto& screen = gDriver->Screen;
   // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
@@ -107,6 +109,7 @@ void DriverDisplayIsCooling() {
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsCooling();
 #else
+  AutoTwi t;
   auto& screen = gDriver->Screen;
   // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
@@ -120,6 +123,7 @@ void DriverDisplayIsIdle() {
   auto& screen = gDriver->Screen;
   screen.DriverDisplayIsIdle();
 #else
+  AutoTwi t;
   auto& screen = gDriver->Screen;
   // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
   screen.GU7000_clearScreen();
@@ -156,7 +160,7 @@ bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
   ds1307_time_s timeStruct{
       .year = date.year,
       .month = date.month,
-      .week = date.day,
+      .week = date.day_of_week,
       .date = date.day,
       .hour = time.hour,
       .minute = time.minute,
@@ -164,8 +168,6 @@ bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
       .am_pm = time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
                                      : ds1307_am_pm_t::DS1307_PM,
   };
-  week_date s;
-  iso_week_date_r(date.year, date.day, &s);
   return DriverSetTime(timeStruct);
 }
 
@@ -177,6 +179,8 @@ bool DriverGetTime(ds1307_time_s& time) {
 Noritake_VFD_GU7000& DriverGetScreenHandle() {
   return gDriver->Screen;
 }
+
+uint8_t AutoTwi::instanceCount_ = 0;
 
 AutoTwi::AutoTwi() {
   if (instanceCount_ == 0) {

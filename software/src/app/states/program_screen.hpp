@@ -27,8 +27,6 @@ class ScreenBox {
  protected:
   uint8_t* const TargetData_;
   uint8_t xPositionDots() const;
-  static constexpr uint8_t CharDotWidth = 7;
-  static constexpr uint8_t CharDotHeight = 7;
 
  private:
   const uint8_t xPosChars;
@@ -38,8 +36,7 @@ class ScreenBox {
 
 class TwoDigitScreenBox : public ScreenBox {
  public:
-  TwoDigitScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
-                    uint8_t max);
+  using ScreenBox::ScreenBox;
   void Draw(bool on) const override;
 };
 

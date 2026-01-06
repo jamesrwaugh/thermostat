@@ -10,6 +10,8 @@
 
 // ================================================================ //
 
+static constexpr uint8_t CharDotWidth = 7;
+static constexpr uint8_t CharDotHeight = 7;
 constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {
@@ -84,10 +86,6 @@ uint8_t ScreenBox::xPositionDots() const {
 
 // ================================================================ //
 
-TwoDigitScreenBox::TwoDigitScreenBox(uint8_t xPosChars, uint8_t* targetData,
-                                     uint8_t min, uint8_t max)
-    : ScreenBox(xPosChars, targetData, min, max) {}
-
 void TwoDigitScreenBox::Draw(bool on) const {
   AutoTwi t;
   const auto pos = xPositionDots();
@@ -153,6 +151,10 @@ void ProgramScreenState::InitDisplay(bool startOnEndBox) {
   Screen_->print(Title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
     GetBox(i).Draw();
+  }
+  for (uint8_t i = 0; i < StaticsCount_; ++i) {
+    const auto& s = Statics_[i].get_reference<StaticScreenBox>();
+    Screen_->print(s.xPosChars * CharDotWidth, 0, s.Character);
   }
   if (startOnEndBox) {
     CursorPosition = BoxesCount_ - 1;

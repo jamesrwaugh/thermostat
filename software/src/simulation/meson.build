@@ -4,6 +4,7 @@ simulation_src = files(
     'sim_i2c_smarter_base.cpp',
     'sim_thermostat.cpp',
     'sim_tmp116.cpp',
+    'sim_gu7000_real.cpp',
     'ui.cpp',
 )
 

@@ -109,7 +109,7 @@ int main() {
   uint8_t lastSecondCount = 0;
 
   // Invalid state to force initial update
-  State::Type lastState = State::Type::COUNT;
+  State::Type lastState = State::Type::NO_CHANGE;
 
   modbus_client_t mb;
   constexpr uint32_t interFrameDelay = INTERFRAME_DELAY_MICROSECONDS(9600);

@@ -243,9 +243,6 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);
       break;
-    case State::Type::COUNT:  // Should never happen
-      ::new (address) Idle(*this);
-      break;
   }
 }
 

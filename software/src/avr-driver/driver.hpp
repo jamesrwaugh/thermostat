@@ -16,7 +16,7 @@ struct AvrDriverCallbacks;
 struct ThermoButtonState;
 
 struct AvrDrivers {
-  AvrDrivers(const AvrDriverCallbacks& callbacks);
+  AvrDrivers();
 
 #if SIMULATED == 1
   SimulatedGu7000 Screen;
@@ -29,7 +29,7 @@ struct AvrDrivers {
   TMP116 TempSensor;
 
   void Setup();
-  void ReadInput();
+  int8_t ReadInput();
   void ReadStateNow(ThermoButtonState* out) const;
   void RelayOn(Relay r) const;
   void RelayOff(Relay r) const;
@@ -37,7 +37,6 @@ struct AvrDrivers {
   bool LoadData(ThermoSaveData& data) const;
 
  private:
-  const AvrDriverCallbacks& Callbacks_;
   void SetupI2C();
   void SetupPins();
   void SetupScreen();

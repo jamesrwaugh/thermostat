@@ -21,7 +21,7 @@ struct ThermoButtonState {
   ReverseValveModeT ReverseValveState;
 };
 
-void DriverInit(const AvrDriverCallbacks& callbacks);
+void DriverInit();
 void DriverGetButtonStateNow(ThermoButtonState* data);
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit);
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT);
@@ -36,7 +36,7 @@ void DriverWriteSerialPortRawCh(char ch);
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes);
 void DriverWriteSerialPortS(const char* message);
 void DriverMcuSleep();
-void DriverPollInput();
+int8_t DriverReadButton();
 bool DriverSetTime(const ds1307_time_s& time);
 bool DriverSetTimeFromSaveData(const Time& time, const Date& date);
 bool DriverGetTime(ds1307_time_s& time);

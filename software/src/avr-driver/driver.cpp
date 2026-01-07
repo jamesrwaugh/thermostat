@@ -11,8 +11,7 @@ etl::optional<AvrDrivers> gDriver;
 
 uint8_t AutoTwi::instanceCount_ = 0;
 
-AvrDrivers::AvrDrivers(const AvrDriverCallbacks& callbacks)
-    : Screen(19), Serial_(Serial), Callbacks_(callbacks) {}
+AvrDrivers::AvrDrivers() : Screen(19), Serial_(Serial) {}
 
 void AvrDrivers::Setup() {
   SetupPins();
@@ -178,7 +177,7 @@ DebounceState TempHeatButton;
 DebounceState TempCoolButton;
 DebounceState TempNoneButton;
 
-void AvrDrivers::ReadInput() {
+int8_t AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
   int8_t button = -1;
 
@@ -202,9 +201,7 @@ void AvrDrivers::ReadInput() {
     button = static_cast<int8_t>(Button::TempNone);
   }
 
-  if (button != -1) {
-    Callbacks_.OnButtonPressed(static_cast<Button>(button));
-  }
+  return button;
 }
 
 void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {

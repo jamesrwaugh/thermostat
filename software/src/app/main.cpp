@@ -85,11 +85,7 @@ void CheckModbus(modbus_client_t& mb, uint8_t tenMsCount) {
 }
 
 int main() {
-  AvrDriverCallbacks callbacks{
-      .OnButtonPressed = OnButtonPressed,
-  };
-
-  DriverInit(callbacks);
+  DriverInit();
 
   ds1307_time_s time = {
       .year = 2025,
@@ -128,7 +124,10 @@ int main() {
     }
 
     if (g10MillisecondPassed) {
-      DriverPollInput();
+      auto button = DriverReadButton();
+      if (button != -1) {
+        OnButtonPressed(static_cast<Button>(button));
+      }
       g10MillisecondPassed = false;
       lastTenMsCount += 1;
       lastHalfSecondCount += 1;

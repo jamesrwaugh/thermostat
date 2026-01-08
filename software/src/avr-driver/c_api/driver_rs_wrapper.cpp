@@ -4,15 +4,14 @@
 #include <avr/sleep.h>
 #include <driver_ds1307.h>
 #include <etl/optional.h>
-#include <time.h>
 #include <twi_master.h>
 
 #include "driver.hpp"
 
 extern "C" {
 
-void DriverInit(const AvrDriverCallbacks& callbacks) {
-  gDriver.emplace(callbacks);
+void DriverInit() {
+  gDriver.emplace();
   gDriver->Setup();
 }
 
@@ -148,8 +147,8 @@ void DriverMcuSleep() {
   SMCR &= ~_BV(SE);
 }
 
-void DriverPollInput() {
-  gDriver->ReadInput();
+int8_t DriverReadButton() {
+  return gDriver->ReadInput();
 }
 
 bool DriverSetTime(const ds1307_time_s& time) {

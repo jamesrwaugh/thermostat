@@ -48,7 +48,7 @@ arv_driver = static_library(
     ],
     link_args: [
         '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
-        '-mmcu=atmega88p',
+        '-mmcu=atmega168p',
     ],
 )
 

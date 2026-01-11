@@ -40,7 +40,7 @@ arv_driver = static_library(
     cpp_args: [
         '-DETL_NO_STL',
         '-fno-threadsafe-statics',
-        '-DSIMULATED=0',
+        '-DSIMULATED=1',
         '-funsigned-char',
         '-funsigned-bitfields',
         '-fshort-enums',

@@ -83,7 +83,7 @@ Screen Saver
 Screen saver mode. p=0 Power save, p=1 Power onp=2 All dots off(not power save), p=3 All dots on, p=4 Repeat normal & reverse display(2sec each)
 
 Real Time Bit Image Display
-1FH, 28H, 66H, 11HxL, xH, yL, yH, g, d1, dk
+1FH, 28H, 66H, 11H, xL, xH, yL, yH, g, d1, dk
 Display the bit image data. xL, xH Bit image Xsize low/high(1dot). yL, yH Bit image Ysize low/high(8dots), g=1(Fixed). d1, ?c dk Bit image data
 
 Character Font Width and Space

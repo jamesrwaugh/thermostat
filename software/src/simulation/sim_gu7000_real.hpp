@@ -1,7 +1,11 @@
 #pragma once
 
+#include <sys/types.h>
+
 #include <array>
 #include <cstdint>
+#include <istream>
+#include <span>
 #include <vector>
 
 class SimGu7000Real {
@@ -10,11 +14,25 @@ class SimGu7000Real {
   static constexpr uint16_t DISPLAY_WIDTH = 112;
   static constexpr uint16_t DISPLAY_HEIGHT = 16;
 
+  typedef std::array<std::array<bool, DISPLAY_HEIGHT>, DISPLAY_WIDTH>
+      DisplayMemory;
+
+  SimGu7000Real();
+
+  // Command processing
+  void ProcessCommand(const std::vector<uint8_t>& command);
+
+  // Display memory access
+  const DisplayMemory& GetDisplayMemory() const;
+
+ private:
+  typedef std::span<const uint8_t, 7> FontCharacter;
+
   // Font dimensions (5x7)
   static constexpr uint8_t FONT_WIDTH = 5;
   static constexpr uint8_t FONT_HEIGHT = 7;
 
-  // Command constants
+  // Some command constants
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_START = 0x20;
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_END = 0xFF;
   static constexpr uint8_t CMD_BACKSPACE = 0x08;
@@ -23,54 +41,10 @@ class SimGu7000Real {
   static constexpr uint8_t CMD_HOME_POSITION = 0x0B;
   static constexpr uint8_t CMD_CARRIAGE_RETURN = 0x0D;
   static constexpr uint8_t CMD_DISPLAY_CLEAR = 0x0C;
-  static constexpr uint8_t CMD_INITIALIZE_DISPLAY = 0x1B;
-  static constexpr uint8_t CMD_SPECIFY_DOWNLOAD_REGISTER = 0x1B;
-  static constexpr uint8_t CMD_DOWNLOAD_CHARACTER = 0x1B;
-  static constexpr uint8_t CMD_DELETE_DOWNLOADED_CHARACTER = 0x1B;
-  static constexpr uint8_t CMD_SPECIFY_INTERNATIONAL_FONT_SET = 0x1B;
-  static constexpr uint8_t CMD_SPECIFY_CHARACTER_CODE_TYPE = 0x1B;
-  static constexpr uint8_t CMD_OVERWRITE_MODE = 0x1F;
-  static constexpr uint8_t CMD_VERTICAL_SCROLL_MODE = 0x1F;
-  static constexpr uint8_t CMD_HORIZONTAL_SCROLL_MODE = 0x1F;
-  static constexpr uint8_t CMD_CURSOR_SET = 0x1F;
-  static constexpr uint8_t CMD_WAIT = 0x1F;
-  static constexpr uint8_t CMD_SCROLL_DISPLAY_ACTION = 0x1F;
-  static constexpr uint8_t CMD_DISPLAY_BLINK = 0x1F;
-  static constexpr uint8_t CMD_SCREEN_SAVER = 0x1F;
-  static constexpr uint8_t CMD_REAL_TIME_BIT_IMAGE_DISPLAY = 0x1F;
-  static constexpr uint8_t CMD_CHARACTER_FONT_WIDTH_AND_SPACE = 0x1F;
-  static constexpr uint8_t CMD_FONT_MAGNIFICATION_SET = 0x1F;
-  static constexpr uint8_t CMD_CURRENT_WINDOW_SELECT = 0x1F;
-  static constexpr uint8_t CMD_USER_WINDOW_DEFINITION_CANCEL = 0x1F;
-  static constexpr uint8_t CMD_WRITE_SCREEN_MODE_SELECT = 0x1F;
-  static constexpr uint8_t CMD_BRIGHTNESS_CONTROL = 0x1F;
-  static constexpr uint8_t CMD_SPECIFY_OR_CANCEL_REVERSE_DISPLAY = 0x1F;
-  static constexpr uint8_t CMD_HORIZONTAL_SCROLL_SPEED = 0x1F;
-  static constexpr uint8_t CMD_SPECIFY_WRITE_MIXTURE_DISPLAY_MODE = 0x1F;
 
-  SimGu7000Real();
-
-  // Command processing
-  void ProcessCommand(const std::vector<uint8_t>& command);
-
-  // Display memory access
-  const std::array<std::array<bool, DISPLAY_HEIGHT>, DISPLAY_WIDTH>&
-  GetDisplayMemory() const;
-  void ClearDisplayMemory();
-
-  // Cursor management
-  void SetCursor(uint16_t x, uint16_t y);
-  uint16_t GetCursorX() const;
-  uint16_t GetCursorY() const;
-
-  // Character rendering
-  void DrawCharacter(uint8_t character);
-  void DrawCharacterAt(uint16_t x, uint16_t y, uint8_t character);
-
- private:
   // Display memory: 112x16 pixels as bool array
   // Each element represents one pixel
-  std::array<std::array<bool, DISPLAY_HEIGHT>, DISPLAY_WIDTH> display_memory_;
+  DisplayMemory display_memory_;
 
   // Cursor position (in pixels)
   uint16_t cursor_x_;
@@ -90,15 +64,35 @@ class SimGu7000Real {
   uint8_t font_magnification_y_;
 
   // Command state tracking
-  bool waiting_for_command_;
   std::vector<uint8_t> command_buffer_;
+
+  // Display memory access
+  void ClearDisplayMemory();
+
+  // Cursor management
+  void SetCursor(uint16_t x, uint16_t y);
+  uint16_t GetCursorX() const;
+  uint16_t GetCursorY() const;
+
+  // Character rendering
+  void DrawCharacter(uint8_t character);
+  void DrawCharacterAt(uint16_t x, uint16_t y, uint8_t character);
 
   // Helper methods
   void SetPixel(uint16_t x, uint16_t y, bool on);
   bool GetPixel(uint16_t x, uint16_t y) const;
-  void DrawFontCharacter(uint16_t x, uint16_t y, uint8_t character,
-                         uint8_t magnification_x, uint8_t magnification_y);
-  const uint8_t* GetFontData(uint8_t character) const;
+  void DrawFontCharacter(uint16_t x, uint16_t y, uint8_t character);
+  void DrawImage(uint16_t x, uint16_t y, const FontCharacter& image,
+                 uint8_t width, uint8_t height);
+  FontCharacter GetFontData(uint8_t character) const;
+
+  typedef std::basic_iostream<uint8_t> Stream;
+
+  // Top-level command implementations
+  void ProcessSingleByteCommand(uint8_t first_byte);
+  void ProcessEscCommand(Stream& command);
+  void ProcessUsExtendedCommands(Stream& command);
+  void ProcessUsCommand(Stream& command);
 
   // Command implementations
   void ProcessCharacterDisplay(uint8_t character);
@@ -108,29 +102,33 @@ class SimGu7000Real {
   void ProcessHomePosition();
   void ProcessCarriageReturn();
   void ProcessDisplayClear();
-  void ProcessInitializeDisplay(const std::vector<uint8_t>& params);
-  void ProcessCursorSet(const std::vector<uint8_t>& params);
+  void ProcessInitializeDisplay();
+  void ProcessCursorSet(Stream& params);
   void ProcessDisplayClearCommand();
-  void ProcessBrightnessControl(const std::vector<uint8_t>& params);
-  void ProcessReverseDisplay(const std::vector<uint8_t>& params);
-  void ProcessHorizontalScrollSpeed(const std::vector<uint8_t>& params);
-  void ProcessCompositionMode(const std::vector<uint8_t>& params);
-  void ProcessInternationalFontSet(const std::vector<uint8_t>& params);
-  void ProcessCharacterCodeType(const std::vector<uint8_t>& params);
-  void ProcessOverwriteMode(const std::vector<uint8_t>& params);
-  void ProcessVerticalScrollMode(const std::vector<uint8_t>& params);
-  void ProcessHorizontalScrollMode(const std::vector<uint8_t>& params);
-  void ProcessWait(const std::vector<uint8_t>& params);
-  void ProcessScrollDisplayAction(const std::vector<uint8_t>& params);
-  void ProcessDisplayBlink(const std::vector<uint8_t>& params);
-  void ProcessScreenSaver(const std::vector<uint8_t>& params);
-  void ProcessRealTimeBitImageDisplay(const std::vector<uint8_t>& params);
-  void ProcessCharacterFontWidthAndSpace(const std::vector<uint8_t>& params);
-  void ProcessFontMagnificationSet(const std::vector<uint8_t>& params);
-  void ProcessCurrentWindowSelect(const std::vector<uint8_t>& params);
-  void ProcessUserWindowDefinitionCancel(const std::vector<uint8_t>& params);
-  void ProcessWriteScreenModeSelect(const std::vector<uint8_t>& params);
-  void ProcessSpecifyDownloadRegister(const std::vector<uint8_t>& params);
-  void ProcessDownloadCharacter(const std::vector<uint8_t>& params);
-  void ProcessDeleteDownloadedCharacter(const std::vector<uint8_t>& params);
+  void ProcessBrightnessControl(Stream& params);
+  void ProcessReverseDisplay(Stream& params);
+  void ProcessHorizontalScrollSpeed(Stream& params);
+  void ProcessCompositionMode(Stream& params);
+  void ProcessInternationalFontSet(Stream& params);
+  void ProcessCharacterCodeType(Stream& params);
+  void ProcessOverwriteMode(Stream& params);
+  void ProcessVerticalScrollMode(Stream& params);
+  void ProcessHorizontalScrollMode(Stream& params);
+  void ProcessWait(Stream& params);
+  void ProcessScrollDisplayAction(Stream& params);
+  void ProcessDisplayBlink(Stream& params);
+  void ProcessScreenSaver(Stream& params);
+  void ProcessRealTimeBitImageDisplayXy(Stream& params);
+  void ProcessRealTimeBitImageDisplay(Stream& params, uint8_t x, uint8_t y);
+  void ProcessCharacterFontWidthAndSpace(Stream& params);
+  void ProcessFontMagnificationSet(Stream& params);
+  void ProcessCurrentWindowSelect(Stream& params);
+  void ProcessUserWindowDefinitionCancel(Stream& params);
+  void ProcessWriteScreenModeSelect(Stream& params);
+  void ProcessSpecifyDownloadRegister(Stream& params);
+  void ProcessDownloadCharacter(Stream& params);
+  void ProcessDeleteDownloadedCharacter(Stream& params);
+
+  // Utilities
+  void ExtractXY(Stream& s, uint8_t& x, uint8_t& y);
 };

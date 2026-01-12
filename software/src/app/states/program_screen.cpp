@@ -10,8 +10,8 @@
 
 // ================================================================ //
 
-static constexpr uint8_t CharDotWidth = 7;
-static constexpr uint8_t CharDotHeight = 7;
+constexpr uint8_t CharDotWidth = 7;
+constexpr uint8_t CharDotHeight = 7;
 constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {

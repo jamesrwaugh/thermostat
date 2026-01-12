@@ -40,8 +40,7 @@ void SimGu7000Real::ProcessCommand(uint8_t byte) {
     command_arguments_.push_back(byte);
     if (command_arguments_.size() == CurrentCommand_->FixedArgumentBytes) {
       if (CurrentCommand_->SizeGetFn) {
-        CurrentCommandVariableBytes_ =
-            (this->*CurrentCommand_->SizeGetFn)(command_arguments_);
+        CurrentCommandVariableBytes_ = (this->*CurrentCommand_->SizeGetFn)();
         if (CurrentCommandVariableBytes_ > 0) {
           state_ = State::GettingVariableArgs;
         } else {
@@ -213,7 +212,7 @@ SimGu7000Real::CommandTableA SimGu7000Real::CommandTable = {{
     {
         .Prefix = "\x1F\x28\x64\x21",
         .Execute = &SimGu7000Real::ProcessRealTimeBitImageDisplayXy,
-        .SizeGetFn = nullptr,
+        .SizeGetFn = &SimGu7000Real::ProcessRealTimeBitImageDisplaySize,
         .FixedArgumentBytes = 9,  // 2 bytes x, 2 bytes y, 1 byte width, 1
                                   // byte height, 1 byte g, 2 bytes data
     },
@@ -619,4 +618,8 @@ void SimGu7000Real::ExtractXY(Stream& s, uint8_t& x, uint8_t& y) {
     x = (xh << 8) | xl;
     y = (yh << 8) | yl;
   }
+}
+
+uint8_t SimGu7000Real::ProcessRealTimeBitImageDisplaySize() {
+  return 0;
 }

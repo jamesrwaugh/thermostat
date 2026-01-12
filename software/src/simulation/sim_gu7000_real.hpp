@@ -92,8 +92,7 @@ class SimGu7000Real {
   typedef std::vector<uint8_t> Stream;
 
   typedef void (SimGu7000Real::*CommandFunction)(Stream&);
-  typedef uint8_t (SimGu7000Real::*SizeGetFnFunction)(
-      const std::vector<uint8_t>&);
+  typedef uint8_t (SimGu7000Real::*SizeGetFnFunction)();
 
   struct CommandItem {
     const char* const Prefix;
@@ -147,6 +146,9 @@ class SimGu7000Real {
   void ProcessSpecifyDownloadRegister(Stream& params);
   void ProcessDownloadCharacter(Stream& params);
   void ProcessDeleteDownloadedCharacter(Stream& params);
+
+  // Command Sizes
+  uint8_t ProcessRealTimeBitImageDisplaySize();
 
   // Utilities
   void ExtractXY(Stream& s, uint8_t& x, uint8_t& y);

@@ -33,11 +33,28 @@ struct Thing {
   int A;
 };
 
+constexpr uint8_t CharDotWidth = 7;
+constexpr uint8_t CharDotHeight = 7;
+constexpr uint8_t ImageWidth = 7;
+
+const uint8_t gArrowImageData[ImageWidth] = {
+    // clang-format off
+    0b0000'1000, 
+    0b0001'1000, 
+    0b0011'1110, 
+    0b0001'1000, 
+    0b0000'1000,
+    0b0000'0000,
+    0b0000'0000,
+    // clang-format on
+};
+
 int main() {
   Noritake_VFD_GU7000 gu(1);
 
   gu.GU7000_init();
-  gu.print("Hello world!");
+  // gu.print("Hello world!");
+  gu.GU7000_drawImage(0, CharDotHeight, ImageWidth, 8, gArrowImageData);
 
   const auto& memory = gSimGu7k.GetDisplayMemory();
 

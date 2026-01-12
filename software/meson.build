@@ -38,6 +38,12 @@ bmodbus_dep = declare_dependency(
     compile_args: ['-DBMODBUS_NO_MASTER'],
 )
 
+lodepng_dep = declare_dependency(
+    sources: ['submodules/lodepng/lodepng.cpp'],
+    include_directories: ['submodules/lodepng'],
+    compile_args: ['-DBMODBUS_NO_MASTER'],
+)
+
 subdir('src/protos')
 subdir('src/avr-driver')
 subdir('src/simulation')

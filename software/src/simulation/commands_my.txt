@@ -1,0 +1,123 @@
+Character Display
+20H-0FFH
+Display the character on the cursor position See Font table
+
+Back Space
+08H
+The cursor moves to the left by one character
+
+Horizontal Tab
+09H
+The cursor moves to the right by one character
+
+Line Feed
+0AH
+The cursor moves to one lower line
+
+Home Position
+0BH
+The cursor moves to the home position
+
+Carriage Return
+0DH
+The cursor moves to the left end of the same line
+
+Display Clear
+0CH
+The display is cleaned and the cursor moves to Home
+
+Initialize Display
+1BH, 40H
+Return to the default. DIP SW is not re-loaded
+
+Specify Download Register
+1BH, 25H, n
+Specify enable/disable for download register. default n=0. n=0 enable, n=1 disable
+
+Download Character Definition
+1BH, 26H, a, c1, c2, X1, d1, .., dx1,,, Xk, d1….dxk 
+Define the download characters into RAM, max 16 characters. a=01H. c1: Start character. code, C2:end character.code X: No of dots for X direction, dn: define data
+
+Delete Downloaded Character
+1BH, 3FH, 01H, c
+Delete the defined character code – c:character code for delete
+
+Specify International Font Set
+1BH, 52H, n n : decimal
+Select int’l font set. Simple symbol only. See Font table. default n=0. n=0 US,n=4 Denmark1,n=8 Japan,n=12 Latin America,n=1 France,n=5 Sweden,n=9 Norway,n=13 Korea,n=2 Germany,n=6 Italy,n=10 Denmark2,n=3 England,n=7 Spain1,n=11 Spain2
+
+Specify Character Code Type
+1BH, 74H, n n : decimal
+Select font code. See Font table.  default n=0 n=0 US-Euro std,n=3 Portuguese,n=16 WPC1252,n=19 PC858 n=1 Katakana,n=4 Canadian-French,n=17 Cyrillic #2,n=2 Multilingua,n=5 Nordic,n=18 Latin 2,
+
+Over write Mode
+1FH, 01H
+Over write, or replace exist data
+
+Vertical Scroll Mode
+1FH, 02H
+Scroll cursor up 1 line
+
+Horizontal Scroll Mode
+1FH, 03H
+Scroll cursor horizontally 1 space
+
+Cursor Set
+1FH, 24H, xL, xH, yL, yH
+The cursor moves to the specified X-Y position. default xL, xH, yL, yH=00H. xL, xH X adrs low, high. yL, yH Y adrs low, high
+
+Wait
+1FH, 28H, 61H, 01H, t
+Define wait time Wait time=approx. t*0.5sec
+
+Scroll Display Action
+1FH, 28H, 61H, 10H, wL, wH, cL, cH, s
+Shift the display screen. wL, wH Display screen shift area low/high byte. cL, cH Repetition low/high byte. s speed (approx. s x 14msec)
+
+Display Blink
+1FH, 28H, 61H, 11H, p, t1, t2, c
+Display Blink Control. p=0 Normal, p=1 Repeat normal & blank. p=2 Repeat normal & reverse, t1, t2 Noramal & blank/reverse time approx. t*14msec, c : Number of repeat
+
+Screen Saver
+1FH, 28H, 61H, 40H, p
+Screen saver mode. p=0 Power save, p=1 Power onp=2 All dots off(not power save), p=3 All dots on, p=4 Repeat normal & reverse display(2sec each)
+
+Real Time Bit Image Display
+1FH, 28H, 66H, 11H, xL, xH, yL, yH, g, d1, dk
+Display the bit image data. xL, xH Bit image Xsize low/high(1dot). yL, yH Bit image Ysize low/high(8dots), g=1(Fixed). d1, ?c dk Bit image data
+
+Character Font Width and Space
+1FH, 28H, 67H, 03H, w
+Specify character data Width. default w=1. w=0 Fixed 1, w=1 Fixed 2, w=2 Proportional 1, w=3 Proportional 2
+
+Font Magnification Set
+1FH, 28H, 67H, 40H, x, y
+Specify the size of magnification default x=1, y=1, x=1, 2, 3, 4 y=1, 2
+
+Current Window Select
+1FH, 28H, 77H, 01H, a
+Select current window. a=0 Base window, a=1-4 User Window
+
+User Window definition-cancel
+1FH, 28H, 77H, 02H, a, b, xPL, xPH, yPL, yPH, xSL, xSH, ySL, ySH
+Define or Cancel User Window. a=1-4 (Window), b=0 Cancel, b=1 Define, xPL, xPH Left position of window low/high byte yPL, yPH Top position of window low/high byte, xSL, xSH window X size low/high byte(1dot), ySL, ySH window Y size low/high byte(8dots)
+
+Write Screen Mode Select
+1FH, 28H, 77H, 10H, a
+Select the write screen mode. This command effects only for Base Window. default a=0. a=0 Display screen mode, a=1 All screen mode
+
+Brightness Control;
+1FH, 58H, n
+Specify brightness level of whole screen, default n=8. n=1 darkest, n=8 brightest (1<=n<=8)
+
+Specify or Cancel Reverse Display
+1FH, 72H, n
+Specify or Cancel reverse dsiplay mode, default n=0. n=0 cancel(Normal display), n=1 Reverse mode
+
+Horizontal Scroll Speed
+1FH, 73H, n
+Specify horizontal scroll speed by Character, default n=0. n=1 fastest, n=31 slowest (0<=n<=31)
+
+Specify Write Mixture Display Mode
+1FH, 77H, n
+The new character or graphic image display is mixed with current display image stored in the memory, default n=0. n=0 Not mix, n=1 OR, n=2 AND, n=3 EX-OR

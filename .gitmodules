@@ -10,3 +10,12 @@
 [submodule "software/submodules/bmodbus"]
 	path = software/submodules/bmodbus
 	url = git@github.com:squared-electronic/bmodbus.git
+[submodule "software/submodules/hat-trie"]
+	path = software/submodules/hat-trie
+	url = git@github.com:Tessil/hat-trie.git
+[submodule "software/subprojects/hat-trie"]
+	path = software/subprojects/hat-trie
+	url = git@github.com:Tessil/hat-trie.git
+[submodule "software/submodules/lodepng"]
+	path = software/submodules/lodepng
+	url = git@github.com:lvandeve/lodepng.git

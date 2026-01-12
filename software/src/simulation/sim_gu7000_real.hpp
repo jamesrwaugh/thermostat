@@ -4,8 +4,8 @@
 
 #include <array>
 #include <cstdint>
-#include <istream>
 #include <span>
+#include <string>
 #include <vector>
 
 class SimGu7000Real {
@@ -20,27 +20,30 @@ class SimGu7000Real {
   SimGu7000Real();
 
   // Command processing
-  void ProcessCommand(const std::vector<uint8_t>& command);
+  void ProcessCommand(uint8_t command);
 
   // Display memory access
   const DisplayMemory& GetDisplayMemory() const;
 
  private:
-  typedef std::span<const uint8_t, 7> FontCharacter;
+  typedef std::span<const uint8_t, 7> FontCharSpan;
 
   // Font dimensions (5x7)
   static constexpr uint8_t FONT_WIDTH = 5;
   static constexpr uint8_t FONT_HEIGHT = 7;
 
+  // state
+  enum class State {
+    LookingForCommand,
+    GettingCommandArguments,
+    GettingVariableArgs,
+    WaitingForCommandEnd,
+  };
+
   // Some command constants
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_START = 0x20;
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_END = 0xFF;
-  static constexpr uint8_t CMD_BACKSPACE = 0x08;
-  static constexpr uint8_t CMD_HORIZONTAL_TAB = 0x09;
-  static constexpr uint8_t CMD_LINE_FEED = 0x0A;
-  static constexpr uint8_t CMD_HOME_POSITION = 0x0B;
-  static constexpr uint8_t CMD_CARRIAGE_RETURN = 0x0D;
-  static constexpr uint8_t CMD_DISPLAY_CLEAR = 0x0C;
+  static constexpr std::array<uint8_t, 2> init_command_ = {0x1b, 0x40};
 
   // Display memory: 112x16 pixels as bool array
   // Each element represents one pixel
@@ -51,6 +54,9 @@ class SimGu7000Real {
   uint16_t cursor_y_;
 
   // Font and display settings
+  State state_;
+  std::vector<uint8_t> commandBytes_;
+  bool initialized_;
   uint8_t international_font_set_;
   uint8_t character_code_type_;
   bool overwrite_mode_;
@@ -64,7 +70,8 @@ class SimGu7000Real {
   uint8_t font_magnification_y_;
 
   // Command state tracking
-  std::vector<uint8_t> command_buffer_;
+  std::string command_buffer_;
+  std::vector<uint8_t> command_arguments_;
 
   // Display memory access
   void ClearDisplayMemory();
@@ -82,11 +89,11 @@ class SimGu7000Real {
   void SetPixel(uint16_t x, uint16_t y, bool on);
   bool GetPixel(uint16_t x, uint16_t y) const;
   void DrawFontCharacter(uint16_t x, uint16_t y, uint8_t character);
-  void DrawImage(uint16_t x, uint16_t y, const FontCharacter& image,
+  void DrawImage(uint16_t x, uint16_t y, const FontCharSpan& image,
                  uint8_t width, uint8_t height);
-  FontCharacter GetFontData(uint8_t character) const;
+  FontCharSpan GetFontData(uint8_t character) const;
 
-  typedef std::basic_iostream<uint8_t> Stream;
+  typedef std::vector<uint8_t> Stream;
 
   // Top-level command implementations
   void ProcessSingleByteCommand(uint8_t first_byte);
@@ -94,17 +101,36 @@ class SimGu7000Real {
   void ProcessUsExtendedCommands(Stream& command);
   void ProcessUsCommand(Stream& command);
 
+  typedef void (SimGu7000Real::*CommandFunction)(Stream&);
+  typedef uint8_t (SimGu7000Real::*SizeGetFnFunction)(
+      const std::vector<uint8_t>&);
+
+  struct CommandItem {
+    const char* const Prefix;
+    const CommandFunction Execute;
+    const SizeGetFnFunction SizeGetFn;
+    const uint8_t FixedArgumentBytes;
+  };
+
+  static constexpr uint8_t COMMAND_COUNT = 30;
+
+  typedef std::array<CommandItem, COMMAND_COUNT> CommandTableA;
+
+  static CommandTableA CommandTable;
+  CommandItem* CurrentCommand_;
+  uint8_t CurrentCommandVariableBytes_;
+
   // Command implementations
   void ProcessCharacterDisplay(uint8_t character);
-  void ProcessBackspace();
-  void ProcessHorizontalTab();
-  void ProcessLineFeed();
-  void ProcessHomePosition();
-  void ProcessCarriageReturn();
-  void ProcessDisplayClear();
-  void ProcessInitializeDisplay();
+  void ProcessBackspace(Stream& params);
+  void ProcessHorizontalTab(Stream& params);
+  void ProcessLineFeed(Stream& params);
+  void ProcessHomePosition(Stream& params);
+  void ProcessCarriageReturn(Stream& params);
+  void ProcessDisplayClear(Stream& params);
+  void ProcessInitializeDisplay(Stream& params);
   void ProcessCursorSet(Stream& params);
-  void ProcessDisplayClearCommand();
+  void ProcessDisplayClearCommand(Stream& params);
   void ProcessBrightnessControl(Stream& params);
   void ProcessReverseDisplay(Stream& params);
   void ProcessHorizontalScrollSpeed(Stream& params);

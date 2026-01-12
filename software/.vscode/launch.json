@@ -13,6 +13,14 @@
       "cwd": "${workspaceFolder}/builddir/src/simulation"
     },
     {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Simulate Test",
+      "program": "${workspaceFolder}/builddir/src/simulation/thermo-simulation-test",
+      "args": [],
+      "cwd": "${workspaceFolder}/builddir/src/simulation"
+    },
+    {
       "type": "gdb",
       "request": "attach",
       "name": "Attach to GDB  Thermostat",

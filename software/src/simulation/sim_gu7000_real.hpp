@@ -29,7 +29,8 @@ class SimGu7000Real {
 
   // State
   enum class State {
-    LookingForCommand,
+    Idle,
+    GettingCommand,
     GettingCommandArguments,
     GettingVariableArgs,
   };
@@ -110,6 +111,7 @@ class SimGu7000Real {
   uint8_t CurrentCommandVariableBytes_;
 
   void ExecuteCurrentCommandAndReset();
+  void ResetCommandState();
 
   // Command implementations
   void ProcessCharacterDisplay(uint8_t character);

@@ -10,13 +10,18 @@ namespace Font {
 SimGu7000Real::SimGu7000Real() {}
 
 void SimGu7000Real::ProcessCommand(uint8_t byte) {
-  if (byte >= CMD_CHARACTER_DISPLAY_START &&
-      byte <= CMD_CHARACTER_DISPLAY_END) {
-    ProcessCharacterDisplay(byte);
-    return;
+  if (state_ == State::Idle) {
+    if (byte >= CMD_CHARACTER_DISPLAY_START &&
+        byte <= CMD_CHARACTER_DISPLAY_END) {
+      ProcessCharacterDisplay(byte);
+      ResetCommandState();
+      return;
+    } else {
+      state_ = State::GettingCommand;
+    }
   }
 
-  if (state_ == State::LookingForCommand) {
+  if (state_ == State::GettingCommand) {
     command_buffer_.push_back(byte);
 
     auto command = std::find_if(
@@ -362,9 +367,13 @@ SimGu7000Real::FontCharSpan SimGu7000Real::GetFontData(
 
 void SimGu7000Real::ExecuteCurrentCommandAndReset() {
   (this->*CurrentCommand_->Execute)(command_arguments_);
+  ResetCommandState();
+}
+
+void SimGu7000Real::ResetCommandState() {
   command_buffer_.clear();
   command_arguments_.clear();
-  state_ = State::LookingForCommand;
+  state_ = State::Idle;
   CurrentCommand_ = nullptr;
   CurrentCommandVariableBytes_ = 0;
 }
@@ -423,7 +432,7 @@ void SimGu7000Real::ProcessDisplayClear(Stream& params) {
 
 void SimGu7000Real::ProcessInitializeDisplay(Stream&) {
   ClearDisplayMemory();
-  state_ = State::LookingForCommand;
+  state_ = State::Idle;
   initialized_ = true;
   cursor_x_ = 0;
   cursor_y_ = 0;

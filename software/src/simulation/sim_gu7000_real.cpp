@@ -26,8 +26,7 @@ void SimGu7000Real::ProcessCommand(uint8_t byte) {
     if (command != CommandTable.end()) {
       CurrentCommand_ = command;
       if (command->FixedArgumentBytes == 0) {
-        (this->*CurrentCommand_->Execute)(command_arguments_);
-        state_ = State::LookingForCommand;
+        ExecuteCurrentCommandAndReset();
       } else {
         state_ = State::GettingCommandArguments;
       }
@@ -41,20 +40,17 @@ void SimGu7000Real::ProcessCommand(uint8_t byte) {
         if (CurrentCommandVariableBytes_ > 0) {
           state_ = State::GettingVariableArgs;
         } else {
-          (this->*CurrentCommand_->Execute)(command_arguments_);
-          state_ = State::LookingForCommand;
+          ExecuteCurrentCommandAndReset();
         }
       } else {
-        (this->*CurrentCommand_->Execute)(command_arguments_);
-        state_ = State::LookingForCommand;
+        ExecuteCurrentCommandAndReset();
       }
     }
   } else if (state_ == State::GettingVariableArgs) {
     command_arguments_.push_back(byte);
     if (command_arguments_.size() ==
         (CurrentCommand_->FixedArgumentBytes + CurrentCommandVariableBytes_)) {
-      (this->*CurrentCommand_->Execute)(command_arguments_);
-      state_ = State::LookingForCommand;
+      ExecuteCurrentCommandAndReset();
     }
   }
 }
@@ -362,6 +358,15 @@ SimGu7000Real::FontCharSpan SimGu7000Real::GetFontData(
   }
 
   return GetTheData(character);
+}
+
+void SimGu7000Real::ExecuteCurrentCommandAndReset() {
+  (this->*CurrentCommand_->Execute)(command_arguments_);
+  command_buffer_.clear();
+  command_arguments_.clear();
+  state_ = State::LookingForCommand;
+  CurrentCommand_ = nullptr;
+  CurrentCommandVariableBytes_ = 0;
 }
 
 // Command implementations

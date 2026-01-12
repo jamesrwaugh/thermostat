@@ -10,7 +10,6 @@
 
 class SimGu7000Real {
  public:
-  // Display dimensions
   static constexpr uint16_t DISPLAY_WIDTH = 112;
   static constexpr uint16_t DISPLAY_HEIGHT = 16;
 
@@ -18,11 +17,7 @@ class SimGu7000Real {
       DisplayMemory;
 
   SimGu7000Real();
-
-  // Command processing
   void ProcessCommand(uint8_t command);
-
-  // Display memory access
   const DisplayMemory& GetDisplayMemory() const;
 
  private:
@@ -32,12 +27,11 @@ class SimGu7000Real {
   static constexpr uint8_t FONT_WIDTH = 5;
   static constexpr uint8_t FONT_HEIGHT = 7;
 
-  // state
+  // State
   enum class State {
     LookingForCommand,
     GettingCommandArguments,
     GettingVariableArgs,
-    WaitingForCommandEnd,
   };
 
   // Some command constants
@@ -93,13 +87,8 @@ class SimGu7000Real {
                  uint8_t width, uint8_t height);
   FontCharSpan GetFontData(uint8_t character) const;
 
+  // Command prosessing state
   typedef std::vector<uint8_t> Stream;
-
-  // Top-level command implementations
-  void ProcessSingleByteCommand(uint8_t first_byte);
-  void ProcessEscCommand(Stream& command);
-  void ProcessUsExtendedCommands(Stream& command);
-  void ProcessUsCommand(Stream& command);
 
   typedef void (SimGu7000Real::*CommandFunction)(Stream&);
   typedef uint8_t (SimGu7000Real::*SizeGetFnFunction)(
@@ -119,6 +108,8 @@ class SimGu7000Real {
   static CommandTableA CommandTable;
   CommandItem* CurrentCommand_;
   uint8_t CurrentCommandVariableBytes_;
+
+  void ExecuteCurrentCommandAndReset();
 
   // Command implementations
   void ProcessCharacterDisplay(uint8_t character);

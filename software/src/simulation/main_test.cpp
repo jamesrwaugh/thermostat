@@ -53,7 +53,8 @@ int main() {
   Noritake_VFD_GU7000 gu(1);
 
   gu.GU7000_init();
-  // gu.print("Hello world!");
+  gu.GU7000_setCursor(0, 0);
+  gu.print("Hello world!");
   gu.GU7000_drawImage(0, CharDotHeight, ImageWidth, 8, gArrowImageData);
 
   const auto& memory = gSimGu7k.GetDisplayMemory();

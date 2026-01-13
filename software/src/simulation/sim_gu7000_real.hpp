@@ -4,9 +4,36 @@
 
 #include <array>
 #include <cstdint>
+#include <cstdlib>
 #include <span>
 #include <string>
 #include <vector>
+
+class Stream {
+ public:
+  Stream(const std::vector<uint8_t>& data) : data_(data.begin(), data.end()) {}
+
+  uint8_t get_uint8() {
+    return next();
+  }
+
+  uint16_t get_uint16le() {
+    auto lo = get_uint8();
+    auto hi = get_uint8();
+    return (hi << 8) | lo;
+  }
+
+ private:
+  uint8_t next() {
+    if (position_ >= data_.size()) {
+      std::abort();
+    }
+    return data_[position_++];
+  }
+
+  const std::span<const uint8_t> data_;
+  unsigned position_{0};
+};
 
 class SimGu7000Real {
  public:
@@ -26,6 +53,7 @@ class SimGu7000Real {
   // Font dimensions (5x7)
   static constexpr uint8_t FONT_WIDTH = 5;
   static constexpr uint8_t FONT_HEIGHT = 7;
+  static constexpr uint8_t ROW_HEIGHT_DOTS = (DISPLAY_HEIGHT / 2);
 
   // State
   enum class State {
@@ -88,11 +116,8 @@ class SimGu7000Real {
                  uint8_t width, uint8_t height);
   FontCharSpan GetFontData(uint8_t character) const;
 
-  // Command prosessing state
-  typedef std::vector<uint8_t> Stream;
-
   typedef void (SimGu7000Real::*CommandFunction)(Stream&);
-  typedef uint8_t (SimGu7000Real::*SizeGetFnFunction)();
+  typedef uint16_t (SimGu7000Real::*SizeGetFnFunction)();
 
   struct CommandItem {
     const char* const Prefix;
@@ -107,7 +132,7 @@ class SimGu7000Real {
 
   static CommandTableA CommandTable;
   CommandItem* CurrentCommand_;
-  uint8_t CurrentCommandVariableBytes_;
+  uint16_t CurrentCommandVariableBytes_;
 
   void ExecuteCurrentCommandAndReset();
   void ResetCommandState();
@@ -148,8 +173,8 @@ class SimGu7000Real {
   void ProcessDeleteDownloadedCharacter(Stream& params);
 
   // Command Sizes
-  uint8_t ProcessRealTimeBitImageDisplaySize();
+  uint16_t ProcessRealTimeBitImageDisplaySize();
 
   // Utilities
-  void ExtractXY(Stream& s, uint8_t& x, uint8_t& y);
+  void ExtractXY(Stream& s, uint16_t& x, uint16_t& y);
 };

@@ -7,6 +7,10 @@ namespace Font {
 #include "font.h"
 }
 
+inline constexpr unsigned char operator""_u8(unsigned long long arg) noexcept {
+  return static_cast<unsigned char>(arg);
+}
+
 SimGu7000Real::SimGu7000Real() {}
 
 void SimGu7000Real::ProcessCommand(uint8_t byte) {
@@ -154,7 +158,7 @@ SimGu7000Real::CommandTableA SimGu7000Real::CommandTable = {{
         .FixedArgumentBytes = 0,
     },
     {
-        .Prefix = "\x1F\x28\x24",
+        .Prefix = "\x1F\x24",
         .Execute = &SimGu7000Real::ProcessCursorSet,
         .SizeGetFn = nullptr,
         .FixedArgumentBytes =
@@ -216,10 +220,6 @@ SimGu7000Real::CommandTableA SimGu7000Real::CommandTable = {{
         .FixedArgumentBytes = 9,  // 2 bytes x, 2 bytes y, 1 byte width, 1
                                   // byte height, 1 byte g, 2 bytes data
     },
-    // Note: ProcessRealTimeBitImageDisplay has a different signature (3
-    // params)
-    // and is not in CommandTable. It's called internally by
-    // ProcessRealTimeBitImageDisplayXy
     {
         .Prefix = "\x1F\x28\x67\x03",
         .Execute = &SimGu7000Real::ProcessCharacterFontWidthAndSpace,
@@ -269,7 +269,8 @@ void SimGu7000Real::ClearDisplayMemory() {
 
 void SimGu7000Real::SetCursor(uint16_t x, uint16_t y) {
   cursor_x_ = std::min(x, static_cast<uint16_t>(DISPLAY_WIDTH - 1));
-  cursor_y_ = std::min(y, static_cast<uint16_t>(DISPLAY_HEIGHT - 1));
+  cursor_y_ = std::min(static_cast<uint16_t>(y * ROW_HEIGHT_DOTS),
+                       static_cast<uint16_t>(DISPLAY_HEIGHT - 1));
 }
 
 uint16_t SimGu7000Real::GetCursorX() const {
@@ -365,7 +366,8 @@ SimGu7000Real::FontCharSpan SimGu7000Real::GetFontData(
 }
 
 void SimGu7000Real::ExecuteCurrentCommandAndReset() {
-  (this->*CurrentCommand_->Execute)(command_arguments_);
+  Stream s(command_arguments_);
+  (this->*CurrentCommand_->Execute)(s);
   ResetCommandState();
 }
 
@@ -449,7 +451,7 @@ void SimGu7000Real::ProcessInitializeDisplay(Stream&) {
 }
 
 void SimGu7000Real::ProcessCursorSet(Stream& params) {
-  uint8_t x, y;
+  uint16_t x, y;
   ExtractXY(params, x, y);
   SetCursor(x, y);
 }
@@ -459,46 +461,30 @@ void SimGu7000Real::ProcessDisplayClearCommand(Stream& params) {
 }
 
 void SimGu7000Real::ProcessBrightnessControl(Stream& params) {
-  if (!params.empty()) {
-    brightness_level_ = std::min(uint8_t(8), std::max(uint8_t(1), params[0]));
-  }
+  brightness_level_ = std::clamp(1_u8, 8_u8, params.get_uint8());
 }
 
 void SimGu7000Real::ProcessReverseDisplay(Stream& params) {
-  if (!params.empty()) {
-    reverse_display_ = (params[0] != 0);
-  }
+  reverse_display_ = (params.get_uint8() != 0);
 }
 
 void SimGu7000Real::ProcessHorizontalScrollSpeed(Stream& params) {
-  if (!params.empty()) {
-    horizontal_scroll_speed_ =
-        std::min(uint8_t(31), std::max(uint8_t(0), params[0]));
-  }
+  horizontal_scroll_speed_ = std::clamp(params.get_uint8(), 0_u8, 31_u8);
 }
 
 void SimGu7000Real::ProcessCompositionMode(Stream& params) {
-  if (!params.empty()) {
-    composition_mode_ = std::min(uint8_t(3), std::max(uint8_t(0), params[0]));
-  }
+  composition_mode_ = std::clamp(params.get_uint8(), 0_u8, 3_u8);
 }
-
 void SimGu7000Real::ProcessInternationalFontSet(Stream& params) {
-  if (!params.empty()) {
-    international_font_set_ = params[0];
-  }
+  international_font_set_ = params.get_uint8();
 }
 
 void SimGu7000Real::ProcessCharacterCodeType(Stream& params) {
-  if (!params.empty()) {
-    character_code_type_ = params[0];
-  }
+  character_code_type_ = params.get_uint8();
 }
 
 void SimGu7000Real::ProcessOverwriteMode(Stream& params) {
-  if (!params.empty()) {
-    overwrite_mode_ = (params[0] == 0x01);
-  }
+  overwrite_mode_ = (params.get_uint8() == 1);
 }
 
 void SimGu7000Real::ProcessVerticalScrollMode(Stream& params) {
@@ -525,8 +511,7 @@ void SimGu7000Real::ProcessDisplayBlink(Stream& params) {
 }
 
 void SimGu7000Real::ProcessScreenSaver(Stream& params) {
-  if (params.empty()) return;
-  switch (params[0]) {
+  switch (params.get_uint8()) {
     case 0:  // Power save
     case 2:  // All dots off
       ClearDisplayMemory();
@@ -545,24 +530,21 @@ void SimGu7000Real::ProcessScreenSaver(Stream& params) {
 }
 
 void SimGu7000Real::ProcessRealTimeBitImageDisplayXy(Stream& params) {
-  uint8_t x, y;
+  uint16_t x, y;
   ExtractXY(params, x, y);
   ProcessRealTimeBitImageDisplay(params, x, y);
 }
 
 void SimGu7000Real::ProcessRealTimeBitImageDisplay(Stream& params, uint8_t x,
                                                    uint8_t y) {
-  if (params.size() < 5) return;  // Need at least width, height, and g
-  uint8_t w = params[0];
-  uint8_t h = params[1];
-  // g value at params[4] is not used in simulation
-  size_t data_offset = 5;
+  uint16_t w, h;
+  ExtractXY(params, w, h);
+  uint8_t _ = params.get_uint8();  // Discard "g" (always 1)
 
-  for (uint8_t i = 0; i < (h / 8) * w && data_offset < params.size();
-       i++, data_offset++) {
-    uint8_t byte = params[data_offset];
+  for (uint8_t i = 0; i < (h / 8) * w; i++) {
+    uint8_t byte = params.get_uint8();
     for (uint8_t j = 0; j < h; ++j) {
-      display_memory_[x + i][y + j] = byte & (1 << j);
+      display_memory_[x + i][y + j] = byte & (1 << (7 - j));
     }
   }
 }
@@ -573,18 +555,12 @@ void SimGu7000Real::ProcessCharacterFontWidthAndSpace(Stream& params) {
 }
 
 void SimGu7000Real::ProcessFontMagnificationSet(Stream& params) {
-  if (params.size() >= 2) {
-    font_magnification_x_ =
-        std::min(uint8_t(4), std::max(uint8_t(1), params[0]));
-    font_magnification_y_ =
-        std::min(uint8_t(2), std::max(uint8_t(1), params[1]));
-  }
+  font_magnification_x_ = std::clamp(params.get_uint8(), 1_u8, 4_u8);
+  font_magnification_y_ = std::clamp(params.get_uint8(), 1_u8, 2_u8);
 }
 
 void SimGu7000Real::ProcessCurrentWindowSelect(Stream& params) {
-  if (!params.empty()) {
-    current_window_ = std::min(uint8_t(4), std::max(uint8_t(0), params[0]));
-  }
+  current_window_ = std::clamp(params.get_uint8(), 0_u8, 4_u8);
 }
 
 void SimGu7000Real::ProcessUserWindowDefinitionCancel(Stream& params) {
@@ -612,14 +588,17 @@ void SimGu7000Real::ProcessDeleteDownloadedCharacter(Stream& params) {
   // For now, just stub this out
 }
 
-void SimGu7000Real::ExtractXY(Stream& s, uint8_t& x, uint8_t& y) {
-  if (s.size() >= 4) {
-    uint8_t xl = s[0], xh = s[1], yl = s[2], yh = s[3];
-    x = (xh << 8) | xl;
-    y = (yh << 8) | yl;
-  }
+void SimGu7000Real::ExtractXY(Stream& s, uint16_t& x, uint16_t& y) {
+  x = s.get_uint16le();
+  y = s.get_uint16le();
 }
 
-uint8_t SimGu7000Real::ProcessRealTimeBitImageDisplaySize() {
-  return 0;
+uint16_t SimGu7000Real::ProcessRealTimeBitImageDisplaySize() {
+  Stream s(command_arguments_);
+
+  uint16_t x, y, w, h;
+  ExtractXY(s, x, y);
+  ExtractXY(s, w, h);
+
+  return (h / 8) * w;
 }

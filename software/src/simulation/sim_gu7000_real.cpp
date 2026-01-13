@@ -28,13 +28,11 @@ void SimGu7000Real::ProcessCommand(uint8_t byte) {
   if (state_ == State::GettingCommand) {
     command_buffer_.push_back(byte);
 
-    auto command = std::find_if(
-        CommandTable.begin(), CommandTable.end(),
-        [&](const auto& x) { return x.Prefix == command_buffer_; });
+    auto command_it = CommandTable.find(command_buffer_);
 
-    if (command != CommandTable.end()) {
-      CurrentCommand_ = command;
-      if (command->FixedArgumentBytes == 0) {
+    if (command_it != CommandTable.end()) {
+      CurrentCommand_ = &command_it->second;
+      if (command_it->second.FixedArgumentBytes == 0) {
         ExecuteCurrentCommandAndReset();
       } else {
         state_ = State::GettingCommandArguments;
@@ -63,199 +61,196 @@ void SimGu7000Real::ProcessCommand(uint8_t byte) {
   }
 }
 
-SimGu7000Real::CommandTableA SimGu7000Real::CommandTable = {{
+SimGu7000Real::CommandMap SimGu7000Real::CommandTable = {
     // Single byte commands
-    {
-        .Prefix = "\x08",
-        .Execute = &SimGu7000Real::ProcessBackspace,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x09",
-        .Execute = &SimGu7000Real::ProcessHorizontalTab,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x0A",
-        .Execute = &SimGu7000Real::ProcessLineFeed,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x0B",
-        .Execute = &SimGu7000Real::ProcessHomePosition,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x0C",
-        .Execute = &SimGu7000Real::ProcessDisplayClearCommand,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x0D",
-        .Execute = &SimGu7000Real::ProcessCarriageReturn,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
+    // ------------------------------------------------------- //
+    {"\x08",
+     {
+         .Execute = &SimGu7000Real::ProcessBackspace,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x09",
+     {
+         .Execute = &SimGu7000Real::ProcessHorizontalTab,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x0A",
+     {
+         .Execute = &SimGu7000Real::ProcessLineFeed,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x0B",
+     {
+         .Execute = &SimGu7000Real::ProcessHomePosition,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x0C",
+     {
+         .Execute = &SimGu7000Real::ProcessDisplayClearCommand,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x0D",
+     {
+         .Execute = &SimGu7000Real::ProcessCarriageReturn,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
     // ESC commands (\x1B prefix)
-    {
-        .Prefix = "\x1B\x40",
-        .Execute = &SimGu7000Real::ProcessInitializeDisplay,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1B\x25",
-        .Execute = &SimGu7000Real::ProcessSpecifyDownloadRegister,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1B\x26",
-        .Execute = &SimGu7000Real::ProcessDownloadCharacter,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1B\x3F",
-        .Execute = &SimGu7000Real::ProcessDeleteDownloadedCharacter,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1B\x52",
-        .Execute = &SimGu7000Real::ProcessInternationalFontSet,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1B\x74",
-        .Execute = &SimGu7000Real::ProcessCharacterCodeType,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
+    // ------------------------------------------------------- //
+    {"\x1B\x40",
+     {
+         .Execute = &SimGu7000Real::ProcessInitializeDisplay,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1B\x25",
+     {
+         .Execute = &SimGu7000Real::ProcessSpecifyDownloadRegister,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1B\x26",
+     {
+         .Execute = &SimGu7000Real::ProcessDownloadCharacter,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1B\x3F",
+     {
+         .Execute = &SimGu7000Real::ProcessDeleteDownloadedCharacter,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1B\x52",
+     {
+         .Execute = &SimGu7000Real::ProcessInternationalFontSet,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1B\x74",
+     {
+         .Execute = &SimGu7000Real::ProcessCharacterCodeType,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
     // US commands (\x1F\x28 prefix)
-    {
-        .Prefix = "\x1F\x28\x01",
-        .Execute = &SimGu7000Real::ProcessOverwriteMode,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x02",
-        .Execute = &SimGu7000Real::ProcessVerticalScrollMode,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x28\x03",
-        .Execute = &SimGu7000Real::ProcessHorizontalScrollMode,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x24",
-        .Execute = &SimGu7000Real::ProcessCursorSet,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes =
-            4,  // 2 bytes for x (low, high), 2 bytes for y (low, high)
-    },
-    {
-        .Prefix = "\x1F\x28\x58",
-        .Execute = &SimGu7000Real::ProcessBrightnessControl,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x72",
-        .Execute = &SimGu7000Real::ProcessReverseDisplay,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x73",
-        .Execute = &SimGu7000Real::ProcessHorizontalScrollSpeed,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x77",
-        .Execute = &SimGu7000Real::ProcessCompositionMode,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
+    // ------------------------------------------------------- //
+    {"\x1F\x28\x01",
+     {
+         .Execute = &SimGu7000Real::ProcessOverwriteMode,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x02",
+     {
+         .Execute = &SimGu7000Real::ProcessVerticalScrollMode,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x03",
+     {
+         .Execute = &SimGu7000Real::ProcessHorizontalScrollMode,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x24",
+     {
+         .Execute = &SimGu7000Real::ProcessCursorSet,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 4,
+     }},
+    {"\x1F\x28\x58",
+     {
+         .Execute = &SimGu7000Real::ProcessBrightnessControl,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x72",
+     {
+         .Execute = &SimGu7000Real::ProcessReverseDisplay,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x73",
+     {
+         .Execute = &SimGu7000Real::ProcessHorizontalScrollSpeed,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x77",
+     {
+         .Execute = &SimGu7000Real::ProcessCompositionMode,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
     // US Extended commands (\x1F\x28 prefix with sub-commands)
-    {
-        .Prefix = "\x1F\x28\x61\x01",
-        .Execute = &SimGu7000Real::ProcessWait,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x28\x61\x10",
-        .Execute = &SimGu7000Real::ProcessScrollDisplayAction,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x28\x61\x11",
-        .Execute = &SimGu7000Real::ProcessDisplayBlink,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x28\x61\x40",
-        .Execute = &SimGu7000Real::ProcessScreenSaver,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x64\x21",
-        .Execute = &SimGu7000Real::ProcessRealTimeBitImageDisplayXy,
-        .SizeGetFn = &SimGu7000Real::ProcessRealTimeBitImageDisplaySize,
-        .FixedArgumentBytes = 9,  // 2 bytes x, 2 bytes y, 1 byte width, 1
-                                  // byte height, 1 byte g, 2 bytes data
-    },
-    {
-        .Prefix = "\x1F\x28\x67\x03",
-        .Execute = &SimGu7000Real::ProcessCharacterFontWidthAndSpace,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x67\x40",
-        .Execute = &SimGu7000Real::ProcessFontMagnificationSet,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 2,
-    },
-    {
-        .Prefix = "\x1F\x28\x77\x01",
-        .Execute = &SimGu7000Real::ProcessCurrentWindowSelect,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-    {
-        .Prefix = "\x1F\x28\x77\x02",
-        .Execute = &SimGu7000Real::ProcessUserWindowDefinitionCancel,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 0,
-    },
-    {
-        .Prefix = "\x1F\x28\x77\x10",
-        .Execute = &SimGu7000Real::ProcessWriteScreenModeSelect,
-        .SizeGetFn = nullptr,
-        .FixedArgumentBytes = 1,
-    },
-}};
-
-// Size getter functions for variable-length commands
-// These would be called to determine how many additional bytes follow the fixed
-// arguments For now, they return 0 since most commands don't have variable
-// arguments
+    // ------------------------------------------------------- //
+    {"\x1F\x28\x61\x01",
+     {
+         .Execute = &SimGu7000Real::ProcessWait,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x61\x10",
+     {
+         .Execute = &SimGu7000Real::ProcessScrollDisplayAction,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x61\x11",
+     {
+         .Execute = &SimGu7000Real::ProcessDisplayBlink,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x61\x40",
+     {
+         .Execute = &SimGu7000Real::ProcessScreenSaver,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x64\x21",
+     {
+         .Execute = &SimGu7000Real::ProcessRealTimeBitImageDisplayXy,
+         .SizeGetFn = &SimGu7000Real::ProcessRealTimeBitImageDisplaySize,
+         .FixedArgumentBytes = 9,
+     }},
+    {"\x1F\x28\x67\x03",
+     {
+         .Execute = &SimGu7000Real::ProcessCharacterFontWidthAndSpace,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x67\x40",
+     {
+         .Execute = &SimGu7000Real::ProcessFontMagnificationSet,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 2,
+     }},
+    {"\x1F\x28\x77\x01",
+     {
+         .Execute = &SimGu7000Real::ProcessCurrentWindowSelect,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+    {"\x1F\x28\x77\x02",
+     {
+         .Execute = &SimGu7000Real::ProcessUserWindowDefinitionCancel,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x77\x10",
+     {
+         .Execute = &SimGu7000Real::ProcessWriteScreenModeSelect,
+         .SizeGetFn = nullptr,
+         .FixedArgumentBytes = 1,
+     }},
+};
 
 const SimGu7000Real::DisplayMemory& SimGu7000Real::GetDisplayMemory() const {
   return display_memory_;
@@ -588,12 +583,12 @@ void SimGu7000Real::ProcessDeleteDownloadedCharacter(Stream& params) {
   // For now, just stub this out
 }
 
-void SimGu7000Real::ExtractXY(Stream& s, uint16_t& x, uint16_t& y) {
+void SimGu7000Real::ExtractXY(Stream& s, uint16_t& x, uint16_t& y) const {
   x = s.get_uint16le();
   y = s.get_uint16le();
 }
 
-uint16_t SimGu7000Real::ProcessRealTimeBitImageDisplaySize() {
+uint16_t SimGu7000Real::ProcessRealTimeBitImageDisplaySize() const {
   Stream s(command_arguments_);
 
   uint16_t x, y, w, h;

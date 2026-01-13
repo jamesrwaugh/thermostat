@@ -54,7 +54,7 @@ int main() {
 
   gu.GU7000_init();
   gu.GU7000_setCursor(0, 0);
-  gu.print("Hello world!");
+  gu.print("Hello world 123!");
   gu.GU7000_drawImage(0, CharDotHeight, ImageWidth, 8, gArrowImageData);
 
   const auto& memory = gSimGu7k.GetDisplayMemory();

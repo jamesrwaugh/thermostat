@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <span>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class Stream {
@@ -116,22 +117,21 @@ class SimGu7000Real {
                  uint8_t width, uint8_t height);
   FontCharSpan GetFontData(uint8_t character) const;
 
+  // Command state tracking
+
   typedef void (SimGu7000Real::*CommandFunction)(Stream&);
-  typedef uint16_t (SimGu7000Real::*SizeGetFnFunction)();
+  typedef uint16_t (SimGu7000Real::*SizeGetFnFunction)() const;
 
   struct CommandItem {
-    const char* const Prefix;
     const CommandFunction Execute;
     const SizeGetFnFunction SizeGetFn;
     const uint8_t FixedArgumentBytes;
   };
 
-  static constexpr uint8_t COMMAND_COUNT = 30;
+  typedef std::unordered_map<std::string, CommandItem> CommandMap;
 
-  typedef std::array<CommandItem, COMMAND_COUNT> CommandTableA;
-
-  static CommandTableA CommandTable;
-  CommandItem* CurrentCommand_;
+  static CommandMap CommandTable;
+  CommandItem* CurrentCommand_{nullptr};
   uint16_t CurrentCommandVariableBytes_;
 
   void ExecuteCurrentCommandAndReset();
@@ -173,8 +173,8 @@ class SimGu7000Real {
   void ProcessDeleteDownloadedCharacter(Stream& params);
 
   // Command Sizes
-  uint16_t ProcessRealTimeBitImageDisplaySize();
+  uint16_t ProcessRealTimeBitImageDisplaySize() const;
 
   // Utilities
-  void ExtractXY(Stream& s, uint16_t& x, uint16_t& y);
+  void ExtractXY(Stream& s, uint16_t& x, uint16_t& y) const;
 };

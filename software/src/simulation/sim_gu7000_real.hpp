@@ -38,8 +38,8 @@ class Stream {
 
 class SimGu7000Real {
  public:
-  static constexpr uint16_t DISPLAY_WIDTH = 112;
-  static constexpr uint16_t DISPLAY_HEIGHT = 16;
+  static constexpr uint8_t DISPLAY_WIDTH = 112;
+  static constexpr uint8_t DISPLAY_HEIGHT = 16;
 
   typedef std::array<std::array<bool, DISPLAY_HEIGHT>, DISPLAY_WIDTH>
       DisplayMemory;
@@ -139,6 +139,8 @@ class SimGu7000Real {
 
   // Command implementations
   void ProcessCharacterDisplay(uint8_t character);
+  void ProcessCharacterDisplayAtPosition(Stream& params);
+  uint16_t ProcessCharacterDisplayAtPositionSize() const;
   void ProcessBackspace(Stream& params);
   void ProcessHorizontalTab(Stream& params);
   void ProcessLineFeed(Stream& params);

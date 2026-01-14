@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace Font {
 #include "font.h"
@@ -11,7 +13,24 @@ inline constexpr unsigned char operator""_u8(unsigned long long arg) noexcept {
   return static_cast<unsigned char>(arg);
 }
 
-SimGu7000Real::SimGu7000Real() {}
+inline constexpr uint8_t u8(auto x) {
+  return static_cast<uint8_t>(x);
+}
+
+// constexpr std::string us_command(uint8_t group, uint8_t cmd) {
+//   return std::format("\x1F\x28{:X}{:X}", group, cmd);
+// }
+
+// constexpr std::string grouped_command(uint8_t prefix, uint8_t group,
+//                                       uint8_t cmd) {
+//   return std::format("{0}{1}{2}", prefix, group, cmd);
+// }
+
+SimGu7000Real::SimGu7000Real() {
+  std::vector<uint8_t> v;
+  Stream s(v);
+  ProcessInitializeDisplay(s);
+}
 
 void SimGu7000Real::ProcessCommand(uint8_t byte) {
   if (state_ == State::Idle) {
@@ -165,6 +184,13 @@ SimGu7000Real::CommandMap SimGu7000Real::CommandTable = {
          .Execute = &SimGu7000Real::ProcessVerticalScrollMode,
          .SizeGetFn = nullptr,
          .FixedArgumentBytes = 0,
+     }},
+    {"\x1F\x28\x64\x30",
+     {
+         .Name = "PrintAtPosition",
+         .Execute = &SimGu7000Real::ProcessCharacterDisplayAtPosition,
+         .SizeGetFn = &SimGu7000Real::ProcessCharacterDisplayAtPositionSize,
+         .FixedArgumentBytes = 6,
      }},
     {"\x1F\x28\x03",
      {
@@ -330,7 +356,7 @@ void SimGu7000Real::SetPixel(uint16_t x, uint16_t y, bool on) {
     return;
   }
 
-  display_memory_[x][y] = on;
+  display_memory_.at(x).at(y) = on;
 }
 
 bool SimGu7000Real::GetPixel(uint16_t x, uint16_t y) const {
@@ -407,6 +433,26 @@ void SimGu7000Real::ResetCommandState() {
 // Command implementations
 void SimGu7000Real::ProcessCharacterDisplay(uint8_t character) {
   DrawCharacter(character);
+}
+
+void SimGu7000Real::ProcessCharacterDisplayAtPosition(Stream& params) {
+  uint16_t x, y;
+  ExtractXY(params, x, y);
+  uint8_t _ = params.get_uint8();  // Unused "m"
+  uint8_t len = params.get_uint8();
+  SetCursor(x, y);
+  for (unsigned i = 0; i < len; ++i) {
+    DrawCharacter(params.get_uint8());
+  }
+}
+
+uint16_t SimGu7000Real::ProcessCharacterDisplayAtPositionSize() const {
+  Stream s(command_arguments_);
+  uint16_t x, y;
+  ExtractXY(s, x, y);
+  uint8_t _ = s.get_uint8();  // Unused "m"
+  uint8_t len = s.get_uint8();
+  return len;
 }
 
 void SimGu7000Real::ProcessBackspace(Stream&) {
@@ -569,7 +615,7 @@ void SimGu7000Real::ProcessRealTimeBitImageDisplay(Stream& params, uint8_t x,
   for (uint8_t i = 0; i < (h / 8) * w; i++) {
     uint8_t byte = params.get_uint8();
     for (uint8_t j = 0; j < h; ++j) {
-      display_memory_[x + i][y + j] = byte & (1 << (7 - j));
+      SetPixel(x + i, y + j, byte & (1 << (7 - j)));
     }
   }
 }

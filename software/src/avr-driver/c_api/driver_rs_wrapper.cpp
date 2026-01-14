@@ -64,70 +64,51 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
-#if SIMULATED == 1
-  gDriver->Screen.DriverDisplayTemp(displayTemp, unit);
-#else
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerRight);
-  screen.GU7000_clearScreen();
-  screen.GU7000_setCursor(0, 0);
-  screen.print(displayTemp);
-#endif
+  screen.GU7000_setCursor(56, 8);
+  screen.print("         ");
+  screen.GU7000_setCursor(56, 8);
+  screen.print("Temp: ");
+  screen.print(displayTemp, 10);
 }
 
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
-#if SIMULATED == 1
-  gDriver->Screen.DriverDisplaySetPoint(displayTemp, unit);
-#else
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_clearScreen();
-  screen.GU7000_setCursor(0, 0);
-  screen.print(displayTemp);
-#endif
+  screen.GU7000_setCursor(0, 8);
+  screen.print("        ");
+  screen.GU7000_setCursor(0, 8);
+  screen.print("Set: ");
+  screen.print(displayTemp, 10);
 }
 
 void DriverDisplayIsHeating() {
-#if SIMULATED == 1
-  auto& screen = gDriver->Screen;
-  screen.DriverDisplayIsHeating();
-#else
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
-  screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
-  screen.print("HEAT");
-#endif
+  screen.print("Heating");
 }
 
 void DriverDisplayIsCooling() {
-#if SIMULATED == 1
-  auto& screen = gDriver->Screen;
-  screen.DriverDisplayIsCooling();
-#else
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
-  screen.GU7000_clearScreen();
   screen.GU7000_setCursor(0, 0);
-  screen.print("COOL");
-#endif
+  screen.print("Cooling");
 }
 
 void DriverDisplayIsIdle() {
-#if SIMULATED == 1
-  auto& screen = gDriver->Screen;
-  screen.DriverDisplayIsIdle();
-#else
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  // screen.GU7000_selectWindow(AvrDrivers::Gu7kWindowId::LowerLeft);
-  screen.GU7000_clearScreen();
-#endif
+  screen.GU7000_setCursor(0, 0);
+  screen.print("Idle");
+}
+
+void DriverDisplayClearScreen() {
+  AutoTwi t;
+  gDriver->Screen.GU7000_clearScreen();
 }
 
 uint8_t DriverReadTemp() {
@@ -177,8 +158,7 @@ bool DriverGetTime(ds1307_time_s& time) {
 }
 
 Noritake_VFD_GU7000& DriverGetScreenHandle() {
-  Noritake_VFD_GU7000 Screen(19);
-  return Screen;
+  return gDriver->Screen;
 }
 
 uint8_t AutoTwi::instanceCount_ = 0;

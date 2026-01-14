@@ -60,11 +60,12 @@ void Machine::TickChangeCounter() {
   }
 }
 
-void Machine::ReadTemperature() {
+void Machine::ReadTemperatureAndDisplayIfChanged() {
   LastReadTemp = DriverReadTemp();
 
   if (LastReadTemp != LastCommTemp) {
     LastCommTemp = LastReadTemp;
+    DriverDisplayTemp(LastCommTemp, SafeSaveState().TemperatureUnit());
   }
 }
 
@@ -179,6 +180,16 @@ void Machine::ReadAndApplySettings() {
   }
 }
 
+void Machine::DisplayTemperature() {
+  DriverDisplayTemp(LastCommTemp, SafeSaveState().TemperatureUnit());
+}
+
+void Machine::DisplaySetPointAndTemp() {
+  const auto& save = SafeSaveState();
+  DriverDisplaySetPoint(save.Data.set_point, (save.TemperatureUnit()));
+  DriverDisplayTemp(LastCommTemp, SafeSaveState().TemperatureUnit());
+}
+
 void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Idle(*this);
 
@@ -186,10 +197,7 @@ void Machine::start() {
 
   ReadAndApplySettings();
 
-  DriverDisplaySetPoint(SaveState().set_point,
-                        SafeSaveState().TemperatureUnit());
-
-  ReadTemperature();
+  DisplaySetPointAndTemp();
 }
 
 void Machine::receive(const Event::Base& event) {

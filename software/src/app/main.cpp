@@ -1,3 +1,4 @@
+#include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
 #include <bmodbus.h>
 #include <driver_ds1307.h>
@@ -8,6 +9,7 @@
 #include "event.hpp"
 #include "state.hpp"
 #include "states/machine.hpp"
+#include "states/program_screen.hpp"
 
 Machine machine;
 volatile bool g10MillisecondPassed = false;
@@ -115,6 +117,8 @@ int main() {
   constexpr uint32_t interFrameDelay = INTERFRAME_DELAY_MICROSECONDS(9600);
   bmodbus_client_init(&mb, interFrameDelay, 34);
 
+  ProgramScreenState::Screen_ = &DriverGetScreenHandle();
+  ScreenBox::Screen_ = &DriverGetScreenHandle();
   while (true) {
     auto state = machine.get_state_id();
 

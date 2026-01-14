@@ -56,14 +56,6 @@ class SimGu7000Real {
   static constexpr uint8_t FONT_HEIGHT = 7;
   static constexpr uint8_t ROW_HEIGHT_DOTS = (DISPLAY_HEIGHT / 2);
 
-  // State
-  enum class State {
-    Idle,
-    GettingCommand,
-    GettingCommandArguments,
-    GettingVariableArgs,
-  };
-
   // Some command constants
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_START = 0x20;
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_END = 0xFF;
@@ -78,7 +70,6 @@ class SimGu7000Real {
   uint16_t cursor_y_;
 
   // Font and display settings
-  State state_;
   std::vector<uint8_t> commandBytes_;
   bool initialized_;
   uint8_t international_font_set_;
@@ -119,10 +110,18 @@ class SimGu7000Real {
 
   // Command state tracking
 
+  enum class State {
+    Idle,
+    GettingCommand,
+    GettingCommandArguments,
+    GettingVariableArgs,
+  };
+
   typedef void (SimGu7000Real::*CommandFunction)(Stream&);
   typedef uint16_t (SimGu7000Real::*SizeGetFnFunction)() const;
 
   struct CommandItem {
+    const char* Name;
     const CommandFunction Execute;
     const SizeGetFnFunction SizeGetFn;
     const uint8_t FixedArgumentBytes;
@@ -130,9 +129,10 @@ class SimGu7000Real {
 
   typedef std::unordered_map<std::string, CommandItem> CommandMap;
 
+  State state_{State::Idle};
   static CommandMap CommandTable;
   CommandItem* CurrentCommand_{nullptr};
-  uint16_t CurrentCommandVariableBytes_;
+  uint16_t CurrentCommandVariableBytes_{0};
 
   void ExecuteCurrentCommandAndReset();
   void ResetCommandState();

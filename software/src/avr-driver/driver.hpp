@@ -1,3 +1,4 @@
+#include <Noritake_VFD_GU7000.h>
 #include <Serial/HardwareSerial.h>
 #include <driver_ds1307.h>
 #include <etl/optional.h>
@@ -6,24 +7,13 @@
 #include "ThermoSaveData_bp.h"
 #include "data_types.hpp"
 
-#if SIMULATED == 1
-#include "SimulatedGu7000/SimulatedGu7000.hpp"
-#else
-#include <Noritake_VFD_GU7000.h>
-#endif
-
 struct AvrDriverCallbacks;
 struct ThermoButtonState;
 
 struct AvrDrivers {
   AvrDrivers();
 
-#if SIMULATED == 1
-  SimulatedGu7000 Screen;
-#else
   Noritake_VFD_GU7000 Screen;
-#endif
-
   ds1307_handle_t Rtc;
   HardwareSerial& Serial_;
   TMP116 TempSensor;

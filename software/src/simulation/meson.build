@@ -1,8 +1,6 @@
-cmake = import('cmake')
-
 simulation_src = files(
     'main.cpp',
-    'sim_gu700.cpp',
+    'sim_gu7000_i2c.cpp',
     'sim_gu7000_real.cpp',
     'sim_i2c_smarter_base.cpp',
     'sim_thermostat.cpp',
@@ -32,6 +30,7 @@ executable(
         simavr_toolbox_dep,
         simavr_parts_dep,
         ftxui_toolbox_dep,
+        lodepng_dep,
     ],
     cpp_args: ['-std=c++20'],
     include_directories: [],

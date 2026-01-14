@@ -41,9 +41,11 @@ class Machine {
                              ReverseValveModeT onIfType);
   void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
-  void ReadTemperature();
+  void ReadTemperatureAndDisplayIfChanged();
   [[nodiscard]] bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
+  void DisplayTemperature();
+  void DisplaySetPointAndTemp();
 
   void start();
   void receive(const Event::Base& event);

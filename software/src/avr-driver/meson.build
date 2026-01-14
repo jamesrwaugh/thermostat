@@ -11,7 +11,6 @@ drivers_src = files(
     'DS1307/src/driver_ds1307.c',
     'GU7000/Noritake_VFD_GU7000.cpp',
     'I2C/twi/twi_master.c',
-    'SimulatedGu7000/SimulatedGu7000.cpp',
     'TMP116/tmp116.cpp',
 )
 
@@ -40,7 +39,6 @@ arv_driver = static_library(
     cpp_args: [
         '-DETL_NO_STL',
         '-fno-threadsafe-statics',
-        '-DSIMULATED=1',
         '-funsigned-char',
         '-funsigned-bitfields',
         '-fshort-enums',

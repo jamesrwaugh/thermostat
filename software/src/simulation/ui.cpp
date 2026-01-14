@@ -3,7 +3,6 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/color.hpp>
-#include <string_view>
 
 #include "ftxui-toolbox/logs_renderer.hpp"
 
@@ -128,36 +127,6 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
     });
   });
 
-  // Right Panel - Screen State
-  auto screen_panel = Renderer([this] {
-    const auto& screen_state = Thermostat_.GetScreenState();
-
-    std::string_view cool_state_str;
-    switch (screen_state.CoolState) {
-      case SimFakeGu7000::CoolStateE::Idle:
-        cool_state_str = "Idle";
-        break;
-      case SimFakeGu7000::CoolStateE::Cooling:
-        cool_state_str = "Cooling";
-        break;
-      case SimFakeGu7000::CoolStateE::Heating:
-        cool_state_str = "Heating";
-        break;
-    }
-
-    return vbox({
-        text("Screen State") | bold | center,
-        separator(),
-        vbox({
-            hbox({text("State: "), text(cool_state_str.data()) | bold}),
-            hbox({text("Set Point: "),
-                  text(std::to_string(screen_state.SetPoint)) | bold}),
-            hbox({text("Temperature: "),
-                  text(std::to_string(screen_state.Temp)) | bold}),
-        }) | border,
-    });
-  });
-
   auto logs_panel = LogsRenderer(logs);
 
   // I2C Listener Panel
@@ -167,7 +136,6 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
   auto main_layout = Container::Horizontal({
       left_panel,
       relay_panel,
-      screen_panel,
       i2c_listener_panel,
       logs_panel,
   });

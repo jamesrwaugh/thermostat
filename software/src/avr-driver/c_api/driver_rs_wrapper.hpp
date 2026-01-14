@@ -28,6 +28,7 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT);
 void DriverDisplayIsHeating();
 void DriverDisplayIsCooling();
 void DriverDisplayIsIdle();
+void DriverDisplayClearScreen();
 uint8_t DriverReadTemp();
 void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);

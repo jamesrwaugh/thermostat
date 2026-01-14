@@ -7,7 +7,10 @@
 #include "state.hpp"
 
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
-    : State::Base(stateId), machine_(machine) {}
+    : State::Base(stateId), machine_(machine) {
+  DriverDisplayClearScreen();
+  machine_.DisplaySetPointAndTemp();
+}
 
 CoolableParent::~CoolableParent() {}
 
@@ -23,7 +26,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::SecondPassed: {
-      machine_.ReadTemperature();
+      machine_.ReadTemperatureAndDisplayIfChanged();
       machine_.TickChangeCounter();
       return machine_.DetermineNextState();
     }

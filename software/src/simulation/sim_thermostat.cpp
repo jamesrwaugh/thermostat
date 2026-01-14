@@ -31,7 +31,7 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
                                    TaskReceiver& receiver)
     : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
-  Screen = std::make_unique<SimFakeGu7000>(Avr_);
+  Screen = std::make_unique<SimGu7000I2C>(Avr_);
 
   // Buttons
   UpButton =
@@ -88,10 +88,6 @@ const RelayState& SimAvrThermostat::GetRelayState() const {
   return Relays_;
 }
 
-const SimFakeGu7000::State& SimAvrThermostat::GetScreenState() const {
-  return Screen->GetState();
-}
-
 avr_t* SimAvrThermostat::GetAvr() const {
   return Avr_;
 }
@@ -140,5 +136,14 @@ void SimAvrThermostat::SendSerialMessage(std::string_view message) {
 }
 
 void SimAvrThermostat::BeforeAvrCycleSideEffect() {
+  auto now = std::chrono::steady_clock::now();
+  auto last_ms_delta =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - LastMsTick_);
+
+  if (last_ms_delta > std::chrono::milliseconds(1)) {
+    LastMsTick_ = now;
+    Screen->OnMillisecondPassed();
+  }
+
   Tmp116_->SimulateTempChange(Relays_);
 }

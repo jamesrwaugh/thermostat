@@ -440,9 +440,8 @@ void SimGu7000Real::ProcessCharacterDisplayAtPosition(Stream& params) {
   ExtractXY(params, x, y);
   uint8_t _ = params.get_uint8();  // Unused "m"
   uint8_t len = params.get_uint8();
-  SetCursor(x, y);
   for (unsigned i = 0; i < len; ++i) {
-    DrawCharacter(params.get_uint8());
+    DrawFontCharacter(x, y, params.get_uint8());
   }
 }
 

@@ -74,7 +74,6 @@ class ProgramScreenState : public State::Base {
   ProgramScreenState(State::Type stateId, const char* title, ThermoSaveData& s,
                      uint8_t boxesCount, State::Type prevState,
                      State::Type nextState);
-  ~ProgramScreenState();
 
   void InitDisplay(bool startOnEndBox);
   State::Type handle_event(const Event::Base& event) override;

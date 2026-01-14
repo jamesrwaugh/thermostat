@@ -147,6 +147,7 @@ ProgramScreenState::ProgramScreenState(State::Type stateId, const char* title,
 
 void ProgramScreenState::InitDisplay(bool startOnEndBox) {
   AutoTwi t;
+  Screen_->GU7000_clearScreen();
   Screen_->GU7000_setCursor(0, 0);
   Screen_->print(Title);
   for (uint8_t i = 0; i < BoxesCount_; ++i) {
@@ -179,11 +180,6 @@ State::Type ProgramScreenState::handle_event(const Event::Base& event) {
   }
 
   return State::Type::NO_CHANGE;
-}
-
-ProgramScreenState::~ProgramScreenState() {
-  AutoTwi t;
-  Screen_->GU7000_clearScreen();
 }
 
 State::Type ProgramScreenState::OnUpPressed() {
@@ -277,7 +273,7 @@ constexpr const char* CorFCharSet = "CF";
 constexpr uint8_t CorFLen = 2;
 
 TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTemp, "Units", s, 1,
+    : ProgramScreenState(State::Type::ProgramTemp, "Temp Unit", s, 1,
                          State::Type::Idle, State::Type::ProgramDate) {
   // Temp Unit C or F
   auto& tempUnit = s.temp_display_unit;

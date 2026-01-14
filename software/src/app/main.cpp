@@ -119,6 +119,7 @@ int main() {
 
   ProgramScreenState::Screen_ = &DriverGetScreenHandle();
   ScreenBox::Screen_ = &DriverGetScreenHandle();
+
   while (true) {
     auto state = machine.get_state_id();
 

@@ -16,10 +16,10 @@ constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
-    0b0000'1000, 
-    0b0001'1000, 
-    0b0011'1110, 
-    0b0001'1000, 
+    0b0000'1000,
+    0b0001'1000,
+    0b0011'1110,
+    0b0001'1000,
     0b0000'1000,
     0b0000'0000,
     0b0000'0000,
@@ -28,11 +28,11 @@ const uint8_t gArrowImageData[ImageWidth] = {
 
 const uint8_t gBlankImageData[ImageWidth] = {
     // clang-format off
-    0b0000'0000, 
-    0b0000'0000, 
-    0b0000'0000, 
-    0b0000'0000, 
-    0b0000'0000, 
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
     0b0000'0000,
     0b0000'0000,
     // clang-format on

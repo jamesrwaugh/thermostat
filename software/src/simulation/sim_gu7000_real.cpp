@@ -332,16 +332,18 @@ uint16_t SimGu7000Real::GetCursorY() const {
   return cursor_y_;
 }
 
-void SimGu7000Real::DrawCharacter(uint8_t character) {
+void SimGu7000Real::DrawCharacterAtCursor(uint8_t character) {
   DrawFontCharacter(cursor_x_, cursor_y_, character);
+  AdvanceCursor(cursor_x_, cursor_y_);
+}
 
-  // Advance cursor
-  cursor_x_ += FONT_WIDTH * font_magnification_x_;
-  if (cursor_x_ >= DISPLAY_WIDTH) {
-    cursor_x_ = 0;
-    cursor_y_ += FONT_HEIGHT * font_magnification_y_;
-    if (cursor_y_ >= DISPLAY_HEIGHT) {
-      cursor_y_ = 0;
+void SimGu7000Real::AdvanceCursor(uint16_t& x, uint16_t& y) const {
+  x += FONT_WIDTH * font_magnification_x_;
+  if (x >= DISPLAY_WIDTH) {
+    x = 0;
+    y += FONT_HEIGHT * font_magnification_y_;
+    if (y >= DISPLAY_HEIGHT) {
+      y = 0;
     }
   }
 }
@@ -432,7 +434,7 @@ void SimGu7000Real::ResetCommandState() {
 
 // Command implementations
 void SimGu7000Real::ProcessCharacterDisplay(uint8_t character) {
-  DrawCharacter(character);
+  DrawCharacterAtCursor(character);
 }
 
 void SimGu7000Real::ProcessCharacterDisplayAtPosition(Stream& params) {
@@ -442,6 +444,7 @@ void SimGu7000Real::ProcessCharacterDisplayAtPosition(Stream& params) {
   uint8_t len = params.get_uint8();
   for (unsigned i = 0; i < len; ++i) {
     DrawFontCharacter(x, y, params.get_uint8());
+    AdvanceCursor(x, y);
   }
 }
 

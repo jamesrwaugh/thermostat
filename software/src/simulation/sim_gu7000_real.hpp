@@ -97,7 +97,8 @@ class SimGu7000Real {
   uint16_t GetCursorY() const;
 
   // Character rendering
-  void DrawCharacter(uint8_t character);
+  void AdvanceCursor(uint16_t& x, uint16_t& y) const;
+  void DrawCharacterAtCursor(uint8_t character);
   void DrawCharacterAt(uint16_t x, uint16_t y, uint8_t character);
 
   // Helper methods
@@ -165,6 +166,7 @@ class SimGu7000Real {
   void ProcessScreenSaver(Stream& params);
   void ProcessRealTimeBitImageDisplayXy(Stream& params);
   void ProcessRealTimeBitImageDisplay(Stream& params, uint8_t x, uint8_t y);
+  uint16_t ProcessRealTimeBitImageDisplaySize() const;
   void ProcessCharacterFontWidthAndSpace(Stream& params);
   void ProcessFontMagnificationSet(Stream& params);
   void ProcessCurrentWindowSelect(Stream& params);
@@ -173,9 +175,6 @@ class SimGu7000Real {
   void ProcessSpecifyDownloadRegister(Stream& params);
   void ProcessDownloadCharacter(Stream& params);
   void ProcessDeleteDownloadedCharacter(Stream& params);
-
-  // Command Sizes
-  uint16_t ProcessRealTimeBitImageDisplaySize() const;
 
   // Utilities
   void ExtractXY(Stream& s, uint16_t& x, uint16_t& y) const;

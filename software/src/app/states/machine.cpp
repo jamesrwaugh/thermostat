@@ -54,6 +54,14 @@ void Machine::ResetStateChangeData() {
   ::new (&ChData) StateChangeData();
 }
 
+void Machine::ResetAutoTimeData() {
+  ::new (&AtData) ProgramAutoTimeData();
+}
+
+ProgramAutoTimeData& Machine::AutoTimeData() {
+  return AtData;
+}
+
 void Machine::TickChangeCounter() {
   if (ChData.StateChangeTimeoutSec < ChData.MaxStateChangeTimeoutSec) {
     ChData.StateChangeTimeoutSec += 1;
@@ -250,6 +258,12 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       break;
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);
+      break;
+    case State::Type::ProgramAutoTimeSelect:
+    case State::Type::ProgramAutoTimeDates:
+    case State::Type::ProgramAutoTimeStart:
+    case State::Type::ProgramAutoTimeEnd:
+    case State::Type::ProgramAutoTimeTemps:
       break;
   }
 }

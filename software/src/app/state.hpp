@@ -13,6 +13,11 @@ enum class Type : uint8_t {
   ProgramTemp,
   ProgramDate,
   ProgramTime,
+  ProgramAutoTimeSelect,
+  ProgramAutoTimeDates,
+  ProgramAutoTimeStart,
+  ProgramAutoTimeEnd,
+  ProgramAutoTimeTemps,
   NO_CHANGE = 0xFF,
 };
 

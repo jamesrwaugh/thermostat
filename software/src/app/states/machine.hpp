@@ -22,6 +22,10 @@ class SafeThermoSaveData {
   TemperatureUnitT TemperatureUnit() const;
 };
 
+struct ProgramAutoTimeData {
+  uint8_t Selection_{0};
+};
+
 class Machine {
  public:
   Machine();
@@ -46,6 +50,8 @@ class Machine {
   void ReadAndApplySettings();
   void DisplayTemperature();
   void DisplaySetPointAndTemp();
+  void ResetAutoTimeData();
+  ProgramAutoTimeData& AutoTimeData();
 
   void start();
   void receive(const Event::Base& event);
@@ -63,6 +69,7 @@ class Machine {
   SafeThermoSaveData SaveData;
   ThermoButtonState ButtonData;
   StateChangeData ChData;
+  ProgramAutoTimeData AtData;
   uint8_t LastReadTemp{0};
   uint8_t LastCommTemp{0};
 

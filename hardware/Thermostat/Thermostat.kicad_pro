@@ -495,13 +495,13 @@
       },
       {
         "clearance": 0.2,
-        "name": "BigPower",
+        "name": "MegaPower",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 1.5,
-        "via_diameter": 0.8,
-        "via_drill": 0.8
+        "via_diameter": 1.5,
+        "via_drill": 1.5
       },
       {
         "bus_width": 12,
@@ -515,7 +515,7 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 1,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
+        "track_width": 0.6,
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
@@ -539,16 +539,16 @@
         "Power"
       ],
       "Net-(J4-Pin_2)": [
-        "Power"
+        "MegaPower"
       ],
       "Net-(J4-Pin_3)": [
-        "Power"
+        "MegaPower"
       ],
       "Net-(J4-Pin_4)": [
-        "Power"
+        "MegaPower"
       ],
       "Net-(J4-Pin_5)": [
-        "Power"
+        "MegaPower"
       ]
     },
     "netclass_patterns": [
@@ -561,15 +561,15 @@
         "pattern": "+5V"
       },
       {
-        "netclass": "BigPower",
+        "netclass": "MegaPower",
         "pattern": "24VAC*"
       },
       {
-        "netclass": "BigPower",
+        "netclass": "MegaPower",
         "pattern": "24VDC"
       },
       {
-        "netclass": "BigPower",
+        "netclass": "MegaPower",
         "pattern": "/Compressor"
       }
     ]

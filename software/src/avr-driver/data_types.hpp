@@ -1,16 +1,17 @@
 #pragma once
 
+#include <ThermoSaveData_bp.h>
 #include <stdint.h>
 
 enum class FanModeT : uint8_t {
-  On = 0,
-  Auto = 1,
+  On = FANMODE_ON,
+  Auto = FANMODE_AUTO,
 };
 
 enum class HeatModeT : uint8_t {
-  Heating = 0,
-  Cooling = 1,
-  None = 2,
+  Heating = HEATMODE_HEAT,
+  Cooling = HEATMODE_COOL,
+  None = HEATMODE_NONE,
 };
 
 enum class ReverseValveModeT : uint8_t {
@@ -19,8 +20,8 @@ enum class ReverseValveModeT : uint8_t {
 };
 
 enum class TemperatureUnitT : uint8_t {
-  Freedom,
-  Celsius,
+  Freedom = TEMP_UNIT_FREEDOM,
+  Celsius = TEMP_UNIT_CELSIUS,
 };
 
 enum class Relay : uint8_t {
@@ -34,11 +35,8 @@ enum class Button : uint8_t {
   Up = 0,
   Down,
   Select,
-  TempHeat,
-  TempCold,
-  TempNone,
-  FanAuto,
-  FanOn,
+  Fan,
+  Heat,
   ReverseValveOnHeat,
   ReverseValveOnCool,
 };

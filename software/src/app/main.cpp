@@ -24,20 +24,11 @@ void OnButtonPressed(Button b) {
     case Button::Select:
       machine.receive(Event::SelectButtonPressed());
       break;
-    case Button::TempHeat:
-      machine.receive(Event::HeatModeChanged(HeatModeT::Heating));
+    case Button::Fan:
+      machine.receive(Event::FanButtonPressed());
       break;
-    case Button::TempCold:
-      machine.receive(Event::HeatModeChanged(HeatModeT::Cooling));
-      break;
-    case Button::TempNone:
-      machine.receive(Event::HeatModeChanged(HeatModeT::None));
-      break;
-    case Button::FanAuto:
-      machine.receive(Event::FanModeChanged(FanModeT::Auto));
-      break;
-    case Button::FanOn:
-      machine.receive(Event::FanModeChanged(FanModeT::On));
+    case Button::Heat:
+      machine.receive(Event::HeatButtonPressed());
       break;
     case Button::ReverseValveOnHeat:
       machine.receive(

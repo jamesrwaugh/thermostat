@@ -39,14 +39,12 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
   DownButton =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 2), false);
   SelectButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 5), false);
   ReverseValveSwitch =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
-  TempHeat =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 4), false);
-  TempCool =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 5), false);
-  FanSwitch =
+  HeatButton =
+      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
+  FanButton =
       std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 6), false);
 
   // TMP116
@@ -104,31 +102,16 @@ void SimAvrThermostat::PushSelectButton() {
   Post([this]() { SelectButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
-void SimAvrThermostat::SwitchHeatingHeat() {
-  Post([this]() { TempCool->Open(); });
-  Post([this]() { TempHeat->Close(); });
+void SimAvrThermostat::PushFanButton() {
+  Post([this]() { FanButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
-void SimAvrThermostat::SwitchHeatingCooling() {
-  Post([this]() { TempHeat->Open(); });
-  Post([this]() { TempCool->Close(); });
-}
-
-void SimAvrThermostat::SwitchHeatingNone() {
-  Post([this]() { TempHeat->Open(); });
-  Post([this]() { TempCool->Open(); });
-}
-
-void SimAvrThermostat::SwitchFanOn() {
-  Post([this]() { FanSwitch->Close(); });
-}
-
-void SimAvrThermostat::SwitchFanAuto() {
-  Post([this]() { FanSwitch->Open(); });
+void SimAvrThermostat::PushHeatButton() {
+  Post([this]() { HeatButton->CloseForMs(std::chrono::milliseconds(100)); });
 }
 
 void SimAvrThermostat::SwitchReverseValve(bool onForHeat) {
-  Post([this, onForHeat]() { FanSwitch->Set(onForHeat); });
+  Post([this, onForHeat]() { ReverseValveSwitch->Set(onForHeat); });
 }
 
 void SimAvrThermostat::SendSerialMessage(std::string_view message) {

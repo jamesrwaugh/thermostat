@@ -16,9 +16,7 @@ struct AvrDriverCallbacks {
 };
 
 struct ThermoButtonState {
-  FanModeT FanState;
-  HeatModeT HeatingState;
-  ReverseValveModeT ReverseValveState;
+  ReverseValveModeT ReverseValveState{ReverseValveModeT::OnForCooling};
 };
 
 void DriverInit();

@@ -30,9 +30,8 @@ void SimGu7000I2C::OnDataReceived(const std::vector<uint8_t>& data) {
 
 void SimGu7000I2C::WriteDisplayMemoryToPng() {
   const auto& memory = screen_.GetDisplayMemory();
-
-  unsigned width = SimGu7000Real::DISPLAY_WIDTH,
-           height = SimGu7000Real::DISPLAY_HEIGHT;
+  unsigned width = screen_.Width();
+  unsigned height = screen_.Height();
 
   std::vector<unsigned char> image;
   image.resize(width * height * 4);

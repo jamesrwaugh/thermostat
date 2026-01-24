@@ -167,50 +167,32 @@ struct DebounceState {
 DebounceState UpButton;
 DebounceState DownButton;
 DebounceState SelectButton;
-DebounceState FanOnButton;
-DebounceState FanAutoButton;
-DebounceState TempHeatButton;
-DebounceState TempCoolButton;
-DebounceState TempNoneButton;
+DebounceState FanButton;
+DebounceState HeatButton;
 
 int8_t AvrDrivers::ReadInput() {
   uint8_t pind = PIND;
   int8_t button = -1;
 
-  bool tempNoneInput = !((pind & _BV(PIND4)) && (pind & _BV(PIND5)));
-
   if (UpButton.Add(pind & _BV(PIND3))) {
     button = static_cast<int8_t>(Button::Up);
   } else if (DownButton.Add(pind & _BV(PIND2))) {
     button = static_cast<int8_t>(Button::Down);
-  } else if (SelectButton.Add(pind & _BV(PIND7))) {
+  } else if (SelectButton.Add(pind & _BV(PIND5))) {
     button = static_cast<int8_t>(Button::Select);
-  } else if (FanOnButton.Add(pind & _BV(PIND6))) {
-    button = static_cast<int8_t>(Button::FanOn);
-  } else if (FanAutoButton.Add(!(pind & _BV(PIND6)))) {
-    button = static_cast<int8_t>(Button::FanAuto);
-  } else if (TempHeatButton.Add(pind & _BV(PIND4))) {
-    button = static_cast<int8_t>(Button::TempHeat);
-  } else if (TempCoolButton.Add(pind & _BV(PIND5))) {
-    button = static_cast<int8_t>(Button::TempCold);
-  } else if (TempNoneButton.Add(tempNoneInput)) {
-    button = static_cast<int8_t>(Button::TempNone);
+  } else if (HeatButton.Add(pind & _BV(PIND7))) {
+    button = static_cast<int8_t>(Button::Heat);
+  } else if (FanButton.Add(pind & _BV(PIND6))) {
+    button = static_cast<int8_t>(Button::Fan);
   }
 
   return button;
 }
 
 void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
-  bool heatingOn = (PIND & _BV(PIND4)) != 0;
-  bool coolingOn = (PIND & _BV(PIND5)) != 0;
   bool reverseHeat = (PINC & _BV(PINC3)) != 0;
-  bool fanOn = (PIND & _BV(PIND6)) != 0;
   data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
                                         : ReverseValveModeT::OnForCooling;
-  data->FanState = fanOn ? FanModeT::On : FanModeT::Auto;
-  data->HeatingState = heatingOn   ? HeatModeT::Heating
-                       : coolingOn ? HeatModeT::Cooling
-                                   : HeatModeT::None;
 }
 
 void AvrDrivers::RelayOn(Relay r) const {

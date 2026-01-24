@@ -20,6 +20,10 @@ class SafeThermoSaveData {
   SafeThermoSaveData(const ThermoSaveData& other);
   ThermoSaveData Data;
   TemperatureUnitT TemperatureUnit() const;
+  HeatModeT HeatMode() const;
+  FanModeT FanMode() const;
+  FanModeT BumpFanMode();
+  HeatModeT BumpHeatingMode();
 };
 
 struct ProgramAutoTimeData {
@@ -28,14 +32,11 @@ struct ProgramAutoTimeData {
 
 class Machine {
  public:
-  Machine();
-
   void SetThermoSaveData(const ThermoSaveData& raw);
   void SetThermoButtonState(const ThermoButtonState& raw);
   [[nodiscard]] ThermoButtonState& ButtonState();
-  [[nodiscard]] ThermoSaveData& SaveState();
-  [[nodiscard]] const ThermoSaveData& SaveState() const;
   [[nodiscard]] const SafeThermoSaveData& SafeSaveState() const;
+  [[nodiscard]] SafeThermoSaveData& SafeSaveState();
   void ResetStateChangeData();
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;

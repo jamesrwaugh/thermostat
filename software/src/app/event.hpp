@@ -8,10 +8,10 @@ enum class Type : uint8_t {
   UpButtonPressed = 0,
   DownButtonPressed,
   SelectButtonPressed,
+  FanButtonPushed,
+  HeatButtonPushed,
   HalfSecondPassed,
   SecondPassed,
-  FanModeChanged,
-  HeatModeChanged,
   ReverseValveModeChanged
 };
 
@@ -32,24 +32,20 @@ struct SelectButtonPressed : Base {
   SelectButtonPressed() : Base(Event::Type::SelectButtonPressed) {}
 };
 
+struct HeatButtonPressed : Base {
+  HeatButtonPressed() : Base(Event::Type::HeatButtonPushed) {}
+};
+
+struct FanButtonPressed : Base {
+  FanButtonPressed() : Base(Event::Type::FanButtonPushed) {}
+};
+
 struct HalfSecondPassed : Base {
   HalfSecondPassed() : Base(Event::Type::HalfSecondPassed) {}
 };
 
 struct SecondPassed : Base {
   SecondPassed() : Base(Event::Type::SecondPassed) {}
-};
-
-struct FanModeChanged : Base {
-  FanModeChanged(FanModeT mode)
-      : Base(Event::Type::FanModeChanged), Mode(mode) {}
-  const FanModeT Mode;
-};
-
-struct HeatModeChanged : Base {
-  HeatModeChanged(HeatModeT mode)
-      : Base(Event::Type::HeatModeChanged), Mode(mode) {}
-  const HeatModeT Mode;
 };
 
 struct ReverseValveModeChanged : Base {

@@ -312,6 +312,14 @@ const SimGu7000Real::DisplayMemory& SimGu7000Real::GetDisplayMemory() const {
   return display_memory_;
 }
 
+uint8_t SimGu7000Real::Width() const {
+  return DISPLAY_WIDTH;
+}
+
+uint8_t SimGu7000Real::Height() const {
+  return DISPLAY_HEIGHT;
+}
+
 void SimGu7000Real::ClearDisplayMemory() {
   for (auto& column : display_memory_) {
     column.fill(false);

@@ -11634,7 +11634,7 @@
 		)
 	)
 	(gr_text "FAN"
-		(at 141.05 124.236 0)
+		(at 123 124 0)
 		(layer "F.SilkS")
 		(uuid "a6ab6d42-44d4-43f0-b6ea-f1e4b8d1223f")
 		(effects
@@ -11660,7 +11660,7 @@
 		)
 	)
 	(gr_text "HEAT"
-		(at 123.05 124.236 0)
+		(at 140.75 123.75 0)
 		(layer "F.SilkS")
 		(uuid "d710d38e-9226-45f3-9941-ce27438d944a")
 		(effects
@@ -14973,6 +14973,14 @@
 		(uuid "44886ac0-0b04-4a43-9e96-4ea967b6cfcd")
 	)
 	(segment
+		(start 189.738 55.552)
+		(end 190.083 55.207)
+		(width 0.5)
+		(layer "F.Cu")
+		(net 26)
+		(uuid "0be8b123-2b5e-46eb-8c21-d0a9c7b94972")
+	)
+	(segment
 		(start 185.9156 80.0844)
 		(end 185.9156 94.4434)
 		(width 0.5)
@@ -14986,7 +14994,7 @@
 		(width 0.5)
 		(layer "F.Cu")
 		(net 26)
-		(uuid "5f0e0f97-6cb1-4088-8df1-bdabacd6fe41")
+		(uuid "4237724c-5f5e-4cfa-9d89-31c6699367ed")
 	)
 	(segment
 		(start 188.022 77.978)
@@ -14995,14 +15003,6 @@
 		(layer "F.Cu")
 		(net 26)
 		(uuid "aca8393b-d011-4800-95c7-965eebc62e8e")
-	)
-	(segment
-		(start 189.738 55.552)
-		(end 190.083 55.207)
-		(width 0.5)
-		(layer "F.Cu")
-		(net 26)
-		(uuid "c1abcac3-0c20-42b8-a22d-a6b68f21ac1c")
 	)
 	(segment
 		(start 189.738 77.978)

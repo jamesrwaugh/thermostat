@@ -4488,9 +4488,9 @@
 		)
 		(uuid "0ae47314-f0d0-463a-bc55-35c8fe79aa9e")
 	)
-	(text "HEAT/COOL"
+	(text "HEAT/COOL/NONE"
 		(exclude_from_sim no)
-		(at 85.852 166.878 0)
+		(at 89.408 166.878 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4500,7 +4500,7 @@
 	)
 	(text "FAN ON/AUTO"
 		(exclude_from_sim no)
-		(at 90.678 171.704 0)
+		(at 86.868 171.45 0)
 		(effects
 			(font
 				(size 1.27 1.27)

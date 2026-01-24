@@ -14,14 +14,14 @@ class Stream {
  public:
   Stream(const std::vector<uint8_t>& data) : data_(data.begin(), data.end()) {}
 
-  uint8_t get_uint8() {
-    return next();
-  }
-
   uint16_t get_uint16le() {
     auto lo = get_uint8();
     auto hi = get_uint8();
     return (hi << 8) | lo;
+  }
+
+  uint8_t get_uint8() {
+    return next();
   }
 
  private:
@@ -59,7 +59,6 @@ class SimGu7000Real {
   // Some command constants
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_START = 0x20;
   static constexpr uint8_t CMD_CHARACTER_DISPLAY_END = 0xFF;
-  static constexpr std::array<uint8_t, 2> init_command_ = {0x1b, 0x40};
 
   // Display memory: 112x16 pixels as bool array
   // Each element represents one pixel

@@ -2,6 +2,7 @@
 
 #include <HardwareSerial.h>
 #include <avr/interrupt.h>
+#include <avr/io.h>
 #include <driver_ds1307.h>
 #include <twi_master.h>
 
@@ -215,16 +216,16 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
 void AvrDrivers::RelayOn(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC |= _BV(PORTC0);
-      break;
-    case Relay::Compressor:
-      PORTB |= _BV(PORTB2);
-      break;
-    case Relay::Heat:
       PORTC |= _BV(PORTC1);
       break;
-    case Relay::ReversingValve:
+    case Relay::Compressor:
       PORTC |= _BV(PORTC2);
+      break;
+    case Relay::Heat:
+      PORTC |= _BV(PORTC0);
+      break;
+    case Relay::ReversingValve:
+      PORTB |= _BV(PORTB2);
       break;
   }
 }
@@ -232,16 +233,16 @@ void AvrDrivers::RelayOn(Relay r) const {
 void AvrDrivers::RelayOff(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC &= ~_BV(PORTC0);
-      break;
-    case Relay::Compressor:
-      PORTB &= ~_BV(PORTB2);
-      break;
-    case Relay::Heat:
       PORTC &= ~_BV(PORTC1);
       break;
+    case Relay::Compressor:
+      PORTC &= ~_BV(PORTB2);
+      break;
+    case Relay::Heat:
+      PORTC &= ~_BV(PORTC0);
+      break;
     case Relay::ReversingValve:
-      PORTC &= ~_BV(PORTC2);
+      PORTB &= ~_BV(PORTB2);
       break;
   }
 }

@@ -66,7 +66,6 @@ enum Charset {
 };
 
 class Noritake_VFD_GU7000 {
-  const uint8_t BusyPin_;
   void initialState();
   void printNumber(unsigned long number, uint8_t base);
   void printNumber(unsigned x, uint8_t y, unsigned long number, uint8_t base);
@@ -78,7 +77,6 @@ class Noritake_VFD_GU7000 {
   void crlf();
 
  public:
-  Noritake_VFD_GU7000(uint8_t busyPin);
   void GU7000_back();
   void GU7000_forward();
   void GU7000_lineFeed();

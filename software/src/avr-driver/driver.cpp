@@ -9,7 +9,7 @@
 
 etl::optional<AvrDrivers> gDriver;
 
-AvrDrivers::AvrDrivers() : Screen(19), Serial_(Serial) {}
+AvrDrivers::AvrDrivers() : Serial_(Serial) {}
 
 void AvrDrivers::Setup() {
   SetupPins();
@@ -62,7 +62,7 @@ void AvrDrivers::SetupPins() {
 
 void initPort() {}
 
-void writePort(const uint8_t data, const uint8_t busyPin) {
+void writePort(const uint8_t data) {
   while (PINB & _BV(PINB1)) {
     ;
   }

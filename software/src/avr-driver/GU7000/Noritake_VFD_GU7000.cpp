@@ -7,15 +7,25 @@
 #include "config.h"
 #include "interface.h"
 
-void Noritake_VFD_GU7000::GU7000_back() { command(0x08); }
+void Noritake_VFD_GU7000::GU7000_back() {
+  command(0x08);
+}
 
-void Noritake_VFD_GU7000::GU7000_forward() { command(0x09); }
+void Noritake_VFD_GU7000::GU7000_forward() {
+  command(0x09);
+}
 
-void Noritake_VFD_GU7000::GU7000_lineFeed() { command(0x0a); }
+void Noritake_VFD_GU7000::GU7000_lineFeed() {
+  command(0x0a);
+}
 
-void Noritake_VFD_GU7000::GU7000_home() { command(0x0b); }
+void Noritake_VFD_GU7000::GU7000_home() {
+  command(0x0b);
+}
 
-void Noritake_VFD_GU7000::GU7000_carriageReturn() { command(0x0d); }
+void Noritake_VFD_GU7000::GU7000_carriageReturn() {
+  command(0x0d);
+}
 
 void Noritake_VFD_GU7000::GU7000_setCursor(unsigned x, unsigned y) {
   command(0x1f);
@@ -23,11 +33,17 @@ void Noritake_VFD_GU7000::GU7000_setCursor(unsigned x, unsigned y) {
   command_xy(x, y);
 }
 
-void Noritake_VFD_GU7000::GU7000_clearScreen() { command(0x0c); }
+void Noritake_VFD_GU7000::GU7000_clearScreen() {
+  command(0x0c);
+}
 
-void Noritake_VFD_GU7000::GU7000_cursorOn() { command(0x1f, 'C', 1); }
+void Noritake_VFD_GU7000::GU7000_cursorOn() {
+  command(0x1f, 'C', 1);
+}
 
-void Noritake_VFD_GU7000::GU7000_cursorOff() { command(0x1f, 'C', 0); }
+void Noritake_VFD_GU7000::GU7000_cursorOff() {
+  command(0x1f, 'C', 0);
+}
 
 void Noritake_VFD_GU7000::GU7000_init() {
   _delay_ms(NORITAKE_VFD_RESET_DELAY);
@@ -36,10 +52,12 @@ void Noritake_VFD_GU7000::GU7000_init() {
   command('@');
 }
 
-void Noritake_VFD_GU7000::GU7000_reset() { hardReset(); }
+void Noritake_VFD_GU7000::GU7000_reset() {
+  hardReset();
+}
 
 void Noritake_VFD_GU7000::GU7000_useMultibyteChars(bool enable) {
-#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 ||                            \
+#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 || \
     (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 1
   us_command('g', 0x02);
   command(enable);
@@ -47,7 +65,7 @@ void Noritake_VFD_GU7000::GU7000_useMultibyteChars(bool enable) {
 }
 
 void Noritake_VFD_GU7000::GU7000_setMultibyteCharset(uint8_t code) {
-#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 ||                            \
+#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 || \
     (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 1
   us_command('g', 0x0f);
   command(code);
@@ -58,36 +76,34 @@ void Noritake_VFD_GU7000::GU7000_useCustomChars(bool enable) {
   command(0x1b, '%', enable);
 }
 
-static inline uint8_t getColumn(const uint8_t *src, int col) {
+static inline uint8_t getColumn(const uint8_t* src, int col) {
   uint8_t out = 0;
   for (int i = 0; i < 8; i++)
-    if (src[i] & (1 << (4 - col)))
-      out += 1 << (7 - i);
+    if (src[i] & (1 << (4 - col))) out += 1 << (7 - i);
   return out;
 }
 
 void Noritake_VFD_GU7000::GU7000_defineCustomChar(uint8_t code,
                                                   FontFormat format,
-                                                  const uint8_t *data) {
+                                                  const uint8_t* data) {
   command(0x1b, '&', 0x01);
   command(code);
   command(code);
 
   switch (format) {
-  case CUUFormat:
-    command(5);
-    for (uint8_t i = 0; i < 5; i++)
-      command(getColumn(data, i));
-    break;
+    case CUUFormat:
+      command(5);
+      for (uint8_t i = 0; i < 5; i++) command(getColumn(data, i));
+      break;
 
-  case GU70005x7Format:
-    command(5);
-    print((const char *)data, 5);
-    break;
-  case GU70007x8Format:
-    command(7);
-    print((const char *)data, 7);
-    break;
+    case GU70005x7Format:
+      command(5);
+      print((const char*)data, 5);
+      break;
+    case GU70007x8Format:
+      command(7);
+      print((const char*)data, 7);
+      break;
   }
 }
 
@@ -113,9 +129,13 @@ void Noritake_VFD_GU7000::GU7000_setHorizScrollSpeed(uint8_t speed) {
   command(0x1f, 's', speed);
 }
 
-void Noritake_VFD_GU7000::GU7000_invertOff() { command(0x1f, 'r', 0); }
+void Noritake_VFD_GU7000::GU7000_invertOff() {
+  command(0x1f, 'r', 0);
+}
 
-void Noritake_VFD_GU7000::GU7000_invertOn() { command(0x1f, 'r', 1); }
+void Noritake_VFD_GU7000::GU7000_invertOn() {
+  command(0x1f, 'r', 1);
+}
 
 void Noritake_VFD_GU7000::GU7000_setCompositionMode(CompositionMode mode) {
   command(0x1f, 'w', mode);
@@ -190,7 +210,7 @@ void Noritake_VFD_GU7000::GU7000_setFontSize(uint8_t x, uint8_t y, bool tall) {
     us_command('g', 0x40);
     command(x);
     command(y);
-#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 ||                            \
+#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 || \
     (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 1
     us_command('g', 0x01);
     command(tall + 1);
@@ -199,8 +219,7 @@ void Noritake_VFD_GU7000::GU7000_setFontSize(uint8_t x, uint8_t y, bool tall) {
 }
 
 void Noritake_VFD_GU7000::GU7000_selectWindow(uint8_t window) {
-  if (window <= 4)
-    command(0x10 + window);
+  if (window <= 4) command(0x10 + window);
 }
 
 void Noritake_VFD_GU7000::GU7000_defineWindow(uint8_t window, unsigned x,
@@ -231,16 +250,16 @@ void Noritake_VFD_GU7000::GU7000_separateScreens() {
   command(0);
 }
 
-void Noritake_VFD_GU7000::print(char c) { command(c); }
-
-void Noritake_VFD_GU7000::print(const char *str) {
-  while (*str)
-    writePort(*str++, BusyPin_);
+void Noritake_VFD_GU7000::print(char c) {
+  command(c);
 }
 
-void Noritake_VFD_GU7000::print(const char *buffer, size_t size) {
-  while (size--)
-    print(*buffer++);
+void Noritake_VFD_GU7000::print(const char* str) {
+  while (*str) writePort(*str++);
+}
+
+void Noritake_VFD_GU7000::print(const char* buffer, size_t size) {
+  while (size--) print(*buffer++);
 }
 
 void Noritake_VFD_GU7000::print(long number, uint8_t base) {
@@ -273,12 +292,12 @@ void Noritake_VFD_GU7000::println(char c) {
   crlf();
 }
 
-void Noritake_VFD_GU7000::println(const char *str) {
+void Noritake_VFD_GU7000::println(const char* str) {
   print(str);
   crlf();
 }
 
-void Noritake_VFD_GU7000::println(const char *buffer, size_t size) {
+void Noritake_VFD_GU7000::println(const char* buffer, size_t size) {
   print(buffer, size);
   crlf();
 }
@@ -302,8 +321,7 @@ void Noritake_VFD_GU7000::println(unsigned number, uint8_t base) {
 }
 
 void Noritake_VFD_GU7000::printNumber(unsigned long number, uint8_t base) {
-  if (number / base)
-    printNumber(number / base, base);
+  if (number / base) printNumber(number / base, base);
   number %= base;
   print(number + (number < 10 ? '0' : 'A' - 10));
 }
@@ -324,23 +342,20 @@ void Noritake_VFD_GU7000::GU7000_setBacklightColor(unsigned rgb) {
 }
 
 void Noritake_VFD_GU7000::GU7000_drawImage(unsigned width, uint8_t height,
-                                           const uint8_t *data) {
-  if (height > NORITAKE_VFD_HEIGHT)
-    return;
+                                           const uint8_t* data) {
+  if (height > NORITAKE_VFD_HEIGHT) return;
   us_command('f', 0x11);
   command_xy(width, height);
   command((uint8_t)1);
-  for (unsigned i = 0; i < (height / 8) * width; i++)
-    command(data[i]);
+  for (unsigned i = 0; i < (height / 8) * width; i++) command(data[i]);
 }
 
 void Noritake_VFD_GU7000::GU7000_drawFROMImage(unsigned long address,
                                                uint8_t srcHeight,
                                                unsigned width, uint8_t height) {
-#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 ||                            \
+#if (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 9 || \
     (NORITAKE_VFD_MODEL_CLASS - 7000) / 100 == 1
-  if (height > NORITAKE_VFD_HEIGHT)
-    return;
+  if (height > NORITAKE_VFD_HEIGHT) return;
   us_command('f', 0x10);
   command(0x01);
   command(address);
@@ -353,7 +368,9 @@ void Noritake_VFD_GU7000::GU7000_drawFROMImage(unsigned long address,
 #endif
 }
 
-static unsigned min(unsigned x, unsigned y) { return x < y ? x : y; }
+static unsigned min(unsigned x, unsigned y) {
+  return x < y ? x : y;
+}
 
 void Noritake_VFD_GU7000::GU7000_fillRect(unsigned x0, unsigned y0, unsigned x1,
                                           unsigned y1, bool on) {
@@ -361,10 +378,9 @@ void Noritake_VFD_GU7000::GU7000_fillRect(unsigned x0, unsigned y0, unsigned x1,
   x1 = min(NORITAKE_VFD_WIDTH, x1);
   y0 = min(NORITAKE_VFD_HEIGHT, y0);
   y1 = min(NORITAKE_VFD_HEIGHT, y1);
-  if (y1 <= y0 || x1 <= x0)
-    return;
+  if (y1 <= y0 || x1 <= x0) return;
   uint8_t bufw = 8, bufh = (y1 - y0 + 7) / 8 * 8;
-  uint8_t *buf = (uint8_t *)alloca(bufh / 8 * bufw);
+  uint8_t* buf = (uint8_t*)alloca(bufh / 8 * bufw);
   for (unsigned x = 0; x < x1 - x0; x += bufw) {
     uint8_t part = (x + bufw < x1 - x0) ? bufw : (x1 - x0) - x;
     memset(buf, 0, bufh / 8 * bufw);
@@ -383,7 +399,9 @@ void Noritake_VFD_GU7000::GU7000_fillRect(unsigned x0, unsigned y0, unsigned x1,
   }
 }
 
-void Noritake_VFD_GU7000::command(uint8_t data) { writePort(data, BusyPin_); }
+void Noritake_VFD_GU7000::command(uint8_t data) {
+  writePort(data);
+}
 
 void Noritake_VFD_GU7000::command_xy(unsigned x, unsigned y) {
   command(x);
@@ -413,19 +431,18 @@ void Noritake_VFD_GU7000::command(uint8_t prefix, uint8_t group, uint8_t cmd) {
   command(cmd);
 }
 
-void Noritake_VFD_GU7000::print(unsigned x, uint8_t y, const char *buffer,
+void Noritake_VFD_GU7000::print(unsigned x, uint8_t y, const char* buffer,
                                 uint8_t len) {
 #if NORITAKE_VFD_GENERATION == 'B'
   us_command('d', 0x30);
   command_xy1(x, y);
   command(0);
   command(len);
-  while (len--)
-    command(*buffer++);
+  while (len--) command(*buffer++);
 #endif
 }
 
-void Noritake_VFD_GU7000::print(unsigned x, uint8_t y, const char *str) {
+void Noritake_VFD_GU7000::print(unsigned x, uint8_t y, const char* str) {
 #if NORITAKE_VFD_GENERATION == 'B'
   print(x, y, str, strlen(str));
 #endif
@@ -449,22 +466,20 @@ void Noritake_VFD_GU7000::print(unsigned x, uint8_t y, unsigned number,
                                 uint8_t base) {
 #if NORITAKE_VFD_GENERATION == 'B'
   char buf[16], *p = buf + sizeof buf;
-  do
-    *--p = number % base + (number % base < 10 ? '0' : 'A' - 10);
+  do *--p = number % base + (number % base < 10 ? '0' : 'A' - 10);
   while (number /= base);
   print(x, y, p, buf + sizeof buf - p);
 #endif
 }
 void Noritake_VFD_GU7000::GU7000_drawImage(unsigned x, uint8_t y,
                                            unsigned width, uint8_t height,
-                                           const uint8_t *data) {
+                                           const uint8_t* data) {
 #if NORITAKE_VFD_GENERATION == 'B'
   us_command('d', 0x21);
   command_xy1(x, y);
   command_xy1(width, height);
   command(0x01);
-  for (unsigned i = 0; i < (height / 8) * width; i++)
-    command(data[i]);
+  for (unsigned i = 0; i < (height / 8) * width; i++) command(data[i]);
 #endif
 }
 void Noritake_VFD_GU7000::GU7000_drawImage(unsigned x, uint8_t y,
@@ -474,8 +489,7 @@ void Noritake_VFD_GU7000::GU7000_drawImage(unsigned x, uint8_t y,
                                            uint8_t height, unsigned offsetx,
                                            unsigned offsety) {
 #if NORITAKE_VFD_GENERATION == 'B'
-  if (height > NORITAKE_VFD_HEIGHT)
-    return;
+  if (height > NORITAKE_VFD_HEIGHT) return;
   us_command('d', 0x20);
   command_xy1(x, y);
   command(area);
@@ -499,35 +513,32 @@ void Noritake_VFD_GU7000::GU7000_drawImage(unsigned x, uint8_t y,
 #endif
 }
 
-void Noritake_VFD_GU7000::print_p(const char *str) {
-  while (pgm_read_byte(str))
-    writePort(pgm_read_byte(str++), BusyPin_);
+void Noritake_VFD_GU7000::print_p(const char* str) {
+  while (pgm_read_byte(str)) writePort(pgm_read_byte(str++));
 }
-void Noritake_VFD_GU7000::print_p(unsigned x, uint8_t y, const char *buffer,
+
+void Noritake_VFD_GU7000::print_p(unsigned x, uint8_t y, const char* buffer,
                                   uint8_t len) {
 #if NORITAKE_VFD_GENERATION == 'B'
   us_command('d', 0x30);
   command_xy1(x, y);
   command(0);
   command(len);
-  while (len--)
-    command(pgm_read_byte(buffer++));
+  while (len--) command(pgm_read_byte(buffer++));
 #endif
 }
 
-void Noritake_VFD_GU7000::print_p(unsigned x, uint8_t y, const char *str) {
+void Noritake_VFD_GU7000::print_p(unsigned x, uint8_t y, const char* str) {
 #if NORITAKE_VFD_GENERATION == 'B'
-  const char *end = str;
-  while (pgm_read_byte(end))
-    end++;
+  const char* end = str;
+  while (pgm_read_byte(end)) end++;
   print_p(x, y, str, end - str);
 #endif
 }
 
 void Noritake_VFD_GU7000::GU7000_drawImage_p(unsigned width, uint8_t height,
-                                             const uint8_t *data) {
-  if (height > NORITAKE_VFD_HEIGHT)
-    return;
+                                             const uint8_t* data) {
+  if (height > NORITAKE_VFD_HEIGHT) return;
   us_command('f', 0x11);
   command_xy(width, height);
   command((uint8_t)1);
@@ -537,7 +548,7 @@ void Noritake_VFD_GU7000::GU7000_drawImage_p(unsigned width, uint8_t height,
 
 void Noritake_VFD_GU7000::GU7000_drawImage_p(unsigned x, uint8_t y,
                                              unsigned width, uint8_t height,
-                                             const uint8_t *data) {
+                                             const uint8_t* data) {
 #if NORITAKE_VFD_GENERATION == 'B'
   us_command('d', 0x21);
   command_xy1(x, y);
@@ -547,6 +558,3 @@ void Noritake_VFD_GU7000::GU7000_drawImage_p(unsigned x, uint8_t y,
     command(pgm_read_byte(data + i));
 #endif
 }
-
-Noritake_VFD_GU7000::Noritake_VFD_GU7000(uint8_t busyPin)
-    : BusyPin_{busyPin} {};

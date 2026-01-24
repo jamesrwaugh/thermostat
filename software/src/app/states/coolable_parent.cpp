@@ -30,22 +30,20 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       machine_.TickChangeCounter();
       return machine_.DetermineNextState();
     }
-    case Event::Type::FanModeChanged: {
-      const auto& fanEvent = static_cast<const Event::FanModeChanged&>(event);
-      machine_.ButtonState().FanState = fanEvent.Mode;
+    case Event::Type::FanButtonPushed: {
+      const auto fanMode = machine_.SafeSaveState().BumpFanMode();
 
-      if (fanEvent.Mode == FanModeT::On) {
+      if (fanMode == FanModeT::On) {
         DriverRelayOn(Relay::Fan);
-      } else if (fanEvent.Mode == FanModeT::Auto &&
+      } else if (fanMode == FanModeT::Auto &&
                  !machine_.IsHeatingOrCoolingNow()) {
         DriverRelayOff(Relay::Fan);
       }
 
       return State::Type::NO_CHANGE;
     }
-    case Event::Type::HeatModeChanged: {
-      const auto& heatEvent = static_cast<const Event::HeatModeChanged&>(event);
-      machine_.ButtonState().HeatingState = heatEvent.Mode;
+    case Event::Type::HeatButtonPushed: {
+      machine_.SafeSaveState().BumpHeatingMode();
       return machine_.DetermineNextState();
     }
     case Event::Type::ReverseValveModeChanged: {

@@ -46,6 +46,8 @@ class SimGu7000Real {
 
   SimGu7000Real();
   void ProcessCommand(uint8_t command);
+  uint8_t Width() const;
+  uint8_t Height() const;
   const DisplayMemory& GetDisplayMemory() const;
 
  private:

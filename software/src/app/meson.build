@@ -25,7 +25,6 @@ executable(
   dependencies: [
     etl_dep,
     avr_driver_dep,
-    bmodbus_dep,
     protos_dep,
   ],
   cpp_args: [

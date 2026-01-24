@@ -21,47 +21,13 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
       "Select", [&] { Thermostat_.PushSelectButton(); },
       ButtonOption::Animated());
 
-  // Fan switch (On/Auto) - using buttons since Toggle isn't available
-  auto fan_auto_button = Button(
-      "Fan: Auto",
-      [&] {
-        fan_selection_ = 0;
-        Thermostat_.SwitchFanAuto();
-      },
-      ButtonOption::Animated());
+  // Fan switch (On/Auto)
+  auto fan_button = Button(
+      "Fan", [&] { Thermostat_.PushFanButton(); }, ButtonOption::Animated());
 
-  auto fan_on_button = Button(
-      "Fan: On",
-      [&] {
-        fan_selection_ = 1;
-        Thermostat_.SwitchFanOn();
-      },
-      ButtonOption::Animated());
-
-  // Heat switch (Heat/Cool/None) - using buttons for three options
-  auto heat_heat_button = Button(
-      "Heat",
-      [&] {
-        heat_selection_ = 0;
-        Thermostat_.SwitchHeatingHeat();
-      },
-      ButtonOption::Animated());
-
-  auto heat_cool_button = Button(
-      "Cool",
-      [&] {
-        heat_selection_ = 1;
-        Thermostat_.SwitchHeatingCooling();
-      },
-      ButtonOption::Animated());
-
-  auto heat_none_button = Button(
-      "None",
-      [&] {
-        heat_selection_ = 2;
-        Thermostat_.SwitchHeatingNone();
-      },
-      ButtonOption::Animated());
+  // Heat switch (Heat/Cool/None)
+  auto heat_button = Button(
+      "Heat", [&] { Thermostat_.PushHeatButton(); }, ButtonOption::Animated());
 
   auto topLabel = Renderer([] { return text("Buttons") | bold; });
   auto fan_label = Renderer([] { return text("Fan Mode:") | bold; });
@@ -78,13 +44,10 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
       select,
       separator1,
       fan_label,
-      fan_auto_button,
-      fan_on_button,
+      fan_button,
       separator2,
       heat_label,
-      heat_heat_button,
-      heat_cool_button,
-      heat_none_button,
+      heat_button,
   });
 
   // Middle Panel - Relay States

@@ -1,6 +1,5 @@
 #include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
-#include <bmodbus.h>
 #include <driver_ds1307.h>
 #include <string.h>
 
@@ -25,20 +24,11 @@ void OnButtonPressed(Button b) {
     case Button::Select:
       machine.receive(Event::SelectButtonPressed());
       break;
-    case Button::TempHeat:
-      machine.receive(Event::HeatModeChanged(HeatModeT::Heating));
+    case Button::Fan:
+      machine.receive(Event::FanButtonPressed());
       break;
-    case Button::TempCold:
-      machine.receive(Event::HeatModeChanged(HeatModeT::Cooling));
-      break;
-    case Button::TempNone:
-      machine.receive(Event::HeatModeChanged(HeatModeT::None));
-      break;
-    case Button::FanAuto:
-      machine.receive(Event::FanModeChanged(FanModeT::Auto));
-      break;
-    case Button::FanOn:
-      machine.receive(Event::FanModeChanged(FanModeT::On));
+    case Button::Heat:
+      machine.receive(Event::HeatButtonPressed());
       break;
     case Button::ReverseValveOnHeat:
       machine.receive(
@@ -56,34 +46,6 @@ void PrintStateChange(const char* message) {
   DriverWriteSerialPortRaw((uint8_t*)n, strlen(n));
   DriverWriteSerialPortRaw((uint8_t*)message, strlen(message));
   DriverWriteSerialPortRaw((uint8_t*)"\r\n", 2);
-}
-
-uint16_t register_values[16] = {0};  // Example register values
-
-static int dispatch(uint8_t function, uint16_t address, uint16_t* data,
-                    uint8_t size) {
-  return 0;  // Success
-}
-
-void CheckModbus(modbus_client_t& mb, uint8_t tenMsCount) {
-  uint8_t byte;
-  if (DriverGetSerialByte(&byte)) {
-    bmodbus_client_next_byte(&mb, tenMsCount * 10000, byte);
-  }
-
-  modbus_request_t* request = bmodbus_client_get_request(&mb);
-
-  if (request) {
-    if (dispatch(request->function, request->address, request->data,
-                 request->size) == 0) {
-      modbus_uart_data_t* r = bmodbus_client_get_response(&mb);
-      DriverWriteSerialPortRaw(r->data, r->size);
-    } else {
-      request->result = -1;
-      modbus_uart_data_t* r = bmodbus_client_get_response(&mb);
-      DriverWriteSerialPortRaw(r->data, r->size);
-    }
-  }
 }
 
 int main() {
@@ -106,16 +68,11 @@ int main() {
 
   DriverGetTime(time);
 
-  uint32_t lastTenMsCount = 0;
   uint8_t lastHalfSecondCount = 0;
   uint8_t lastSecondCount = 0;
 
   // Invalid state to force initial update
   State::Type lastState = State::Type::NO_CHANGE;
-
-  modbus_client_t mb;
-  constexpr uint32_t interFrameDelay = INTERFRAME_DELAY_MICROSECONDS(9600);
-  bmodbus_client_init(&mb, interFrameDelay, 34);
 
   ProgramScreenState::Screen_ = &DriverGetScreenHandle();
   ScreenBox::Screen_ = &DriverGetScreenHandle();
@@ -134,12 +91,9 @@ int main() {
         OnButtonPressed(static_cast<Button>(button));
       }
       g10MillisecondPassed = false;
-      lastTenMsCount += 1;
       lastHalfSecondCount += 1;
       lastSecondCount += 1;
     }
-
-    CheckModbus(mb, lastTenMsCount);
 
     if (lastHalfSecondCount >= 50) {
       lastHalfSecondCount = 0;

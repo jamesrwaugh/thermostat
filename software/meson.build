@@ -32,16 +32,9 @@ bitproto_dep = declare_dependency(
   include_directories: ['submodules/bitproto/lib/c/'],
 )
 
-bmodbus_dep = declare_dependency(
-  sources: ['submodules/bmodbus/bmodbus.c'],
-  include_directories: ['submodules/bmodbus/'],
-  compile_args: ['-DBMODBUS_NO_MASTER'],
-)
-
 lodepng_dep = declare_dependency(
   sources: ['submodules/lodepng/lodepng.cpp'],
   include_directories: ['submodules/lodepng'],
-  compile_args: ['-DBMODBUS_NO_MASTER'],
 )
 
 subdir('src/protos')

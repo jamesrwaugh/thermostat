@@ -57,6 +57,8 @@ int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     s[6] |= (((unsigned char *)&((*m).time.second))[0] << 3) & 248;
     s[7] = (((unsigned char *)&((*m).time.second))[0] >> 5) & 7;
     s[7] |= (((unsigned char *)&((*m).time.am_pm))[0] << 3) & 8;
+    s[7] |= (((unsigned char *)&((*m).fan_mode))[0] << 4) & 16;
+    s[7] |= (((unsigned char *)&((*m).heat_mode))[0] << 5) & 96;
     return 0;
 }
 
@@ -77,5 +79,7 @@ int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     ((unsigned char *)&((*m).time.second))[0] = (s[6] >> 3) & 31;
     ((unsigned char *)&((*m).time.second))[0] |= (s[7] << 5) & 224;
     ((unsigned char *)&((*m).time.am_pm))[0] = (s[7] >> 3) & 1;
+    ((unsigned char *)&((*m).fan_mode))[0] = (s[7] >> 4) & 1;
+    ((unsigned char *)&((*m).heat_mode))[0] = (s[7] >> 5) & 3;
     return 0;
 }

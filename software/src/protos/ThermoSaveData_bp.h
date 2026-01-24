@@ -38,6 +38,27 @@ struct Time {
     TimeAmPm am_pm; // 1bit
 };
 
+typedef uint8_t FanMode; // 1bit
+
+#define FANMODE_AUTO 0
+#define FANMODE_ON 1
+
+typedef uint8_t HeatMode; // 2bit
+
+#define HEATMODE_HEAT 0
+#define HEATMODE_COOL 1
+#define HEATMODE_NONE 2
+
+typedef uint8_t DateDayOfWeek; // 4bit
+
+#define DAYOFWEEK_SUNDAY 0
+#define DAYOFWEEK_MONDAY 1
+#define DAYOFWEEK_TUESDAY 2
+#define DAYOFWEEK_WEDNESDAY 3
+#define DAYOFWEEK_THURSDAY 4
+#define DAYOFWEEK_FRIDAY 5
+#define DAYOFWEEK_SATURDAY 6
+
 // Number of bytes to encode struct Date
 #define BYTES_LENGTH_DATE 3
 
@@ -45,7 +66,7 @@ struct Date {
     uint8_t year; // 8bit
     uint8_t month; // 4bit
     uint8_t day; // 5bit
-    uint8_t day_of_week; // 4bit
+    DateDayOfWeek day_of_week; // 4bit
 };
 
 // Number of bytes to encode struct ThermoSaveData
@@ -57,6 +78,8 @@ struct ThermoSaveData {
     TempDisplayUnit temp_display_unit; // 1bit
     struct Date date; // 21bit
     struct Time time; // 22bit
+    FanMode fan_mode; // 1bit
+    HeatMode heat_mode; // 2bit
 };
 
 // Encode struct Time to given buffer s.

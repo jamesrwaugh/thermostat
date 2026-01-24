@@ -19,11 +19,32 @@ message Time {
     TimeAmPm am_pm = 4
 }
 
+enum FanMode : uint1 {
+    FANMODE_AUTO = 0
+    FANMODE_ON = 1
+}
+
+enum HeatMode : uint2 {
+    HEATMODE_HEAT = 0
+    HEATMODE_COOL = 1
+    HEATMODE_NONE = 2
+}
+
+enum DateDayOfWeek : uint4 {
+    DAYOFWEEK_SUNDAY = 0
+    DAYOFWEEK_MONDAY = 1
+    DAYOFWEEK_TUESDAY = 2
+    DAYOFWEEK_WEDNESDAY = 3
+    DAYOFWEEK_THURSDAY = 4
+    DAYOFWEEK_FRIDAY = 5
+    DAYOFWEEK_SATURDAY = 6
+}
+
 message Date {
     uint8 year = 1
     uint4 month = 2
     uint5 day = 3
-    uint4 day_of_week = 4
+    DateDayOfWeek day_of_week = 4
 }
 
 message ThermoSaveData {
@@ -32,4 +53,6 @@ message ThermoSaveData {
     TempDisplayUnit temp_display_unit = 3
     Date date = 4
     Time time = 5
+    FanMode fan_mode = 6
+    HeatMode heat_mode = 7
 }

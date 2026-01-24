@@ -13,18 +13,11 @@
 #include "program_screen.hpp"
 #include "state.hpp"
 
-TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
-  switch (Data.temp_display_unit) {
-    case TEMP_UNIT_FREEDOM:
-      return TemperatureUnitT::Freedom;
-    case TEMP_UNIT_CELSIUS:
-      return TemperatureUnitT::Celsius;
-    default:
-      return TemperatureUnitT::Freedom;
-  }
+inline constexpr uint8_t u8(auto x) {
+  return static_cast<uint8_t>(x);
 }
 
-Machine::Machine() : LastReadTemp(0), LastCommTemp(0) {}
+// ===================================================================== //
 
 void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
   SaveData = raw;
@@ -34,15 +27,11 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
   ButtonData = raw;
 }
 
-[[nodiscard]] ThermoSaveData& Machine::SaveState() {
-  return SaveData.Data;
-}
-
-[[nodiscard]] const ThermoSaveData& Machine::SaveState() const {
-  return SaveData.Data;
-}
-
 [[nodiscard]] const SafeThermoSaveData& Machine::SafeSaveState() const {
+  return SaveData;
+}
+
+[[nodiscard]] SafeThermoSaveData& Machine::SafeSaveState() {
   return SaveData;
 }
 
@@ -100,13 +89,11 @@ void Machine::ReadTemperatureAndDisplayIfChanged() {
 }
 
 [[nodiscard]] State::Type Machine::DetermineNextState() {
-  const auto& buttons = ButtonState();
-
   if (!HasChangeTimeoutPassed()) {
     return State::Type::NO_CHANGE;
   }
 
-  const auto heatMode = buttons.HeatingState;
+  const auto heatMode = SaveData.HeatMode();
   const auto setPoint = SaveData.Data.set_point;
 
   if (heatMode == HeatModeT::None) {
@@ -139,7 +126,7 @@ void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
 }
 
 void Machine::EnterHeatingOrCooling(HeatModeT mode) {
-  if (ButtonState().FanState == FanModeT::Auto) {
+  if (SafeSaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOn(Relay::Fan);
   }
 }
@@ -151,7 +138,7 @@ void Machine::ExitHeatingOrCooling() {
   DriverRelayOff(Relay::Compressor);
   DriverRelayOff(Relay::ReversingValve);
 
-  if (ButtonState().FanState == FanModeT::Auto) {
+  if (SafeSaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
   }
 }
@@ -159,16 +146,6 @@ void Machine::ExitHeatingOrCooling() {
 bool Machine::IsHeatingOrCoolingNow() const {
   return get_state_id() == State::Type::Heating ||
          get_state_id() == State::Type::Cooling;
-}
-
-SafeThermoSaveData::SafeThermoSaveData() {
-  Data.magic = THERMO_STATE_DATA_MAGIC;
-  Data.set_point = 70;
-  Data.temp_display_unit = TEMP_UNIT_FREEDOM;
-}
-
-SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
-  Data = other;
 }
 
 void Machine::ReadAndApplySettings() {
@@ -183,7 +160,7 @@ void Machine::ReadAndApplySettings() {
   DriverGetButtonStateNow(&buttons);
   SetThermoButtonState(buttons);
 
-  if (buttons.FanState == FanModeT::On) {
+  if (SafeSaveState().FanMode() == FanModeT::On) {
     DriverRelayOn(Relay::Fan);
   }
 }
@@ -248,13 +225,13 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       ::new (address) Cooling(*this);
       break;
     case State::Type::ProgramTemp:
-      ::new (address) TempScreen(SaveState(), lastEventWasDown);
+      ::new (address) TempScreen(SaveData.Data, lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(SaveState(), lastEventWasDown);
+      ::new (address) DateScreen(SaveData.Data, lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(SaveState(), lastEventWasDown);
+      ::new (address) TimeScreen(SaveData.Data, lastEventWasDown);
       break;
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);
@@ -269,7 +246,74 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
 }
 
 void Machine::SaveProgrammingSettings() {
-  const auto& saveData = SaveState();
+  const auto& saveData = SaveData.Data;
   DriverSaveData(saveData);
   DriverSetTimeFromSaveData(saveData.time, saveData.date);
+}
+
+// ===================================================================== //
+
+SafeThermoSaveData::SafeThermoSaveData() {
+  Data.magic = THERMO_STATE_DATA_MAGIC;
+
+  // Good defaults
+  Data.set_point = 77;
+  Data.temp_display_unit = TEMP_UNIT_FREEDOM;
+  Data.fan_mode = FANMODE_AUTO;
+  Data.heat_mode = HEATMODE_NONE;
+
+  // Default date of 2000-01-01
+  Data.date.day = 1;
+  Data.date.month = 1;
+  Data.date.year = 0;
+  Data.date.day_of_week = DAYOFWEEK_SATURDAY;  // Saturday
+
+  // Default time of 12:00 AM
+  Data.time.second = 0;
+  Data.time.minute = 0;
+  Data.time.hour = 0;
+  Data.time.am_pm = TIME_AM;
+}
+
+TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
+  return static_cast<TemperatureUnitT>(Data.temp_display_unit);
+}
+
+HeatModeT SafeThermoSaveData::HeatMode() const {
+  return static_cast<HeatModeT>(Data.heat_mode);
+}
+
+FanModeT SafeThermoSaveData::FanMode() const {
+  return static_cast<FanModeT>(Data.fan_mode);
+}
+
+SafeThermoSaveData::SafeThermoSaveData(const ThermoSaveData& other) {
+  Data = other;
+}
+
+HeatModeT SafeThermoSaveData::BumpHeatingMode() {
+  switch (static_cast<HeatModeT>(Data.heat_mode)) {
+    case HeatModeT::Heating:
+      Data.heat_mode = u8(HeatModeT::Cooling);
+      break;
+    case HeatModeT::Cooling:
+      Data.heat_mode = u8(HeatModeT::None);
+      break;
+    case HeatModeT::None:
+      Data.heat_mode = u8(HeatModeT::Heating);
+      break;
+  }
+  return static_cast<HeatModeT>(Data.heat_mode);
+}
+
+FanModeT SafeThermoSaveData::BumpFanMode() {
+  switch (static_cast<FanModeT>(Data.fan_mode)) {
+    case FanModeT::On:
+      Data.fan_mode = u8(FanModeT::Auto);
+      break;
+    case FanModeT::Auto:
+      Data.fan_mode = u8(FanModeT::On);
+      break;
+  }
+  return static_cast<FanModeT>(Data.fan_mode);
 }

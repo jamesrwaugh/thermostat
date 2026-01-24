@@ -26,11 +26,8 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void PushUpButton();
   void PushDownButton();
   void PushSelectButton();
-  void SwitchHeatingHeat();
-  void SwitchHeatingCooling();
-  void SwitchHeatingNone();
-  void SwitchFanOn();
-  void SwitchFanAuto();
+  void PushFanButton();
+  void PushHeatButton();
   void SwitchReverseValve(bool onForHeat);
   void SendSerialMessage(std::string_view message);
   const RelayState& GetRelayState() const;
@@ -46,9 +43,8 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   std::unique_ptr<SimBouncySwitch> DownButton;
   std::unique_ptr<SimBouncySwitch> SelectButton;
   std::unique_ptr<SimBouncySwitch> ReverseValveSwitch;
-  std::unique_ptr<SimBouncySwitch> TempHeat;
-  std::unique_ptr<SimBouncySwitch> TempCool;
-  std::unique_ptr<SimBouncySwitch> FanSwitch;
+  std::unique_ptr<SimBouncySwitch> HeatButton;
+  std::unique_ptr<SimBouncySwitch> FanButton;
   ds1338_virt_t Rtc_;
   std::unique_ptr<SimTMP116> Tmp116_;
   RelayState Relays_;

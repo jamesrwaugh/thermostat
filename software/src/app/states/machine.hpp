@@ -14,6 +14,8 @@
 #include "program_screen.hpp"
 #include "state.hpp"
 
+struct HaCommand;
+
 class SafeThermoSaveData {
  public:
   SafeThermoSaveData();
@@ -56,6 +58,7 @@ class Machine {
 
   void start();
   void receive(const Event::Base& event);
+  void receive(const HaCommand& command);
   [[nodiscard]] State::Type get_state_id() const;
 
  private:
@@ -72,7 +75,9 @@ class Machine {
   StateChangeData ChData;
   ProgramAutoTimeData AtData;
   uint8_t LastReadTemp{0};
+  uint8_t LastReadHumidity{0};
   uint8_t LastCommTemp{0};
+  uint8_t LastCommHumidity{0};
 
   static constexpr size_t StatesMaxSize =
       etl::largest<Heating, Cooling, TempScreen, DateScreen, TimeScreen,

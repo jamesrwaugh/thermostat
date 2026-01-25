@@ -11,10 +11,6 @@ class Noritake_VFD_GU7000;
 
 extern "C" {
 
-struct AvrDriverCallbacks {
-  void (*OnButtonPressed)(Button b);
-};
-
 struct ThermoButtonState {
   ReverseValveModeT ReverseValveState{ReverseValveModeT::OnForCooling};
 };

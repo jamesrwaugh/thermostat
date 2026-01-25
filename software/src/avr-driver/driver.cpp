@@ -28,7 +28,7 @@ void AvrDrivers::SetupI2C() {
   // Set prescaler value of 1
   TWSR &= ~_BV(TWPS0);
   TWSR &= ~_BV(TWPS1);
-  TWBR = ((F_CPU / 50000) - 16) / 2;
+  TWBR = ((F_CPU / 250000) - 16) / 2;
 }
 
 void AvrDrivers::SetupPins() {

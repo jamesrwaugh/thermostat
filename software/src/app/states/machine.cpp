@@ -7,7 +7,6 @@
 #include <driver_rs_wrapper.hpp>
 
 #include "HomeAssistantSerial.hpp"
-#include "HomeAssistantSerial_bp.h"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "heating.hpp"
@@ -59,12 +58,13 @@ void Machine::TickChangeCounter() {
   }
 }
 
-void Machine::ReadTemperatureAndDisplayIfChanged() {
+void Machine::ReadTemperatureAndPeepIfChanged() {
   LastReadTemp = DriverReadTemp();
 
   if (LastReadTemp != LastCommTemp) {
     LastCommTemp = LastReadTemp;
     DriverDisplayTemp(LastCommTemp, SafeSaveState().TemperatureUnit());
+    WriteHaTempStateTopicResponse();
   }
 }
 
@@ -195,28 +195,16 @@ void Machine::receive(const Event::Base& event) {
   }
 }
 
-void WriteHaResponse(HaOutTopicKey topic, uint8_t byte_one, uint8_t byte_two) {
-  uint8_t topic_u8 = u8(topic);
-  HaCommand c;
-  c.topic_key = topic_u8;
-  c.payload_byte_one = byte_one;
-  c.payload_byte_two = byte_two;
-  c.checksum = topic_u8 + byte_one + byte_two;
-  uint8_t b[BYTES_LENGTH_HA_COMMAND];
-  EncodeHaCommand(&c, b);
-  DriverWriteSerialPortRaw(b, sizeof(b));
-}
-
 void Machine::receive(const HaCommand& c) {
   switch (static_cast<HaInTopicKey>(c.topic_key)) {
     case HaInTopicKey::FanModeCommandTopic:
       SafeSaveState().Data.fan_mode = c.payload_byte_one;
-      WriteHaResponse(HaOutTopicKey::FanModeStateTopic, c.payload_byte_one, 0);
+      WriteHaFanModeTopicResponse();
       // TODO: Update Reality
       break;
     case HaInTopicKey::ModeCommandTopic:
       SafeSaveState().Data.heat_mode = c.payload_byte_one;
-      WriteHaResponse(HaOutTopicKey::ModeStateTopic, c.payload_byte_one, 0);
+      WriteHaModeStateTopicResponse();
       // TODO: Update Reality
       break;
     case HaInTopicKey::PowerCommandTopic:
@@ -225,17 +213,19 @@ void Machine::receive(const HaCommand& c) {
       break;
     case HaInTopicKey::TempCommandTopic:
       SafeSaveState().Data.set_point = c.payload_byte_one;
-      WriteHaResponse(HaOutTopicKey::TempStateTopic, c.payload_byte_one, 0);
+      WriteHaTempStateTopicResponse();
       // TODO: Update Reality
       break;
     case HaInTopicKey::TempHighCommandTopic:
       SafeSaveState().Data.auto_high_set_point = c.payload_byte_one;
-      WriteHaResponse(HaOutTopicKey::TempHighStateTopic, c.payload_byte_one, 0);
+      WriteHaSerialResponse(HaOutTopicKey::TempHighStateTopic,
+                            c.payload_byte_one, 0);
       // TODO: Update Reality
       break;
     case HaInTopicKey::TempLowCommandTopic:
       SafeSaveState().Data.auto_low_set_point = c.payload_byte_one;
-      WriteHaResponse(HaOutTopicKey::TempLowStateTopic, c.payload_byte_one, 0);
+      WriteHaSerialResponse(HaOutTopicKey::TempLowStateTopic,
+                            c.payload_byte_one, 0);
       // TODO: Update Reality
       break;
   }
@@ -297,6 +287,33 @@ void Machine::SaveProgrammingSettings() {
   const auto& saveData = SaveData.Data;
   DriverSaveData(saveData);
   DriverSetTimeFromSaveData(saveData.time, saveData.date);
+}
+
+void Machine::WriteHaTempStateTopicResponse() const {
+  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic, LastReadTemp, 0);
+}
+
+void Machine::WriteHaModeStateTopicResponse() const {
+  WriteHaSerialResponse(HaOutTopicKey::ModeStateTopic,
+                        SafeSaveState().Data.heat_mode, 0);
+}
+
+void Machine::WriteHaFanModeTopicResponse() const {
+  WriteHaSerialResponse(HaOutTopicKey::FanModeStateTopic,
+                        SafeSaveState().Data.fan_mode, 0);
+}
+
+void Machine::WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
+                                    uint8_t byte_two) const {
+  uint8_t topic_u8 = u8(topic);
+  HaCommand c;
+  c.topic_key = topic_u8;
+  c.payload_byte_one = byte_one;
+  c.payload_byte_two = byte_two;
+  c.checksum = topic_u8 + byte_one + byte_two;
+  uint8_t b[BYTES_LENGTH_HA_COMMAND];
+  EncodeHaCommand(&c, b);
+  DriverWriteSerialPortRaw(b, sizeof(b));
 }
 
 // ===================================================================== //

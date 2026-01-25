@@ -6,6 +6,7 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "HomeAssistantSerial.hpp"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "event.hpp"
@@ -48,7 +49,7 @@ class Machine {
                              ReverseValveModeT onIfType);
   void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
-  void ReadTemperatureAndDisplayIfChanged();
+  void ReadTemperatureAndPeepIfChanged();
   [[nodiscard]] bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
   void DisplayTemperature();
@@ -64,6 +65,11 @@ class Machine {
  private:
   void SwitchState(State::Type new_state, Event::Type lastEvent);
   void SaveProgrammingSettings();
+  void WriteHaTempStateTopicResponse() const;
+  void WriteHaModeStateTopicResponse() const;
+  void WriteHaFanModeTopicResponse() const;
+  void WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
+                             uint8_t byte_two) const;
 
   struct StateChangeData {
     static constexpr uint8_t MaxStateChangeTimeoutSec = 10;

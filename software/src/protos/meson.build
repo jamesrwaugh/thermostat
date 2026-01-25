@@ -1,4 +1,5 @@
 proto_src = files(
+  'HomeAssistantSerial_bp.c',
   'ThermoSaveData_bp.c',
 )
 

@@ -195,8 +195,7 @@ void Machine::receive(const Event::Base& event) {
   }
 }
 
-void WriteSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
-                         uint8_t byte_two) {
+void WriteHaResponse(HaOutTopicKey topic, uint8_t byte_one, uint8_t byte_two) {
   uint8_t topic_u8 = u8(topic);
   HaCommand c;
   c.topic_key = topic_u8;
@@ -212,16 +211,32 @@ void Machine::receive(const HaCommand& c) {
   switch (static_cast<HaInTopicKey>(c.topic_key)) {
     case HaInTopicKey::FanModeCommandTopic:
       SafeSaveState().Data.fan_mode = c.payload_byte_one;
-      WriteSerialResponse(HaOutTopicKey::FanModeStateTopic,
-                          u8(SafeSaveState().FanMode()), 0);
+      WriteHaResponse(HaOutTopicKey::FanModeStateTopic, c.payload_byte_one, 0);
       // TODO: Update Reality
       break;
     case HaInTopicKey::ModeCommandTopic:
+      SafeSaveState().Data.heat_mode = c.payload_byte_one;
+      WriteHaResponse(HaOutTopicKey::ModeStateTopic, c.payload_byte_one, 0);
+      // TODO: Update Reality
+      break;
     case HaInTopicKey::PowerCommandTopic:
-    case HaInTopicKey::PresetMoreCommandTopic:
+      break;
+    case HaInTopicKey::PresetModeCommandTopic:
+      break;
     case HaInTopicKey::TempCommandTopic:
+      SafeSaveState().Data.set_point = c.payload_byte_one;
+      WriteHaResponse(HaOutTopicKey::TempStateTopic, c.payload_byte_one, 0);
+      // TODO: Update Reality
+      break;
     case HaInTopicKey::TempHighCommandTopic:
+      SafeSaveState().Data.auto_high_set_point = c.payload_byte_one;
+      WriteHaResponse(HaOutTopicKey::TempHighStateTopic, c.payload_byte_one, 0);
+      // TODO: Update Reality
+      break;
     case HaInTopicKey::TempLowCommandTopic:
+      SafeSaveState().Data.auto_low_set_point = c.payload_byte_one;
+      WriteHaResponse(HaOutTopicKey::TempLowStateTopic, c.payload_byte_one, 0);
+      // TODO: Update Reality
       break;
   }
 }

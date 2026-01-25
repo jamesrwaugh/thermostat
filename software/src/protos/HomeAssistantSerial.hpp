@@ -8,7 +8,7 @@ enum class HaInTopicKey : uint8_t {
   FanModeCommandTopic = FAN_MODE_COMMAND_TOPIC,
   ModeCommandTopic = MODE_COMMAND_TOPIC,
   PowerCommandTopic = POWER_COMMAND_TOPIC,
-  PresetMoreCommandTopic = PRESET_MODE_COMMAND_TOPIC,
+  PresetModeCommandTopic = PRESET_MODE_COMMAND_TOPIC,
   TempCommandTopic = TEMP_COMMAND_TOPIC,
   TempHighCommandTopic = TEMP_HIGH_COMMAND_TOPIC,
   TempLowCommandTopic = TEMP_LOW_COMMAND_TOPIC,

@@ -70,7 +70,7 @@ struct Date {
 };
 
 // Number of bytes to encode struct ThermoSaveData
-#define BYTES_LENGTH_THERMO_SAVE_DATA 8
+#define BYTES_LENGTH_THERMO_SAVE_DATA 10
 
 struct ThermoSaveData {
     uint8_t magic; // 8bit
@@ -80,6 +80,8 @@ struct ThermoSaveData {
     struct Time time; // 22bit
     FanMode fan_mode; // 1bit
     HeatMode heat_mode; // 2bit
+    uint8_t auto_high_set_point; // 8bit
+    uint8_t auto_low_set_point; // 8bit
 };
 
 // Encode struct Time to given buffer s.

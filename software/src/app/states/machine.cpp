@@ -6,6 +6,8 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "HomeAssistantSerial.hpp"
+#include "HomeAssistantSerial_bp.h"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "heating.hpp"
@@ -190,6 +192,37 @@ void Machine::receive(const Event::Base& event) {
 
   if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {
     SwitchState(newState, event.id_);
+  }
+}
+
+void WriteSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
+                         uint8_t byte_two) {
+  uint8_t topic_u8 = u8(topic);
+  HaCommand c;
+  c.topic_key = topic_u8;
+  c.payload_byte_one = byte_one;
+  c.payload_byte_two = byte_two;
+  c.checksum = topic_u8 + byte_one + byte_two;
+  uint8_t b[BYTES_LENGTH_HA_COMMAND];
+  EncodeHaCommand(&c, b);
+  DriverWriteSerialPortRaw(b, sizeof(b));
+}
+
+void Machine::receive(const HaCommand& c) {
+  switch (static_cast<HaInTopicKey>(c.topic_key)) {
+    case HaInTopicKey::FanModeCommandTopic:
+      SafeSaveState().Data.fan_mode = c.payload_byte_one;
+      WriteSerialResponse(HaOutTopicKey::FanModeStateTopic,
+                          u8(SafeSaveState().FanMode()), 0);
+      // TODO: Update Reality
+      break;
+    case HaInTopicKey::ModeCommandTopic:
+    case HaInTopicKey::PowerCommandTopic:
+    case HaInTopicKey::PresetMoreCommandTopic:
+    case HaInTopicKey::TempCommandTopic:
+    case HaInTopicKey::TempHighCommandTopic:
+    case HaInTopicKey::TempLowCommandTopic:
+      break;
   }
 }
 

@@ -59,6 +59,10 @@ int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     s[7] |= (((unsigned char *)&((*m).time.am_pm))[0] << 3) & 8;
     s[7] |= (((unsigned char *)&((*m).fan_mode))[0] << 4) & 16;
     s[7] |= (((unsigned char *)&((*m).heat_mode))[0] << 5) & 96;
+    s[7] |= (((unsigned char *)&((*m).auto_high_set_point))[0] << 7) & 128;
+    s[8] = (((unsigned char *)&((*m).auto_high_set_point))[0] >> 1) & 127;
+    s[8] |= (((unsigned char *)&((*m).auto_low_set_point))[0] << 7) & 128;
+    s[9] = (((unsigned char *)&((*m).auto_low_set_point))[0] >> 1) & 127;
     return 0;
 }
 
@@ -81,5 +85,9 @@ int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     ((unsigned char *)&((*m).time.am_pm))[0] = (s[7] >> 3) & 1;
     ((unsigned char *)&((*m).fan_mode))[0] = (s[7] >> 4) & 1;
     ((unsigned char *)&((*m).heat_mode))[0] = (s[7] >> 5) & 3;
+    ((unsigned char *)&((*m).auto_high_set_point))[0] = (s[7] >> 7) & 1;
+    ((unsigned char *)&((*m).auto_high_set_point))[0] |= (s[8] << 1) & 254;
+    ((unsigned char *)&((*m).auto_low_set_point))[0] = (s[8] >> 7) & 1;
+    ((unsigned char *)&((*m).auto_low_set_point))[0] |= (s[9] << 1) & 254;
     return 0;
 }

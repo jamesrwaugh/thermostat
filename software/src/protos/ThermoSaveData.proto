@@ -55,4 +55,6 @@ message ThermoSaveData {
     Time time = 5
     FanMode fan_mode = 6
     HeatMode heat_mode = 7
+    uint8 auto_high_set_point = 8
+    uint8 auto_low_set_point = 9
 }

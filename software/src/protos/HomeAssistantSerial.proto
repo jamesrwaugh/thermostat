@@ -1,0 +1,36 @@
+proto HomeAssistantSerial
+
+enum HaTopicKey : uint8 {
+    ACTION_TOPIC = 0
+    CURRENT_HUMIDITY_TOPIC = 1
+    CURRENT_TEMP_TOPIC = 2
+    FAN_MODE_COMMAND_TOPIC = 3
+    FAN_MODE_STATE_TOPIC = 4
+    HUMIDITY_STATE_TOPIC = 5
+    MODE_COMMAND_TOPIC = 6
+    MODE_STATE_TOPIC = 7
+    POWER_COMMAND_TOPIC = 8
+    PRESET_MODE_COMMAND_TOPIC = 9
+    PRESET_MODE_STATE_TOPIC = 10
+    TEMP_COMMAND_TOPIC = 11
+    TEMP_HIGH_COMMAND_TOPIC = 12
+    TEMP_HIGH_STATE_TOPIC = 13
+    TEMP_LOW_COMMAND_TOPIC = 14
+    TEMP_LOW_STATE_TOPIC = 15
+    TEMP_STATE_TOPIC = 16
+
+    // Not supported from MQTT Climate:
+    // CONF_HUMIDITY_COMMAND_TOPIC = 5
+    // CONF_SWING_HORIZONTAL_MODE_COMMAND_TOPIC = 0
+    // CONF_SWING_HORIZONTAL_MODE_STATE_TOPIC = 0
+    // CONF_SWING_MODE_COMMAND_TOPIC = 0
+    // CONF_SWING_MODE_STATE_TOPIC = 0
+}
+
+
+message HaCommand {
+    HaTopicKey topic_key = 1
+    uint8 payload_byte_one = 2
+    uint8 payload_byte_two = 3
+    uint8 checksum = 4
+}

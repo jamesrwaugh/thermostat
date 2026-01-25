@@ -27,6 +27,13 @@ enum HaTopicKey : uint8 {
     // CONF_SWING_MODE_STATE_TOPIC = 0
 }
 
+enum HaActionTopicKey : uint3 {
+    HA_ACTION_OFF = 0
+    HA_ACTION_HEATING = 1
+    HA_ACTION_COOLING = 2
+    HA_ACTION_IDLE = 3
+    HA_ACTION_FAN = 4
+}
 
 message HaCommand {
     HaTopicKey topic_key = 1

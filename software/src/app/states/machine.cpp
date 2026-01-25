@@ -293,7 +293,15 @@ void Machine::WriteHaTempStateTopicResponse() const {
   WriteHaSerialResponse(HaOutTopicKey::TempStateTopic, LastReadTemp, 0);
 }
 
+void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {
+  // What we are doing now
+  // off, heating, cooling, drying, idle, fan
+  WriteHaSerialResponse(HaOutTopicKey::ActionTopic, u8(key), 0);
+}
+
 void Machine::WriteHaModeStateTopicResponse() const {
+  // The goal setting of the system
+  // cooling, heating, none
   WriteHaSerialResponse(HaOutTopicKey::ModeStateTopic,
                         SafeSaveState().Data.heat_mode, 0);
 }

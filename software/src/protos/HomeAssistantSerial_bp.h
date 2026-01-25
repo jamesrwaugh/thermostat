@@ -36,6 +36,14 @@ typedef uint8_t HaTopicKey; // 8bit
 #define TEMP_LOW_STATE_TOPIC 15
 #define TEMP_STATE_TOPIC 16
 
+typedef uint8_t HaActionTopicKey; // 3bit
+
+#define HA_ACTION_OFF 0
+#define HA_ACTION_HEATING 1
+#define HA_ACTION_COOLING 2
+#define HA_ACTION_IDLE 3
+#define HA_ACTION_FAN 4
+
 // Number of bytes to encode struct HaCommand
 #define BYTES_LENGTH_HA_COMMAND 4
 

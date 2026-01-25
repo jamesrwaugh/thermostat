@@ -66,6 +66,7 @@ class Machine {
   void SwitchState(State::Type new_state, Event::Type lastEvent);
   void SaveProgrammingSettings();
   void WriteHaTempStateTopicResponse() const;
+  void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;
   void WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,

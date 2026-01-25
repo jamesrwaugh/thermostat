@@ -26,3 +26,11 @@ enum class HaOutTopicKey : uint8_t {
   TempLowStateTopic = TEMP_LOW_STATE_TOPIC,
   TempStateTopic = TEMP_STATE_TOPIC,
 };
+
+enum class HaActionKey : uint8_t {
+  Off = HA_ACTION_OFF,
+  Heating = HA_ACTION_HEATING,
+  Cooling = HA_ACTION_COOLING,
+  Idle = HA_ACTION_IDLE,
+  Fan = HA_ACTION_FAN,
+};

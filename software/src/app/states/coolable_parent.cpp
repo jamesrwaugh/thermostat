@@ -41,6 +41,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
         }
       } else if (fanMode != FanModeT::On && IsIdle()) {
         DriverRelayOff(Relay::Fan);
+        machine_.WriteHaActionStateTopicResponse(HaActionKey::Idle);
       }
 
       return State::Type::NO_CHANGE;

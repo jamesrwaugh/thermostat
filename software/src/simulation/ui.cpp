@@ -37,58 +37,61 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
   auto separator2 = Renderer([] { return separator(); });
 
   auto left_panel = Container::Vertical({
-      topLabel,
-      separator0,
-      up,
-      down,
-      select,
-      separator1,
-      fan_label,
-      fan_button,
-      separator2,
-      heat_label,
-      heat_button,
-  });
+                        topLabel,
+                        separator0,
+                        up,
+                        down,
+                        select,
+                        separator1,
+                        fan_label,
+                        fan_button,
+                        separator2,
+                        heat_label,
+                        heat_button,
+                    }) |
+                    size(ftxui::WIDTH, EQUAL, 20);
 
   // Middle Panel - Relay States
-  auto relay_panel = Renderer([this] {
-    const auto& relay_state = Thermostat_.GetRelayState();
+  auto relay_panel =
+      Renderer([this] {
+        const auto& relay_state = Thermostat_.GetRelayState();
 
-    auto fan_light = relay_state.Fan ? text("●") | color(Color::Green)
-                                     : text("●") | color(Color::GrayDark);
+        auto fan_light = relay_state.Fan ? text("●") | color(Color::Green)
+                                         : text("●") | color(Color::GrayDark);
 
-    auto compressor_light = relay_state.Compressor
-                                ? text("●") | color(Color::Green)
-                                : text("●") | color(Color::GrayDark);
+        auto compressor_light = relay_state.Compressor
+                                    ? text("●") | color(Color::Green)
+                                    : text("●") | color(Color::GrayDark);
 
-    auto heat_light = relay_state.Heat ? text("●") | color(Color::Green)
+        auto heat_light = relay_state.Heat ? text("●") | color(Color::Green)
+                                           : text("●") | color(Color::GrayDark);
+
+        auto reverse_valve_light = relay_state.ReverseValve
+                                       ? text("●") | color(Color::Green)
                                        : text("●") | color(Color::GrayDark);
 
-    auto reverse_valve_light = relay_state.ReverseValve
-                                   ? text("●") | color(Color::Green)
-                                   : text("●") | color(Color::GrayDark);
-
-    return vbox({
-        text("Relay States") | bold | center,
-        separator(),
-        hbox({
-            text("Fan"),
-            fan_light | center,
-        }),
-        hbox({
-            text("Compressor"),
-            compressor_light | center,
-        }),
-        hbox({
-            text("Heat"),
-            heat_light | center,
-        }),
-        hbox({
-            text("Reverse Valve"),
-            reverse_valve_light | center,
-        }),
-    });
-  });
+        return vbox({
+            text("Relay States") | bold | center,
+            separator(),
+            hbox({
+                text("Fan"),
+                fan_light | center,
+            }),
+            hbox({
+                text("Compressor"),
+                compressor_light | center,
+            }),
+            hbox({
+                text("Heat"),
+                heat_light | center,
+            }),
+            hbox({
+                text("Reverse Valve"),
+                reverse_valve_light | center,
+            }),
+        });
+      }) |
+      size(ftxui::WIDTH, EQUAL, 32);
 
   auto logs_panel = LogsRenderer(logs);
 

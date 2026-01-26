@@ -2,6 +2,7 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "HomeAssistantSerial.hpp"
 #include "event.hpp"
 #include "machine.hpp"
 #include "state.hpp"
@@ -35,8 +36,10 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
 
       if (fanMode == FanModeT::On) {
         DriverRelayOn(Relay::Fan);
-      } else if (fanMode == FanModeT::Auto &&
-                 !machine_.IsHeatingOrCoolingNow()) {
+        if (IsIdle()) {
+          machine_.WriteHaActionStateTopicResponse(HaActionKey::Fan);
+        }
+      } else if (fanMode != FanModeT::On && IsIdle()) {
         DriverRelayOff(Relay::Fan);
       }
 
@@ -44,6 +47,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     }
     case Event::Type::HeatButtonPushed: {
       machine_.SafeSaveState().BumpHeatingMode();
+      machine_.WriteHaModeStateTopicResponse();
       return machine_.DetermineNextState();
     }
     case Event::Type::ReverseValveModeChanged: {
@@ -55,4 +59,13 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     default:
       return State::Type::NO_CHANGE;
   }
+}
+
+bool CoolableParent::IsHeatingOrCooling() const {
+  return machine_.get_state_id() == State::Type::Heating ||
+         machine_.get_state_id() == State::Type::Cooling;
+}
+
+bool CoolableParent::IsIdle() const {
+  return !IsHeatingOrCooling();
 }

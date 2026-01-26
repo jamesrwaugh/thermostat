@@ -6,10 +6,7 @@
 
 Cooling::Cooling(Machine& machine)
     : CoolableParent(machine, State::Type::Cooling) {
-  DriverDisplayIsCooling();
   machine_.EnterHeatingOrCooling(HeatModeT::Cooling);
-  machine_.ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
-                                 ReverseValveModeT::OnForCooling);
 }
 
 Cooling::~Cooling() {

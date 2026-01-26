@@ -131,6 +131,18 @@ void Machine::EnterHeatingOrCooling(HeatModeT mode) {
   if (SafeSaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOn(Relay::Fan);
   }
+
+  if (mode == HeatModeT::Cooling) {
+    DriverDisplayIsCooling();
+    WriteHaActionStateTopicResponse(HaActionKey::Cooling);
+    ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
+                          ReverseValveModeT::OnForCooling);
+  } else {
+    DriverDisplayIsHeating();
+    WriteHaActionStateTopicResponse(HaActionKey::Heating);
+    ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
+                          ReverseValveModeT::OnForHeating);
+  }
 }
 
 void Machine::ExitHeatingOrCooling() {
@@ -143,11 +155,6 @@ void Machine::ExitHeatingOrCooling() {
   if (SafeSaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
   }
-}
-
-bool Machine::IsHeatingOrCoolingNow() const {
-  return get_state_id() == State::Type::Heating ||
-         get_state_id() == State::Type::Cooling;
 }
 
 void Machine::ReadAndApplySettings() {

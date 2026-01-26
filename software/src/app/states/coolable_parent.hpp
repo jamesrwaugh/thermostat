@@ -12,5 +12,7 @@ class CoolableParent : public State::Base {
   State::Type handle_event(const Event::Base& event) override;
 
  protected:
+  [[nodiscard]] bool IsHeatingOrCooling() const;
+  [[nodiscard]] bool IsIdle() const;
   Machine& machine_;
 };

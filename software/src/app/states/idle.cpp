@@ -6,6 +6,7 @@
 
 Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
   DriverDisplayIsIdle();
+  machine.WriteHaActionStateTopicResponse(HaActionKey::Idle);
 }
 
 Idle::~Idle() {

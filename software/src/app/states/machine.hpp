@@ -50,7 +50,6 @@ class Machine {
   void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
   void ReadTemperatureAndPeepIfChanged();
-  [[nodiscard]] bool IsHeatingOrCoolingNow() const;
   void ReadAndApplySettings();
   void DisplayTemperature();
   void DisplaySetPointAndTemp();
@@ -62,13 +61,15 @@ class Machine {
   void receive(const HaCommand& command);
   [[nodiscard]] State::Type get_state_id() const;
 
- private:
-  void SwitchState(State::Type new_state, Event::Type lastEvent);
-  void SaveProgrammingSettings();
+  // Home Assist integration
   void WriteHaTempStateTopicResponse() const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;
+
+ private:
+  void SwitchState(State::Type new_state, Event::Type lastEvent);
+  void SaveProgrammingSettings();
   void WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
                              uint8_t byte_two) const;
 

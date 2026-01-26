@@ -172,9 +172,9 @@ DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
   auto& date = s.date;
 
   // Year, Month, Day
-  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &date.year, 0, 99);
-  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &date.month, 1, 12);
-  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &date.day, 1, 31);
+  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &date.month, 1, 12);
+  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &date.day, 1, 31);
+  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &date.year, 0, 99);
 
   // Day of Week
   ::new (GetBoxP(3))

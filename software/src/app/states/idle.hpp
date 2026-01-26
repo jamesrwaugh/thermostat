@@ -7,5 +7,4 @@ class Machine;
 class Idle : public CoolableParent {
  public:
   Idle(Machine& machine);
-  virtual ~Idle();
 };

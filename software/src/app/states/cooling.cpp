@@ -6,9 +6,9 @@
 
 Cooling::Cooling(Machine& machine)
     : CoolableParent(machine, State::Type::Cooling) {
-  machine_.EnterHeatingOrCooling(HeatModeT::Cooling);
+  EnterHeatingOrCooling(HeatModeT::Cooling);
 }
 
 Cooling::~Cooling() {
-  machine_.ExitHeatingOrCooling();
+  ExitHeatingOrCooling();
 }

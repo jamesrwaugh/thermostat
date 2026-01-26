@@ -40,21 +40,13 @@ class Machine {
   [[nodiscard]] ThermoButtonState& ButtonState();
   [[nodiscard]] const SafeThermoSaveData& SafeSaveState() const;
   [[nodiscard]] SafeThermoSaveData& SafeSaveState();
-  void ResetStateChangeData();
-  void TickChangeCounter();
-  [[nodiscard]] bool HasChangeTimeoutPassed() const;
-  [[nodiscard]] State::Type ChangeSetPoint(int8_t change);
-  [[nodiscard]] State::Type DetermineNextState();
-  void ActivateCoolingRelays(Relay onRelay, Relay offRelay,
-                             ReverseValveModeT onIfType);
-  void EnterHeatingOrCooling(HeatModeT mode);
-  void ExitHeatingOrCooling();
-  void ReadTemperatureAndPeepIfChanged();
   void ReadAndApplySettings();
   void DisplayTemperature();
   void DisplaySetPointAndTemp();
   void ResetAutoTimeData();
   ProgramAutoTimeData& AutoTimeData();
+  void ReadTemperatureAndPeepIfChanged();
+  uint8_t LastReadTemerature() const;
 
   void start();
   void receive(const Event::Base& event);
@@ -62,7 +54,7 @@ class Machine {
   [[nodiscard]] State::Type get_state_id() const;
 
   // Home Assist integration
-  void WriteHaTempStateTopicResponse() const;
+  void WriteHaTempStateTopicResponse(uint8_t temp) const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;
@@ -73,15 +65,10 @@ class Machine {
   void WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
                              uint8_t byte_two) const;
 
-  struct StateChangeData {
-    static constexpr uint8_t MaxStateChangeTimeoutSec = 10;
-    uint8_t StateChangeTimeoutSec{0};
-  };
-
   SafeThermoSaveData SaveData;
   ThermoButtonState ButtonData;
-  StateChangeData ChData;
   ProgramAutoTimeData AtData;
+
   uint8_t LastReadTemp{0};
   uint8_t LastReadHumidity{0};
   uint8_t LastCommTemp{0};

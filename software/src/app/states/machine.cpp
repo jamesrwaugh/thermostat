@@ -40,10 +40,6 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
   return ButtonData;
 }
 
-void Machine::ResetStateChangeData() {
-  ::new (&ChData) StateChangeData();
-}
-
 void Machine::ResetAutoTimeData() {
   ::new (&AtData) ProgramAutoTimeData();
 }
@@ -52,109 +48,18 @@ ProgramAutoTimeData& Machine::AutoTimeData() {
   return AtData;
 }
 
-void Machine::TickChangeCounter() {
-  if (ChData.StateChangeTimeoutSec < ChData.MaxStateChangeTimeoutSec) {
-    ChData.StateChangeTimeoutSec += 1;
-  }
-}
-
 void Machine::ReadTemperatureAndPeepIfChanged() {
   LastReadTemp = DriverReadTemp();
 
   if (LastReadTemp != LastCommTemp) {
     LastCommTemp = LastReadTemp;
     DriverDisplayTemp(LastCommTemp, SafeSaveState().TemperatureUnit());
-    WriteHaTempStateTopicResponse();
+    WriteHaTempStateTopicResponse(LastCommTemp);
   }
 }
 
-[[nodiscard]] bool Machine::HasChangeTimeoutPassed() const {
-  return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
-}
-
-[[nodiscard]] State::Type Machine::ChangeSetPoint(int8_t change) {
-  auto& setPoint = SaveData.Data.set_point;
-
-  if (setPoint == 1 && change < 0) {
-    return State::Type::NO_CHANGE;
-  }
-
-  if (setPoint == 100 && change > 0) {
-    return State::Type::NO_CHANGE;
-  }
-
-  setPoint += change;
-
-  DriverDisplaySetPoint(setPoint, SaveData.TemperatureUnit());
-
-  return DetermineNextState();
-}
-
-[[nodiscard]] State::Type Machine::DetermineNextState() {
-  if (!HasChangeTimeoutPassed()) {
-    return State::Type::NO_CHANGE;
-  }
-
-  const auto heatMode = SaveData.HeatMode();
-  const auto setPoint = SaveData.Data.set_point;
-
-  if (heatMode == HeatModeT::None) {
-    return State::Type::Idle;
-  }
-
-  if (LastReadTemp >= setPoint && heatMode == HeatModeT::Heating) {
-    return State::Type::Idle;
-  } else if (LastReadTemp <= setPoint && heatMode == HeatModeT::Cooling) {
-    return State::Type::Idle;
-  } else if (LastReadTemp <= setPoint && heatMode == HeatModeT::Heating) {
-    return State::Type::Heating;
-  } else if (LastReadTemp >= setPoint && heatMode == HeatModeT::Cooling) {
-    return State::Type::Cooling;
-  }
-
-  return State::Type::NO_CHANGE;
-}
-
-void Machine::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
-                                    ReverseValveModeT onIfType) {
-  if (ButtonState().ReverseValveState == onIfType) {
-    DriverRelayOn(Relay::ReversingValve);
-  } else {
-    DriverRelayOff(Relay::ReversingValve);
-  }
-
-  DriverRelayOn(onRelay);
-  DriverRelayOff(offRelay);
-}
-
-void Machine::EnterHeatingOrCooling(HeatModeT mode) {
-  if (SafeSaveState().FanMode() == FanModeT::Auto) {
-    DriverRelayOn(Relay::Fan);
-  }
-
-  if (mode == HeatModeT::Cooling) {
-    DriverDisplayIsCooling();
-    WriteHaActionStateTopicResponse(HaActionKey::Cooling);
-    ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
-                          ReverseValveModeT::OnForCooling);
-  } else {
-    DriverDisplayIsHeating();
-    WriteHaActionStateTopicResponse(HaActionKey::Heating);
-    ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
-                          ReverseValveModeT::OnForHeating);
-  }
-}
-
-void Machine::ExitHeatingOrCooling() {
-  ResetStateChangeData();
-
-  DriverRelayOff(Relay::Heat);
-  DriverRelayOff(Relay::Compressor);
-  DriverRelayOff(Relay::ReversingValve);
-
-  if (SafeSaveState().FanMode() == FanModeT::Auto) {
-    DriverRelayOff(Relay::Fan);
-  }
+uint8_t Machine::LastReadTemerature() const {
+  return LastReadTemp;
 }
 
 void Machine::ReadAndApplySettings() {
@@ -186,11 +91,7 @@ void Machine::DisplaySetPointAndTemp() {
 
 void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Idle(*this);
-
-  ResetStateChangeData();
-
   ReadAndApplySettings();
-
   DisplaySetPointAndTemp();
 }
 
@@ -220,7 +121,6 @@ void Machine::receive(const HaCommand& c) {
       break;
     case HaInTopicKey::TempCommandTopic:
       SafeSaveState().Data.set_point = c.payload_byte_one;
-      WriteHaTempStateTopicResponse();
       // TODO: Update Reality
       break;
     case HaInTopicKey::TempHighCommandTopic:
@@ -296,8 +196,8 @@ void Machine::SaveProgrammingSettings() {
   DriverSetTimeFromSaveData(saveData.time, saveData.date);
 }
 
-void Machine::WriteHaTempStateTopicResponse() const {
-  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic, LastReadTemp, 0);
+void Machine::WriteHaTempStateTopicResponse(uint8_t temp) const {
+  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic, temp, 0);
 }
 
 void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {

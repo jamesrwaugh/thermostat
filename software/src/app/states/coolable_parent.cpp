@@ -8,6 +8,8 @@
 #include "machine.hpp"
 #include "state.hpp"
 
+// ===================================================================== //
+
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
     : State::Base(stateId), machine_(machine) {
   DriverDisplayClearScreen();

@@ -65,9 +65,3 @@ struct StaticScreenBox {
 typedef etl::aligned_storage<sizeof(StaticScreenBox),
                              alignof(StaticScreenBox)>::type
     StaticScreenBoxStorage;
-
-// ================================================================ //
-
-constexpr uint8_t ImageWidth = 7;
-extern const uint8_t gArrowImageData[ImageWidth];
-extern const uint8_t gBlankImageData[ImageWidth];

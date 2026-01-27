@@ -130,3 +130,7 @@ void SimAvrThermostat::BeforeAvrCycleSideEffect() {
 
   Tmp116_->SimulateTempChange(Relays_);
 }
+
+const SimGu7000Real::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {
+  return Screen->GetDisplayMemory();
+}

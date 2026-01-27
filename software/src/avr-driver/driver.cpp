@@ -5,6 +5,7 @@
 #include <avr/io.h>
 #include <driver_ds1307.h>
 #include <twi_master.h>
+#include <util/delay.h>
 
 #include "c_api/driver_rs_wrapper.hpp"
 
@@ -29,6 +30,11 @@ void AvrDrivers::SetupI2C() {
   TWSR &= ~_BV(TWPS0);
   TWSR &= ~_BV(TWPS1);
   TWBR = ((F_CPU / 250000) - 16) / 2;
+
+  // Possible delay needed with setting up I2C?
+  // Possible simulator bug only, *sometimes* screen initializes
+  // without first sending I2C start message without this.
+  _delay_ms(5);
 }
 
 void AvrDrivers::SetupPins() {

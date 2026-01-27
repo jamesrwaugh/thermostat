@@ -14,7 +14,7 @@ void SimGu7000I2C::OnMillisecondPassed() {
   if (screen_dirty_) {
     last_command_debounce_ms_ += 1;
     if (last_command_debounce_ms_ >= 250) {
-      WriteDisplayMemoryToPng();
+      // WriteDisplayMemoryToPng();
       screen_dirty_ = false;
     }
   }

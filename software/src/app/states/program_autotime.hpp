@@ -5,6 +5,7 @@
 #include "ThermoSaveData_bp.h"
 #include "driver_rs_wrapper.hpp"
 #include "event.hpp"
+#include "images.hpp"
 #include "state.hpp"
 #include "states/machine.hpp"
 #include "states/program_screen.hpp"
@@ -79,7 +80,7 @@ class ProgramAutoTimeSelectScreen : State::Base {
     AutoTwi t;
     auto& s = DriverGetScreenHandle();
     s.GU7000_drawImage(20 + (selection_ * CharDotWidth) + 1, CharDotHeight,
-                       ImageWidth, 8, on ? gArrowImageData : gBlankImageData);
+                       ImageWidth, 8, on ? gUpArrowImageData : gBlankImageData);
   }
 
  private:

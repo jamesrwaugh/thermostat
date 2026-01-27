@@ -51,6 +51,21 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
                     }) |
                     size(ftxui::WIDTH, EQUAL, 20);
 
+  auto screen = Renderer([&] {
+                  const auto& screen = Thermostat_.GetScreenMemory();
+
+                  auto c = Canvas(112, 16);
+
+                  for (unsigned y = 0; y < 16; y++) {
+                    for (unsigned x = 0; x < 112; x++) {
+                      c.DrawPoint(x, y, screen.at(x).at(y));
+                    }
+                  }
+
+                  return canvas(std::move(c));
+                }) |
+                size(ftxui::HEIGHT, EQUAL, 10) | border;
+
   // Middle Panel - Relay States
   auto relay_panel =
       Renderer([this] {
@@ -96,14 +111,21 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
   auto logs_panel = LogsRenderer(logs);
 
   // I2C Listener Panel
-  auto i2c_listener_panel = I2CListenerRenderer(Thermostat_.GetAvr());
+  auto i2c_listener_panel = I2CListenerRenderer(Thermostat_.GetAvr()) |
+                            size(ftxui::WIDTH, ftxui::LESS_THAN, 80);
 
   // Main layout - four panels side by side with horizontal divider
-  auto main_layout = Container::Horizontal({
-      left_panel,
-      relay_panel,
-      i2c_listener_panel,
-      logs_panel,
+  auto bottom_items = Container::Horizontal({
+                          left_panel,
+                          relay_panel,
+                          i2c_listener_panel,
+                          logs_panel,
+                      }) |
+                      size(ftxui::HEIGHT, ftxui::LESS_THAN, 40);
+
+  auto main_layout = Container::Vertical({
+      screen,
+      bottom_items,
   });
 
   Add(main_layout);

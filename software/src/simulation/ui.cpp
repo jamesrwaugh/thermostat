@@ -51,20 +51,24 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
                     }) |
                     size(ftxui::WIDTH, EQUAL, 20);
 
-  auto screen = Renderer([&] {
-                  const auto& screen = Thermostat_.GetScreenMemory();
+  auto screen =
+      Renderer([&] {
+        const auto& screen = Thermostat_.GetScreenMemory();
 
-                  auto c = Canvas(112, 16);
+        auto c = Canvas(112, 16);
 
-                  for (unsigned y = 0; y < 16; y++) {
-                    for (unsigned x = 0; x < 112; x++) {
-                      c.DrawPoint(x, y, screen.at(x).at(y));
-                    }
-                  }
+        for (unsigned y = 0; y < 16; y++) {
+          for (unsigned x = 0; x < 112; x++) {
+            c.DrawPoint(x, y, true,
+                        [&](Pixel& s) { s.background_color = Color::Grey0; });
+            c.DrawPoint(x, y, screen.at(x).at(y),
+                        [&](Pixel& s) { s.foreground_color = Color::Cyan3; });
+          }
+        }
 
-                  return canvas(std::move(c));
-                }) |
-                size(ftxui::HEIGHT, EQUAL, 10) | border;
+        return canvas(std::move(c)) | border;
+      }) |
+      size(ftxui::HEIGHT, EQUAL, 10);
 
   // Middle Panel - Relay States
   auto relay_panel =

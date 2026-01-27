@@ -66,11 +66,11 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(56, 8);
-  screen.print("         ");
-  screen.GU7000_setCursor(56, 8);
-  screen.print("Temp: ");
-  screen.print(displayTemp, 10);
+  screen.GU7000_setFontSize(2, 2, false);
+  screen.print(0, 0, "   ");
+  screen.print(0, 0, displayTemp, 10);
+  screen.GU7000_setFontSize(1, 1, false);
+  screen.print(22, 0, unit == TemperatureUnitT::Freedom ? 'F' : 'C');
 }
 
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
@@ -78,32 +78,26 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(0, 8);
-  screen.print("        ");
-  screen.GU7000_setCursor(0, 8);
-  screen.print("Set: ");
-  screen.print(displayTemp, 10);
+  screen.print(66, 0, "Set @");
+  screen.print(96, 0, displayTemp, 10);
 }
 
 void DriverDisplayIsHeating() {
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(0, 0);
-  screen.print("Heating");
+  screen.print(76, 8, "Heating");
 }
 
 void DriverDisplayIsCooling() {
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(0, 0);
-  screen.print("Cooling");
+  screen.print(76, 8, "Cooling");
 }
 
 void DriverDisplayIsIdle() {
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(0, 0);
-  screen.print("Idle");
+  screen.print(91, 8, "Idle");
 }
 
 void DriverDisplayClearScreen() {

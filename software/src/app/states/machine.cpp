@@ -220,12 +220,13 @@ void Machine::WriteHaFanModeTopicResponse() const {
 
 void Machine::WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
                                     uint8_t byte_two) const {
-  uint8_t topic_u8 = u8(topic);
+  const uint8_t topic_u8 = u8(topic);
+  const uint16_t checksum = topic_u8 + byte_one + byte_two;
   HaCommand c;
   c.topic_key = topic_u8;
   c.payload_byte_one = byte_one;
   c.payload_byte_two = byte_two;
-  c.checksum = topic_u8 + byte_one + byte_two;
+  c.checksum = checksum & 0xFF;
   uint8_t b[BYTES_LENGTH_HA_COMMAND];
   EncodeHaCommand(&c, b);
   DriverWriteSerialPortRaw(b, sizeof(b));

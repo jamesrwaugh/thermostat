@@ -6,7 +6,7 @@
       },
       "binary": {
         "arguments": [
-          "--query-driver=/usr/local/avr/bin/avr-g++",
+          "--query-driver=/usr/bin/avr-g++",
           "--compile-commands-dir=builddir",
         ],
       },

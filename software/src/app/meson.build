@@ -3,11 +3,11 @@ src = files(
   'states/cooling.cpp',
   'states/heating.cpp',
   'states/idle.cpp',
+  'states/images.cpp',
   'states/machine.cpp',
   'states/program_autotime.cpp',
   'states/program_screen.cpp',
   'states/program_types.cpp',
-  'states/images.cpp',
   'main.cpp',
   'sim.c',
 )
@@ -23,11 +23,7 @@ sim_avr_avr_inc = ['/usr/local/include/simavr/avr']
 executable(
   'thermo-app',
   src,
-  dependencies: [
-    etl_dep,
-    avr_driver_dep,
-    protos_dep,
-  ],
+  dependencies: [etl_dep, avr_driver_dep, protos_dep, mqtt_dep],
   cpp_args: [
     '-DETL_NO_STL',
     '-fno-threadsafe-statics',

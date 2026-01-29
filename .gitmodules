@@ -19,3 +19,6 @@
 [submodule "software/submodules/lodepng"]
 	path = software/submodules/lodepng
 	url = git@github.com:lvandeve/lodepng.git
+[submodule "software/submodules/MQTT-C"]
+	path = software/submodules/MQTT-C
+	url = git@github.com:LiamBindle/MQTT-C.git

@@ -8,6 +8,7 @@
 
 #include "Noritake_VFD_GU7000.h"
 #include "driver.hpp"
+#include "images.hpp"
 
 extern "C" {
 
@@ -64,13 +65,25 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
 void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
   auto displayTemp =
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
-  AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setFontSize(2, 2, false);
-  screen.print(0, 0, "   ");
-  screen.print(0, 0, displayTemp, 10);
-  screen.GU7000_setFontSize(1, 1, false);
-  screen.print(22, 0, unit == TemperatureUnitT::Freedom ? 'F' : 'C');
+  {
+    AutoTwi t;
+    screen.GU7000_setFontSize(2, 2, false);
+    screen.print(0, 0, "    ");
+    screen.GU7000_setCursor(0, 0);
+    screen.print(displayTemp, 10);
+    screen.GU7000_setFontSize(1, 1, false);
+    screen.print(unit == TemperatureUnitT::Freedom ? 'F' : 'C');
+  }
+  {
+    AutoTwi t;
+    screen.GU7000_setFontSize(2, 2, false);
+    screen.print(30, 0, "   ");
+    screen.GU7000_setCursor(30, 0);
+    screen.print(displayTemp, 10);
+    screen.GU7000_setFontSize(1, 1, false);
+    screen.print("RH");
+  }
 }
 
 void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
@@ -78,8 +91,9 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.print(66, 0, "Set @");
-  screen.print(96, 0, displayTemp, 10);
+  screen.GU7000_setCursor(71, 0);
+  screen.print("Set@ ");
+  screen.print(displayTemp, 10);
 }
 
 void DriverDisplayIsHeating() {

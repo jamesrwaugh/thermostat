@@ -30,7 +30,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::SecondPassed: {
-      machine_.ReadTemperatureAndPeepIfChanged();
+      machine_.ReadTemperatureAndReportIfChanged();
       TickChangeCounter();
       return DetermineNextState();
     }

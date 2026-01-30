@@ -74,9 +74,8 @@ const uint8_t gSnowflakeTwoImageData[ImageWidth]{
     // clang-format on
 };
 
-void DrawImage(Noritake_VFD_GU7000& screen, uint8_t xPositionDots, bool bottom,
-               const uint8_t image[ImageWidth]) {
+void DrawImage(uint8_t xPositionDots, bool bottom, Image image) {
   AutoTwi t;
-  screen.GU7000_drawImage(xPositionDots, ImageHeight, ImageWidth,
-                          bottom ? 8 : 0, image);
+  DriverGetScreenHandle().GU7000_drawImage(xPositionDots, ImageHeight,
+                                           ImageWidth, bottom ? 8 : 0, image);
 }

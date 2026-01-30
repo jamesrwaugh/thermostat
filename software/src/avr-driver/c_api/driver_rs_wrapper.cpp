@@ -8,7 +8,6 @@
 
 #include "Noritake_VFD_GU7000.h"
 #include "driver.hpp"
-#include "images.hpp"
 
 extern "C" {
 
@@ -91,8 +90,8 @@ void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
       unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
   AutoTwi t;
   auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(71, 0);
-  screen.print("Set@ ");
+  screen.GU7000_setCursor(80, 0);
+  screen.print("S@ ");
   screen.print(displayTemp, 10);
 }
 

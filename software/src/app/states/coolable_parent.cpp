@@ -38,7 +38,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       TickChangeCounter();
       if (status_image_a_ && status_image_b_) {
         image_state_ = !image_state_;
-        DrawImage(64, true, image_state_ ? *status_image_a_ : *status_image_b_);
+        DrawImage(68, true, image_state_ ? *status_image_a_ : *status_image_b_);
       }
       return DetermineNextState();
     }

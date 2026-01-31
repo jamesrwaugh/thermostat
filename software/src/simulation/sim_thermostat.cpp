@@ -14,13 +14,13 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
   auto cb = (SimAvrThermostat::RelayCb*)param;
   bool on = value != 0;
 
-  if (strcmp(irq->name, "=avr.portc.pin1") == 0) {
+  if (strcmp(irq->name, "=avr.portc.pin0") == 0) {
     (*cb)(Relay::Fan, on);
-  } else if (strcmp(irq->name, "=avr.portc.pin2") == 0) {
-    (*cb)(Relay::Compressor, on);
-  } else if (strcmp(irq->name, "=avr.portc.pin0") == 0) {
-    (*cb)(Relay::Heat, on);
   } else if (strcmp(irq->name, "=avr.portb.pin2") == 0) {
+    (*cb)(Relay::Compressor, on);
+  } else if (strcmp(irq->name, "=avr.portc.pin1") == 0) {
+    (*cb)(Relay::Heat, on);
+  } else if (strcmp(irq->name, "=avr.portc.pin2") == 0) {
     (*cb)(Relay::ReverseValve, on);
   } else {
     std::abort();

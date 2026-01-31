@@ -195,7 +195,7 @@ int8_t AvrDrivers::ReadInput() {
 }
 
 void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
-  bool reverseHeat = (PINC & _BV(PINC3)) != 0;
+  bool reverseHeat = (PINC & _BV(PINC2)) != 0;
   data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
                                         : ReverseValveModeT::OnForCooling;
 }
@@ -203,16 +203,16 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
 void AvrDrivers::RelayOn(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC |= _BV(PORTC1);
-      break;
-    case Relay::Compressor:
-      PORTC |= _BV(PORTC2);
-      break;
-    case Relay::Heat:
       PORTC |= _BV(PORTC0);
       break;
-    case Relay::ReversingValve:
+    case Relay::Compressor:
       PORTB |= _BV(PORTB2);
+      break;
+    case Relay::Heat:
+      PORTC |= _BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      PORTC |= _BV(PORTC2);
       break;
   }
 }
@@ -220,16 +220,16 @@ void AvrDrivers::RelayOn(Relay r) const {
 void AvrDrivers::RelayOff(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC &= ~_BV(PORTC1);
-      break;
-    case Relay::Compressor:
-      PORTC &= ~_BV(PORTB2);
-      break;
-    case Relay::Heat:
       PORTC &= ~_BV(PORTC0);
       break;
-    case Relay::ReversingValve:
+    case Relay::Compressor:
       PORTB &= ~_BV(PORTB2);
+      break;
+    case Relay::Heat:
+      PORTC &= ~_BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      PORTC &= ~_BV(PORTC2);
       break;
   }
 }

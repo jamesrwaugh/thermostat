@@ -1,29 +1,29 @@
 #![no_std]
 #![no_main]
 
-use esp_backtrace as _;
 use esp_hal::{
-    delay::Delay,
+    clock::CpuClock,
     gpio::{Level, Output, OutputConfig},
     main,
+    time::{Duration, Instant},
 };
-use esp_println::println;
 
-esp_bootloader_esp_idf::esp_app_desc!();
-
-/// Onboard LED on many ESP32-C3 dev boards (GPIO 8). Use GPIO7 for ESP32-C3-DevKit-RUST-1.
 #[main]
 fn main() -> ! {
-    let peripherals = esp_hal::init(esp_hal::Config::default());
+    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
 
-    println!("comms: blink starting");
+    let peripherals = esp_hal::init(config);
 
-    let mut led = Output::new(peripherals.GPIO8, Level::Low, OutputConfig::default());
-
-    let delay = Delay::new();
+    let mut led = Output::new(peripherals.GPIO0, Level::High, OutputConfig::default());
 
     loop {
         led.toggle();
-        delay.delay_millis(500);
+        let delay_start = Instant::now();
+        while delay_start.elapsed() < Duration::from_millis(500) {}
     }
+}
+
+#[panic_handler]
+fn panic(_: &core::panic::PanicInfo) -> ! {
+    esp_hal::system::software_reset()
 }

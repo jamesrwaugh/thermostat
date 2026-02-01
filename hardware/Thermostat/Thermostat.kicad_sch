@@ -4643,6 +4643,12 @@
 		(uuid "7ed2f12b-87c1-4ba6-bcbd-63134b4d0d20")
 	)
 	(junction
+		(at 228.6 157.48)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "86edebf9-5da9-40a9-9175-14c07f86268d")
+	)
+	(junction
 		(at 190.5 35.56)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4703,12 +4709,6 @@
 		(uuid "c01813e8-2e0d-4bf5-93c5-925e506eaf5c")
 	)
 	(junction
-		(at 228.6 157.48)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "c3464db1-6d6e-4ff9-8a87-2667dc3a4711")
-	)
-	(junction
 		(at 76.2 130.81)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4749,12 +4749,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "dc07940f-3508-4f49-98fc-95fff662404a")
-	)
-	(junction
-		(at 226.06 157.48)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "dc3fdd8f-b21a-4045-89af-52daceaf1e98")
 	)
 	(junction
 		(at 236.22 147.32)
@@ -5880,16 +5874,6 @@
 	)
 	(wire
 		(pts
-			(xy 218.44 147.32) (xy 218.44 157.48)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "af5c9987-a91b-4fb8-9824-0cd93365722e")
-	)
-	(wire
-		(pts
 			(xy 158.75 130.81) (xy 200.66 130.81)
 		)
 		(stroke
@@ -5947,16 +5931,6 @@
 			(type default)
 		)
 		(uuid "bb508b0d-8848-4b39-8f04-2dbb8d873a3d")
-	)
-	(wire
-		(pts
-			(xy 228.6 157.48) (xy 236.22 157.48)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "bbe9f701-55ff-4861-83fb-add89de87f34")
 	)
 	(wire
 		(pts
@@ -6107,16 +6081,6 @@
 			(type default)
 		)
 		(uuid "cc2ce513-d0e8-4fb9-9c87-26606335f4c4")
-	)
-	(wire
-		(pts
-			(xy 218.44 157.48) (xy 226.06 157.48)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cc659274-cefe-41a2-8108-8b4d90ac2a9c")
 	)
 	(wire
 		(pts
@@ -6347,6 +6311,16 @@
 			(type default)
 		)
 		(uuid "ef75e923-48be-41ff-aa2e-c976c4534ea2")
+	)
+	(wire
+		(pts
+			(xy 228.6 157.48) (xy 228.6 158.75)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f1d0b554-a9eb-4287-b899-1f1e1b9c65e4")
 	)
 	(wire
 		(pts
@@ -8177,7 +8151,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "2aeb7c6f-088d-4805-bef3-fc85866e1451")
 		(property "Reference" "C8"
 			(at 214.63 151.1299 0)
@@ -10737,6 +10710,71 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+5V")
+		(at 228.6 158.75 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a23619fe-77d0-43a7-9fc7-f59a038862bb")
+		(property "Reference" "#PWR031"
+			(at 228.6 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V"
+			(at 231.902 158.75 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 228.6 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 228.6 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 228.6 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4ebfc869-60cc-4267-8c3c-d5129e2731b2")
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "#PWR031")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 82.55 87.63 90)
 		(mirror x)
@@ -10929,6 +10967,71 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "#PWR011")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 236.22 157.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a66e34bb-cd58-41da-8be2-43bca49d8d80")
+		(property "Reference" "#PWR029"
+			(at 236.22 163.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 233.426 157.988 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 236.22 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 236.22 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 236.22 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f4623c63-99ee-4954-9d8a-af28b6297426")
+		)
+		(instances
+			(project "Thermostat"
+				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
+					(reference "#PWR029")
 					(unit 1)
 				)
 			)
@@ -12358,7 +12461,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 228.6 157.48 0)
+		(at 218.44 147.32 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12366,7 +12469,7 @@
 		(dnp no)
 		(uuid "f3d8c1b2-f347-446f-b180-de861561d113")
 		(property "Reference" "#PWR03"
-			(at 228.6 163.83 0)
+			(at 212.09 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12375,7 +12478,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 232.918 159.258 0)
+			(at 217.932 144.526 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12383,7 +12486,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 228.6 157.48 0)
+			(at 218.44 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12392,7 +12495,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 228.6 157.48 0)
+			(at 218.44 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12401,7 +12504,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 228.6 157.48 0)
+			(at 218.44 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)

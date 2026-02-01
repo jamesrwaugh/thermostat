@@ -63,6 +63,9 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
   avr_irq_register_notify(GetPinIrq('B', 2), FakeCb, &RelayCb_);
   avr_irq_register_notify(GetPinIrq('C', 1), FakeCb, &RelayCb_);
   avr_irq_register_notify(GetPinIrq('C', 2), FakeCb, &RelayCb_);
+
+  // EEPROM
+  Eeprom_ = std::make_unique<Sim47LXX>(Avr_, 1, 1);
 }
 
 void SimAvrThermostat::OnRelayChange(Relay r, bool value) {

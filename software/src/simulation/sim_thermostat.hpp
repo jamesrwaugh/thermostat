@@ -1,5 +1,7 @@
 #pragma once
 
+#include <simavr-toolbox/sim_47l04.h>
+
 #include <ftxui-toolbox/ftxui_simulated_avr.hpp>
 #include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
@@ -49,6 +51,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   std::unique_ptr<SimTMP116> Tmp116_;
   RelayState Relays_;
   RelayCb RelayCb_;
+  std::unique_ptr<Sim47LXX> Eeprom_;
 
   std::chrono::steady_clock::time_point LastMsTick_;
 };

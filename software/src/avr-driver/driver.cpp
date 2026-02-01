@@ -20,6 +20,7 @@ void AvrDrivers::Setup() {
   SetupRTC();
   SetupScreen();
   SetupTemp();
+  SetupFlash();
   SetupSerial();
   sei();
 }
@@ -146,6 +147,12 @@ void AvrDrivers::SetupSerial() {
   Serial_.begin();
 }
 
+void AvrDrivers::SetupFlash() {
+  // Need to use A2 and A1 here to avoid clash with 0x50
+  // I2C Address of the screen
+  ram_.begin(1, 1);
+}
+
 struct DebounceState {
   uint8_t ZeroCount{0};
   bool IsSet{false};
@@ -260,14 +267,12 @@ bool AvrDrivers::LoadData(ThermoSaveData& data) const {
 
 bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,
                             uint8_t length) const {
-  uint8_t err = ds1307_write_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
-                                 const_cast<uint8_t*>(data), length);
+  uint8_t err = ram_.write(address, data, static_cast<uint16_t>(length));
   return err == 0;
 }
 
 bool AvrDrivers::ReadFlash(uint16_t address, uint8_t* buffer,
                            uint8_t maxLength) const {
-  uint8_t err = ds1307_read_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
-                                buffer, maxLength);
-  return err == 0;
+  ram_.read(address, buffer, maxLength);
+  return true;
 }

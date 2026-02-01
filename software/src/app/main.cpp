@@ -41,7 +41,9 @@ void OnButtonPressed(Button b) {
 }
 
 void publish_response_callback(void** state,
-                               struct mqtt_response_publish* publish) {}
+                               struct mqtt_response_publish* publish) {
+  //
+}
 
 int main() {
   DriverInit();
@@ -68,7 +70,8 @@ int main() {
 
   /* publish the time */
   const char* message = "Hello";
-  mqtt_publish(&client, "temp", message, strlen(message) + 1, MQTT_PUBLISH_QOS_0);
+  mqtt_publish(&client, "temp", message, strlen(message) + 1,
+               MQTT_PUBLISH_QOS_0);
 
   while (true) {
     if (g10MillisecondPassed) {

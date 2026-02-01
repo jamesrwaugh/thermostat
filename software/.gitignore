@@ -50,3 +50,6 @@ builddir/
 *.exe
 *.out
 *.app
+
+# Rust (comms)
+src/comms/target/

@@ -10,8 +10,12 @@
 
 // ===================================================================== //
 
-CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
-    : State::Base(stateId), machine_(machine) {
+CoolableParent::CoolableParent(Machine& machine, State::Type stateId,
+                               const Image* const a, const Image* const b)
+    : State::Base(stateId),
+      machine_(machine),
+      status_image_a_{a},
+      status_image_b_{b} {
   DriverDisplayClearScreen();
   machine_.DisplaySetPointAndTemp();
 }
@@ -30,8 +34,12 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::SecondPassed: {
-      machine_.ReadTemperatureAndPeepIfChanged();
+      machine_.ReadTemperatureAndReportIfChanged();
       TickChangeCounter();
+      if (status_image_a_ && status_image_b_) {
+        image_state_ = !image_state_;
+        DrawImage(68, true, image_state_ ? *status_image_a_ : *status_image_b_);
+      }
       return DetermineNextState();
     }
     case Event::Type::FanButtonPushed: {

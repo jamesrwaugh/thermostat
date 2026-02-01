@@ -14,13 +14,13 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
   auto cb = (SimAvrThermostat::RelayCb*)param;
   bool on = value != 0;
 
-  if (strcmp(irq->name, "=avr.portc.pin1") == 0) {
+  if (strcmp(irq->name, "=avr.portc.pin0") == 0) {
     (*cb)(Relay::Fan, on);
-  } else if (strcmp(irq->name, "=avr.portc.pin2") == 0) {
-    (*cb)(Relay::Compressor, on);
-  } else if (strcmp(irq->name, "=avr.portc.pin0") == 0) {
-    (*cb)(Relay::Heat, on);
   } else if (strcmp(irq->name, "=avr.portb.pin2") == 0) {
+    (*cb)(Relay::Compressor, on);
+  } else if (strcmp(irq->name, "=avr.portc.pin1") == 0) {
+    (*cb)(Relay::Heat, on);
+  } else if (strcmp(irq->name, "=avr.portc.pin2") == 0) {
     (*cb)(Relay::ReverseValve, on);
   } else {
     std::abort();
@@ -63,6 +63,9 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
   avr_irq_register_notify(GetPinIrq('B', 2), FakeCb, &RelayCb_);
   avr_irq_register_notify(GetPinIrq('C', 1), FakeCb, &RelayCb_);
   avr_irq_register_notify(GetPinIrq('C', 2), FakeCb, &RelayCb_);
+
+  // EEPROM
+  Eeprom_ = std::make_unique<Sim47LXX>(Avr_, 1, 1);
 }
 
 void SimAvrThermostat::OnRelayChange(Relay r, bool value) {

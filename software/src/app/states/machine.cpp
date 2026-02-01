@@ -48,7 +48,7 @@ ProgramAutoTimeData& Machine::AutoTimeData() {
   return AtData;
 }
 
-void Machine::ReadTemperatureAndPeepIfChanged() {
+void Machine::ReadTemperatureAndReportIfChanged() {
   LastReadTemp = DriverReadTemp();
 
   if (LastReadTemp != LastCommTemp) {

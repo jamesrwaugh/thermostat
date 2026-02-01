@@ -20,6 +20,7 @@ void AvrDrivers::Setup() {
   SetupRTC();
   SetupScreen();
   SetupTemp();
+  SetupFlash();
   SetupSerial();
   sei();
 }
@@ -146,6 +147,12 @@ void AvrDrivers::SetupSerial() {
   Serial_.begin();
 }
 
+void AvrDrivers::SetupFlash() {
+  // Need to use A2 and A1 here to avoid clash with 0x50
+  // I2C Address of the screen
+  ram_.begin(1, 1);
+}
+
 struct DebounceState {
   uint8_t ZeroCount{0};
   bool IsSet{false};
@@ -195,7 +202,7 @@ int8_t AvrDrivers::ReadInput() {
 }
 
 void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
-  bool reverseHeat = (PINC & _BV(PINC3)) != 0;
+  bool reverseHeat = (PINC & _BV(PINC2)) != 0;
   data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
                                         : ReverseValveModeT::OnForCooling;
 }
@@ -203,16 +210,16 @@ void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
 void AvrDrivers::RelayOn(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC |= _BV(PORTC1);
-      break;
-    case Relay::Compressor:
-      PORTC |= _BV(PORTC2);
-      break;
-    case Relay::Heat:
       PORTC |= _BV(PORTC0);
       break;
-    case Relay::ReversingValve:
+    case Relay::Compressor:
       PORTB |= _BV(PORTB2);
+      break;
+    case Relay::Heat:
+      PORTC |= _BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      PORTC |= _BV(PORTC2);
       break;
   }
 }
@@ -220,16 +227,16 @@ void AvrDrivers::RelayOn(Relay r) const {
 void AvrDrivers::RelayOff(Relay r) const {
   switch (r) {
     case Relay::Fan:
-      PORTC &= ~_BV(PORTC1);
-      break;
-    case Relay::Compressor:
-      PORTC &= ~_BV(PORTB2);
-      break;
-    case Relay::Heat:
       PORTC &= ~_BV(PORTC0);
       break;
-    case Relay::ReversingValve:
+    case Relay::Compressor:
       PORTB &= ~_BV(PORTB2);
+      break;
+    case Relay::Heat:
+      PORTC &= ~_BV(PORTC1);
+      break;
+    case Relay::ReversingValve:
+      PORTC &= ~_BV(PORTC2);
       break;
   }
 }
@@ -260,14 +267,12 @@ bool AvrDrivers::LoadData(ThermoSaveData& data) const {
 
 bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,
                             uint8_t length) const {
-  uint8_t err = ds1307_write_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
-                                 const_cast<uint8_t*>(data), length);
+  uint8_t err = ram_.write(address, data, static_cast<uint16_t>(length));
   return err == 0;
 }
 
 bool AvrDrivers::ReadFlash(uint16_t address, uint8_t* buffer,
                            uint8_t maxLength) const {
-  uint8_t err = ds1307_read_ram(const_cast<ds1307_handle_t*>(&Rtc), address,
-                                buffer, maxLength);
-  return err == 0;
+  ram_.read(address, buffer, maxLength);
+  return true;
 }

@@ -45,7 +45,7 @@ class Machine {
   void DisplaySetPointAndTemp();
   void ResetAutoTimeData();
   ProgramAutoTimeData& AutoTimeData();
-  void ReadTemperatureAndPeepIfChanged();
+  void ReadTemperatureAndReportIfChanged();
   uint8_t LastReadTemerature() const;
 
   void start();

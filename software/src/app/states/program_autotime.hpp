@@ -2,10 +2,11 @@
 
 #include <Noritake_VFD_GU7000.h>
 
+#include <images.hpp>
+
 #include "ThermoSaveData_bp.h"
 #include "driver_rs_wrapper.hpp"
 #include "event.hpp"
-#include "images.hpp"
 #include "state.hpp"
 #include "states/machine.hpp"
 #include "states/program_screen.hpp"

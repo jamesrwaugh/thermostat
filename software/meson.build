@@ -37,14 +37,6 @@ lodepng_dep = declare_dependency(
   include_directories: ['submodules/lodepng'],
 )
 
-mqtt_dep = declare_dependency(
-  sources: [
-    'submodules/MQTT-C/src/mqtt.c',
-    'submodules/MQTT-C/src/mqtt_pal.c',
-  ],
-  include_directories: ['submodules/MQTT-C/include'],
-)
-
 subdir('src/protos')
 subdir('src/avr-driver')
 subdir('src/simulation')

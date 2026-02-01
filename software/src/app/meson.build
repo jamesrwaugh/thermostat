@@ -22,7 +22,7 @@ sim_avr_avr_inc = ['/usr/local/include/simavr/avr']
 executable(
   'thermo-app',
   src,
-  dependencies: [etl_dep, avr_driver_dep, protos_dep, mqtt_dep],
+  dependencies: [etl_dep, avr_driver_dep, protos_dep],
   cpp_args: [
     '-DETL_NO_STL',
     '-fno-threadsafe-statics',

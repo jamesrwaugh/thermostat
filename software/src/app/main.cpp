@@ -1,7 +1,6 @@
 #include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
 #include <driver_ds1307.h>
-#include <mqtt.h>
 
 #include <driver_rs_wrapper.hpp>
 
@@ -40,11 +39,6 @@ void OnButtonPressed(Button b) {
   }
 }
 
-void publish_response_callback(void** state,
-                               struct mqtt_response_publish* publish) {
-  //
-}
-
 int main() {
   DriverInit();
   machine.start();
@@ -54,24 +48,6 @@ int main() {
 
   ProgramScreenState::Screen_ = &DriverGetScreenHandle();
   ScreenBox::Screen_ = &DriverGetScreenHandle();
-
-  uint8_t sendbuf[50];
-  uint8_t recvbuf[50];
-
-  struct mqtt_client client; /* instantiate the client */
-  mqtt_init(&client, 0, sendbuf, sizeof(sendbuf), recvbuf, sizeof(recvbuf),
-            publish_response_callback); /* initialize the client */
-
-  /* Send connection request to the broker. */
-  const char* client_id = NULL;
-  uint8_t connect_flags = MQTT_CONNECT_CLEAN_SESSION;
-  mqtt_connect(&client, client_id, NULL, NULL, 0, NULL, NULL, connect_flags,
-               400);
-
-  /* publish the time */
-  const char* message = "Hello";
-  mqtt_publish(&client, "temp", message, strlen(message) + 1,
-               MQTT_PUBLISH_QOS_0);
 
   while (true) {
     if (g10MillisecondPassed) {
@@ -93,8 +69,6 @@ int main() {
       lastSecondCount = 0;
       machine.receive(Event::SecondPassed());
     }
-
-    mqtt_sync(&client);
 
     DriverMcuSleep();
   }

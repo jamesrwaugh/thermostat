@@ -1,6 +1,10 @@
 #![no_std]
 #![no_main]
 #![deny(clippy::large_stack_frames)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
@@ -31,6 +35,23 @@ async fn main(spawner: Spawner) -> ! {
     let (mut _wifi_controller, _interfaces) =
         esp_radio::wifi::new(&radio_init, peripherals.WIFI, Default::default())
             .expect("Failed to initialize Wi-Fi controller");
+
+    let mut item = HaCommand {
+        topic_key: MQTT_PING_TOPIC as u8,
+        checksum: MQTT_PING_TOPIC as u8 + 1,
+        payload_byte_two: 1,
+        payload_byte_one: 0,
+    };
+
+    let config = esp_hal::uart::Config::default().with_baudrate(9600);
+
+    let mut uart = esp_hal::uart::Uart::new(peripherals.UART0, config).unwrap();
+
+    unsafe {
+        let mut rx_buffer = [0u8; BYTES_LENGTH_HA_COMMAND as usize];
+        EncodeHaCommand(&mut item, rx_buffer.as_mut_ptr());
+        uart.write(&rx_buffer).unwrap_or(0);
+    }
 
     // TODO: Spawn some tasks
     let _ = spawner;

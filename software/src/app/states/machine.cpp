@@ -123,17 +123,7 @@ void Machine::receive(const HaCommand& c) {
       SafeSaveState().Data.set_point = c.payload_byte_one;
       // TODO: Update Reality
       break;
-    case HaInTopicKey::TempHighCommandTopic:
-      SafeSaveState().Data.auto_high_set_point = c.payload_byte_one;
-      WriteHaSerialResponse(HaOutTopicKey::TempHighStateTopic,
-                            c.payload_byte_one, 0);
-      // TODO: Update Reality
-      break;
-    case HaInTopicKey::TempLowCommandTopic:
-      SafeSaveState().Data.auto_low_set_point = c.payload_byte_one;
-      WriteHaSerialResponse(HaOutTopicKey::TempLowStateTopic,
-                            c.payload_byte_one, 0);
-      // TODO: Update Reality
+    case HaInTopicKey::MqttPing:
       break;
   }
 }

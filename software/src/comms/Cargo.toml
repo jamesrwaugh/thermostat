@@ -15,6 +15,10 @@ pedantic = { level = "warn", priority = -1 }
 [profile.dev]
 opt-level = "s"
 
+[build-dependencies]
+bindgen = "0.71.0"
+cc = "1.0"
+
 [profile.release]
 opt-level = "s"
 debug = 2

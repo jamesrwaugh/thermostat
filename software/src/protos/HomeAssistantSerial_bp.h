@@ -3,7 +3,6 @@
 #ifndef __BITPROTO__HOME_ASSISTANT_SERIAL_H__
 #define __BITPROTO__HOME_ASSISTANT_SERIAL_H__ 1
 
-#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #ifndef __cplusplus
@@ -16,7 +15,7 @@ extern "C" {
 
 #define BITPROTO_OPTIMIZATION_MODE 1
 
-typedef uint8_t HaTopicKey; // 8bit
+typedef uint8_t HaTopicKey;  // 8bit
 
 #define ACTION_TOPIC 0
 #define CURRENT_HUMIDITY_TOPIC 1
@@ -30,13 +29,10 @@ typedef uint8_t HaTopicKey; // 8bit
 #define PRESET_MODE_COMMAND_TOPIC 9
 #define PRESET_MODE_STATE_TOPIC 10
 #define TEMP_COMMAND_TOPIC 11
-#define TEMP_HIGH_COMMAND_TOPIC 12
-#define TEMP_HIGH_STATE_TOPIC 13
-#define TEMP_LOW_COMMAND_TOPIC 14
-#define TEMP_LOW_STATE_TOPIC 15
-#define TEMP_STATE_TOPIC 16
+#define TEMP_STATE_TOPIC 12
+#define MQTT_PING_TOPIC 13
 
-typedef uint8_t HaActionTopicKey; // 3bit
+typedef uint8_t HaActionTopicKey;  // 3bit
 
 #define HA_ACTION_OFF 0
 #define HA_ACTION_HEATING 1
@@ -48,16 +44,16 @@ typedef uint8_t HaActionTopicKey; // 3bit
 #define BYTES_LENGTH_HA_COMMAND 4
 
 struct HaCommand {
-    HaTopicKey topic_key; // 8bit
-    uint8_t payload_byte_one; // 8bit
-    uint8_t payload_byte_two; // 8bit
-    uint8_t checksum; // 8bit
+  HaTopicKey topic_key;      // 8bit
+  uint8_t payload_byte_one;  // 8bit
+  uint8_t payload_byte_two;  // 8bit
+  uint8_t checksum;          // 8bit
 };
 
 // Encode struct HaCommand to given buffer s.
-int EncodeHaCommand(struct HaCommand *m, unsigned char *s);
+int EncodeHaCommand(struct HaCommand* m, unsigned char* s);
 // Decode struct HaCommand from given buffer s.
-int DecodeHaCommand(struct HaCommand *m, unsigned char *s);
+int DecodeHaCommand(struct HaCommand* m, unsigned char* s);
 
 #if defined(__cplusplus)
 }

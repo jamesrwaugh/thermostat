@@ -45,10 +45,10 @@ typedef uint8_t HaActionTopicKey; // 3bit
 #define BYTES_LENGTH_HA_COMMAND 4
 
 struct HaCommand {
+    uint8_t checksum; // 8bit
     HaTopicKey topic_key; // 8bit
     uint8_t payload_byte_one; // 8bit
     uint8_t payload_byte_two; // 8bit
-    uint8_t checksum; // 8bit
 };
 
 // Encode struct HaCommand to given buffer s.

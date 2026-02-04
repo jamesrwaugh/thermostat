@@ -3,17 +3,17 @@
 #include "HomeAssistantSerial_bp.h"
 
 int EncodeHaCommand(struct HaCommand *m, unsigned char *s) {
-    s[0] = (((unsigned char *)&((*m).topic_key))[0] ) & 255;
-    s[1] = (((unsigned char *)&((*m).payload_byte_one))[0] ) & 255;
-    s[2] = (((unsigned char *)&((*m).payload_byte_two))[0] ) & 255;
-    s[3] = (((unsigned char *)&((*m).checksum))[0] ) & 255;
+    s[0] = (((unsigned char *)&((*m).checksum))[0] ) & 255;
+    s[1] = (((unsigned char *)&((*m).topic_key))[0] ) & 255;
+    s[2] = (((unsigned char *)&((*m).payload_byte_one))[0] ) & 255;
+    s[3] = (((unsigned char *)&((*m).payload_byte_two))[0] ) & 255;
     return 0;
 }
 
 int DecodeHaCommand(struct HaCommand *m, unsigned char *s) {
-    ((unsigned char *)&((*m).topic_key))[0] = (s[0] ) & 255;
-    ((unsigned char *)&((*m).payload_byte_one))[0] = (s[1] ) & 255;
-    ((unsigned char *)&((*m).payload_byte_two))[0] = (s[2] ) & 255;
-    ((unsigned char *)&((*m).checksum))[0] = (s[3] ) & 255;
+    ((unsigned char *)&((*m).checksum))[0] = (s[0] ) & 255;
+    ((unsigned char *)&((*m).topic_key))[0] = (s[1] ) & 255;
+    ((unsigned char *)&((*m).payload_byte_one))[0] = (s[2] ) & 255;
+    ((unsigned char *)&((*m).payload_byte_two))[0] = (s[3] ) & 255;
     return 0;
 }

@@ -8,6 +8,7 @@
 
 #include "HomeAssistantSerial.hpp"
 #include "casts.hpp"
+#include "checksum.hpp"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "event.hpp"
@@ -114,12 +115,12 @@ void Machine::receive(const HaCommand& c) {
     case HaInTopicKey::FanModeCommandTopic:
       SaveState().FanMode() = static_cast<FanModeT>(c.payload_byte_one);
       WriteHaFanModeTopicResponse();
-      // TODO: Update Reality
+      ApplySaveState();
       break;
     case HaInTopicKey::ModeCommandTopic:
       SaveState().HeatMode() = static_cast<HeatModeT>(c.payload_byte_one);
       WriteHaModeStateTopicResponse();
-      // TODO: Update Reality
+      ApplySaveState();
       break;
     case HaInTopicKey::PowerCommandTopic:
       break;
@@ -127,7 +128,6 @@ void Machine::receive(const HaCommand& c) {
       break;
     case HaInTopicKey::TempCommandTopic:
       SaveState().SetPoint() = c.payload_byte_one;
-      // TODO: Update Reality
       break;
     case HaInTopicKey::MqttPing:
       MqttData.ResetTimeout();
@@ -238,14 +238,13 @@ void Machine::WriteHaFanModeTopicResponse() const {
 
 void Machine::WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
                                     uint8_t byte_two) const {
-  const uint8_t topic_u8 = u8(topic);
-  const uint16_t checksum = topic_u8 + byte_one + byte_two;
   HaCommand c;
-  c.topic_key = topic_u8;
+  c.checksum = 0;
+  c.topic_key = u8(topic);
   c.payload_byte_one = byte_one;
   c.payload_byte_two = byte_two;
-  c.checksum = checksum & 0xFF;
   uint8_t b[BYTES_LENGTH_HA_COMMAND];
   EncodeHaCommand(&c, b);
+  b[0] = checksum(b + 1, sizeof(b) - 1);
   DriverWriteSerialPortRaw(b, sizeof(b));
 }

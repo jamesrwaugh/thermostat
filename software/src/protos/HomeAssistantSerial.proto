@@ -37,8 +37,8 @@ enum HaActionTopicKey : uint3 {
 }
 
 message HaCommand {
-    HaTopicKey topic_key = 1
-    uint8 payload_byte_one = 2
-    uint8 payload_byte_two = 3
-    uint8 checksum = 4
+    uint8 checksum = 1
+    HaTopicKey topic_key = 2
+    uint8 payload_byte_one = 3
+    uint8 payload_byte_two = 4
 }

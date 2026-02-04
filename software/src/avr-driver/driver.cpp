@@ -249,22 +249,24 @@ void AvrDrivers::SetupTemp() {
 constexpr uint16_t FlashSaveDataAddress = 0;
 
 bool AvrDrivers::SaveData(const ThermoSaveData& data) const {
-  uint8_t buffer[BYTES_LENGTH_THERMO_SAVE_DATA];
-  EncodeThermoSaveData(&const_cast<ThermoSaveData&>(data), buffer);
-  return WriteFlash(FlashSaveDataAddress, buffer,
-                    BYTES_LENGTH_THERMO_SAVE_DATA);
+  uint8_t b[BYTES_LENGTH_THERMO_SAVE_DATA];
+
+  EncodeThermoSaveData(&const_cast<ThermoSaveData&>(data), b);
+  b[0] = checksum(b + 1, sizeof(b) - 1);
+
+  return WriteFlash(FlashSaveDataAddress, b, BYTES_LENGTH_THERMO_SAVE_DATA);
 }
 
 bool AvrDrivers::LoadData(ThermoSaveData& data) const {
-  uint8_t buffer[BYTES_LENGTH_THERMO_SAVE_DATA];
+  uint8_t b[BYTES_LENGTH_THERMO_SAVE_DATA];
 
-  if (!ReadFlash(FlashSaveDataAddress, buffer, BYTES_LENGTH_THERMO_SAVE_DATA)) {
+  if (!ReadFlash(FlashSaveDataAddress, b, BYTES_LENGTH_THERMO_SAVE_DATA)) {
     return false;
   }
 
-  DecodeThermoSaveData(&data, buffer);
+  DecodeThermoSaveData(&data, b);
 
-  return checksum(buffer + 1, sizeof(buffer) - 1) == data.checksum;
+  return checksum(b + 1, sizeof(b) - 1) == data.checksum;
 }
 
 bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,

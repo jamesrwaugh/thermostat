@@ -1,3 +1,4 @@
+#include <HomeAssistantSerial_bp.h>
 #include <Noritake_VFD_GU7000.h>
 #include <avr/interrupt.h>
 #include <driver_ds1307.h>
@@ -39,12 +40,38 @@ void OnButtonPressed(Button b) {
   }
 }
 
+class HaCommandMailBox {
+ public:
+  HaCommandMailBox(Machine& m) : m_{m} {}
+
+  void ReceiveByte(uint8_t byte) {
+    if (current_bytes_ < sizeof(buffer_)) {
+      buffer_[current_bytes_++] = byte;
+    } else {
+      HaCommand c;
+      DecodeHaCommand(&c, buffer_);
+      uint16_t checksum = c.topic_key + c.payload_byte_one + c.payload_byte_two;
+      if ((checksum & 0xFF) == c.checksum) {
+        m_.receive(c);
+      }
+      current_bytes_ = 0;
+    }
+  }
+
+ private:
+  Machine& m_;
+  uint8_t current_bytes_{0};
+  uint8_t buffer_[BYTES_LENGTH_HA_COMMAND];
+};
+
 int main() {
   DriverInit();
   machine.start();
 
   uint8_t lastHalfSecondCount = 0;
   uint8_t lastSecondCount = 0;
+
+  HaCommandMailBox m(machine);
 
   ProgramScreenState::Screen_ = &DriverGetScreenHandle();
   ScreenBox::Screen_ = &DriverGetScreenHandle();
@@ -68,6 +95,11 @@ int main() {
     if (lastSecondCount >= 100) {
       lastSecondCount = 0;
       machine.receive(Event::SecondPassed());
+    }
+
+    uint8_t byte;
+    if (DriverGetSerialByte(&byte)) {
+      m.ReceiveByte(byte);
     }
 
     DriverMcuSleep();

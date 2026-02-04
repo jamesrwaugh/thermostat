@@ -299,8 +299,8 @@ size_t HardwareSerial::write(uint8_t c) {
   return 1;
 }
 
-const unsigned char *HardwareSerial::tx_buffer() const { return _tx_buffer; }
+const unsigned char * const HardwareSerial::tx_buffer() const { return _tx_buffer; }
 
-const unsigned char *HardwareSerial::rx_buffer() const { return _rx_buffer; }
+const unsigned char * const HardwareSerial::rx_buffer() const { return _rx_buffer; }
 
 #endif // whole file

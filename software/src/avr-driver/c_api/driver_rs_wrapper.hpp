@@ -30,12 +30,14 @@ void DriverWriteSerialPortRaw(const uint8_t* bytes, uint8_t numBytes);
 void DriverWriteSerialPortRawCh(char ch);
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes);
 void DriverWriteSerialPortS(const char* message);
+bool DriverGetSerialByte(uint8_t* byte);
+uint8_t DriverGetSerialAvailableBytes();
+const uint8_t* const DriverGetSerialRxBuffer();
 void DriverMcuSleep();
 int8_t DriverReadButton();
 bool DriverSetTime(const ds1307_time_s& time);
 bool DriverSetTimeFromSaveData(const Time& time, const Date& date);
 bool DriverGetTime(ds1307_time_s& time);
-bool DriverGetSerialByte(uint8_t* byte);
 bool DriverSaveData(const ThermoSaveData& data);
 bool DriverLoadData(ThermoSaveData& data);
 }

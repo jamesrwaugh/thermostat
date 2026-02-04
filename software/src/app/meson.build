@@ -8,6 +8,7 @@ src = files(
   'states/program_screen.cpp',
   'states/program_types.cpp',
   'main.cpp',
+  'safe_thermo_safe.cpp',
   'sim.c',
 )
 

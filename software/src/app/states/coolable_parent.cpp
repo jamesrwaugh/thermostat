@@ -43,7 +43,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return DetermineNextState();
     }
     case Event::Type::FanButtonPushed: {
-      const auto fanMode = machine_.SafeSaveState().BumpFanMode();
+      const auto fanMode = machine_.SaveState().BumpFanMode();
 
       if (fanMode == FanModeT::On) {
         DriverRelayOn(Relay::Fan);
@@ -58,7 +58,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::NO_CHANGE;
     }
     case Event::Type::HeatButtonPushed: {
-      machine_.SafeSaveState().BumpHeatingMode();
+      machine_.SaveState().BumpHeatingMode();
       machine_.WriteHaModeStateTopicResponse();
       return DetermineNextState();
     }
@@ -86,7 +86,7 @@ void CoolableParent::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
 }
 
 void CoolableParent::EnterHeatingOrCooling(HeatModeT mode) {
-  if (machine_.SafeSaveState().FanMode() == FanModeT::Auto) {
+  if (machine_.SaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOn(Relay::Fan);
   }
 
@@ -108,7 +108,7 @@ void CoolableParent::ExitHeatingOrCooling() {
   DriverRelayOff(Relay::Compressor);
   DriverRelayOff(Relay::ReversingValve);
 
-  if (machine_.SafeSaveState().FanMode() == FanModeT::Auto) {
+  if (machine_.SaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
     machine_.WriteHaActionStateTopicResponse(HaActionKey::Idle);
   } else {
@@ -127,9 +127,9 @@ void CoolableParent::TickChangeCounter() {
 }
 
 [[nodiscard]] State::Type CoolableParent::ChangeSetPoint(int8_t change) {
-  auto& saveData = machine_.SafeSaveState();
+  auto& saveData = machine_.SaveState();
 
-  auto& setPoint = saveData.Data.set_point;
+  auto& setPoint = saveData.SetPoint();
 
   if (setPoint == 1 && change < 0) {
     return State::Type::NO_CHANGE;
@@ -151,9 +151,9 @@ void CoolableParent::TickChangeCounter() {
     return State::Type::NO_CHANGE;
   }
 
-  const auto& saveData = machine_.SafeSaveState();
+  const auto& saveData = machine_.SaveState();
   const auto heatMode = saveData.HeatMode();
-  const auto setPoint = saveData.Data.set_point;
+  const auto setPoint = saveData.SetPoint();
   uint8_t temp = machine_.LastReadTemerature();
 
   if (heatMode == HeatModeT::None) {

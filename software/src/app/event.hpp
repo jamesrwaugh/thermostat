@@ -12,7 +12,9 @@ enum class Type : uint8_t {
   HeatButtonPushed,
   HalfSecondPassed,
   SecondPassed,
-  ReverseValveModeChanged
+  ReverseValveModeChanged,
+  MqttConnected,
+  MqttDisconnected,
 };
 
 struct Base {
@@ -52,6 +54,14 @@ struct ReverseValveModeChanged : Base {
   ReverseValveModeChanged(ReverseValveModeT mode)
       : Base(Event::Type::ReverseValveModeChanged), Mode(mode) {}
   const ReverseValveModeT Mode;
+};
+
+struct MqttConnected : Base {
+  MqttConnected() : Base(Event::Type::MqttConnected) {}
+};
+
+struct MqttDisconnected : Base {
+  MqttDisconnected() : Base(Event::Type::MqttDisconnected) {}
 };
 
 }  // namespace Event

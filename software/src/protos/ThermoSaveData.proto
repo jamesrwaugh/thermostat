@@ -1,6 +1,10 @@
 proto ThermoSaveData
 
 const THERMO_STATE_DATA_MAGIC = 45
+const WIFI_NAME_MAX_LEN = 32
+const WIFI_NAME_MAX_LEN_W_NULL = 33
+const WIFI_PASSWORD_MAX_LEN = 64
+const WIFI_PASSWORD_MAX_LEN_W_NULL = 65
 
 enum TempDisplayUnit : uint1 {
     TEMP_UNIT_FREEDOM = 0
@@ -47,6 +51,11 @@ message Date {
     DateDayOfWeek day_of_week = 4
 }
 
+message MqttConfig {
+    byte[WIFI_NAME_MAX_LEN_W_NULL] wifi_name = 1
+    byte[WIFI_PASSWORD_MAX_LEN_W_NULL] wifi_password = 2
+}
+
 message ThermoSaveData {
     uint8 magic = 1
     uint8 set_point = 2
@@ -55,4 +64,7 @@ message ThermoSaveData {
     Time time = 5
     FanMode fan_mode = 6
     HeatMode heat_mode = 7
+    uint1 pad = 8
+    uint8 have_mqtt = 9
+    MqttConfig mqtt = 10
 }

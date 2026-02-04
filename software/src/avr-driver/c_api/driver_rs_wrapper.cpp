@@ -47,6 +47,14 @@ bool DriverGetSerialByte(uint8_t* byte) {
   return true;
 }
 
+uint8_t DriverGetSerialAvailableBytes() {
+  return gDriver->Serial_.available();
+}
+
+const uint8_t* const DriverGetSerialRxBuffer() {
+  return gDriver->Serial_.rx_buffer();
+}
+
 bool DriverSaveData(const ThermoSaveData& data) {
   return gDriver->SaveData(data);
 }

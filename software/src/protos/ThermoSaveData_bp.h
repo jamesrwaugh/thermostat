@@ -18,6 +18,14 @@ extern "C" {
 
 #define THERMO_STATE_DATA_MAGIC 45
 
+#define WIFI_NAME_MAX_LEN 32
+
+#define WIFI_NAME_MAX_LEN_W_NULL 33
+
+#define WIFI_PASSWORD_MAX_LEN 64
+
+#define WIFI_PASSWORD_MAX_LEN_W_NULL 65
+
 typedef uint8_t TempDisplayUnit; // 1bit
 
 #define TEMP_UNIT_FREEDOM 0
@@ -69,8 +77,16 @@ struct Date {
     DateDayOfWeek day_of_week; // 4bit
 };
 
+// Number of bytes to encode struct MqttConfig
+#define BYTES_LENGTH_MQTT_CONFIG 98
+
+struct MqttConfig {
+    unsigned char wifi_name[33]; // 264bit
+    unsigned char wifi_password[65]; // 520bit
+};
+
 // Number of bytes to encode struct ThermoSaveData
-#define BYTES_LENGTH_THERMO_SAVE_DATA 8
+#define BYTES_LENGTH_THERMO_SAVE_DATA 107
 
 struct ThermoSaveData {
     uint8_t magic; // 8bit
@@ -80,6 +96,9 @@ struct ThermoSaveData {
     struct Time time; // 22bit
     FanMode fan_mode; // 1bit
     HeatMode heat_mode; // 2bit
+    uint8_t pad; // 1bit
+    uint8_t have_mqtt; // 8bit
+    struct MqttConfig mqtt; // 784bit
 };
 
 // Encode struct Time to given buffer s.
@@ -91,6 +110,11 @@ int DecodeTime(struct Time *m, unsigned char *s);
 int EncodeDate(struct Date *m, unsigned char *s);
 // Decode struct Date from given buffer s.
 int DecodeDate(struct Date *m, unsigned char *s);
+
+// Encode struct MqttConfig to given buffer s.
+int EncodeMqttConfig(struct MqttConfig *m, unsigned char *s);
+// Decode struct MqttConfig from given buffer s.
+int DecodeMqttConfig(struct MqttConfig *m, unsigned char *s);
 
 // Encode struct ThermoSaveData to given buffer s.
 int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s);

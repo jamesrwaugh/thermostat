@@ -133,8 +133,8 @@ public:
   inline size_t write(int n) { return write((uint8_t)n); }
   using Print::write; // pull in write(str) and write(buf, size) from Print
   operator bool() { return true; }
-  const unsigned char *tx_buffer() const;
-  const unsigned char *rx_buffer() const;
+  const unsigned char * const tx_buffer() const;
+  const unsigned char * const rx_buffer() const;
 
   // Interrupt handlers - Not intended to be called externally
   inline void _rx_complete_irq(void);

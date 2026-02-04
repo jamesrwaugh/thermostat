@@ -23,8 +23,6 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
 
   using RelayCb = std::function<void(Relay r, bool value)>;
 
-  virtual void BeforeAvrCycleSideEffect() override;
-
   void PushUpButton();
   void PushDownButton();
   void PushSelectButton();
@@ -35,6 +33,10 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   const RelayState& GetRelayState() const;
   const SimGu7000Real::DisplayMemory& GetScreenMemory() const;
   avr_t* GetAvr() const;
+
+ protected:
+  virtual void BeforeAvrCycleSideEffect() override;
+  virtual void OnUartByteReceived(int uartNumber, uint8_t byte) override;
 
  private:
   void OnRelayChange(Relay r, bool value);

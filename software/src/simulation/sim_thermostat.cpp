@@ -134,6 +134,10 @@ void SimAvrThermostat::BeforeAvrCycleSideEffect() {
   Tmp116_->SimulateTempChange(Relays_);
 }
 
+void SimAvrThermostat::OnUartByteReceived(int uartNumber, uint8_t byte) {
+  sim_debug_log("[%d] %d", uartNumber, (int)byte);
+}
+
 const SimGu7000Real::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {
   return Screen->GetDisplayMemory();
 }

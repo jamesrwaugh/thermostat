@@ -23,3 +23,23 @@ protos_dep = declare_dependency(
   include_directories: [proto_include],
   dependencies: [bitproto_dep],
 )
+
+protos_lib_native = static_library(
+  'thermo-protos-native',
+  proto_src,
+  pic: true,
+  native: true,
+  dependencies: [bitproto_dep],
+  include_directories: [proto_include],
+  c_args: [
+    '-funsigned-char',
+    '-funsigned-bitfields',
+    '-fshort-enums',
+  ],
+)
+
+protos_dep_native = declare_dependency(
+  link_with: protos_lib_native,
+  include_directories: [proto_include],
+  dependencies: [bitproto_dep],
+)

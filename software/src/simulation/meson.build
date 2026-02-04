@@ -31,6 +31,7 @@ executable(
     simavr_parts_dep,
     ftxui_toolbox_dep,
     lodepng_dep,
+    protos_dep_native,
   ],
   cpp_args: [
     '-std=c++20',

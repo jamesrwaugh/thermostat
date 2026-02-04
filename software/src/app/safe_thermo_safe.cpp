@@ -1,12 +1,12 @@
 #include "safe_thermo_safe.hpp"
 
+#include <string.h>
+
 #include "casts.hpp"
 
 // ===================================================================== //
 
 SafeThermoSaveData::SafeThermoSaveData() {
-  Data.magic = THERMO_STATE_DATA_MAGIC;
-
   // Good defaults
   Data.set_point = 77;
   Data.temp_display_unit = TEMP_UNIT_FREEDOM;
@@ -24,6 +24,11 @@ SafeThermoSaveData::SafeThermoSaveData() {
   Data.time.minute = 0;
   Data.time.hour = 0;
   Data.time.am_pm = TIME_AM;
+
+  // Empty MQTT data
+  Data.have_mqtt = false;
+  memset(Data.mqtt.wifi_name, 0, sizeof(Data.mqtt.wifi_name));
+  memset(Data.mqtt.wifi_password, 0, sizeof(Data.mqtt.wifi_password));
 }
 
 TemperatureUnitT SafeThermoSaveData::TemperatureUnit() const {
@@ -62,7 +67,7 @@ const ThermoSaveData& SafeThermoSaveData::Raw() const {
   return Data;
 }
 
-ThermoSaveData& SafeThermoSaveData::RawRaw() {
+ThermoSaveData& SafeThermoSaveData::MutableRaw() {
   return Data;
 }
 

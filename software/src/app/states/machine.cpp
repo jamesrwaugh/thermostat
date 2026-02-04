@@ -14,12 +14,16 @@
 #include "heating.hpp"
 #include "idle.hpp"
 #include "program_screen.hpp"
+#include "safe_thermo_safe.hpp"
 #include "state.hpp"
+#include "states/started.hpp"
 
 // ===================================================================== //
+//
 
-void Machine::SetThermoSaveData(const ThermoSaveData& raw) {
-  SaveData = raw;
+void Machine::start() {
+  ::new (CurrentState.get_address<void*>()) Started();
+  ReadAndApplySettings();
 }
 
 void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
@@ -61,20 +65,18 @@ uint8_t Machine::LastReadTemerature() const {
 }
 
 void Machine::ReadAndApplySettings() {
-  ThermoSaveData data;
-  const bool loadSuccess = DriverLoadData(data);
+  const bool loadSuccess = DriverLoadData(SaveData.MutableRaw());
 
-  if (loadSuccess) {
-    SetThermoSaveData(data);
+  // If something went wrong, save data is now corrupted. Reset it.
+  if (!loadSuccess) {
+    ::new (&SaveData) SafeThermoSaveData();
   }
 
   ThermoButtonState buttons;
   DriverGetButtonStateNow(&buttons);
   SetThermoButtonState(buttons);
 
-  if (SaveState().FanMode() == FanModeT::On) {
-    DriverRelayOn(Relay::Fan);
-  }
+  ApplySaveState();
 }
 
 void Machine::DisplayTemperature() {
@@ -85,12 +87,6 @@ void Machine::DisplaySetPointAndTemp() {
   const auto& save = SaveState();
   DriverDisplaySetPoint(save.SetPoint(), (save.TemperatureUnit()));
   DriverDisplayTemp(LastCommTemp, SaveState().TemperatureUnit());
-}
-
-void Machine::start() {
-  ::new (CurrentState.get_address<void*>()) Idle(*this);
-  ReadAndApplySettings();
-  DisplaySetPointAndTemp();
 }
 
 // Setting: MQTT Config
@@ -171,14 +167,15 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       ::new (address) Cooling(*this);
       break;
     case State::Type::ProgramTemp:
-      ::new (address) TempScreen(SaveData.RawRaw(), lastEventWasDown);
+      ::new (address) TempScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(SaveData.RawRaw(), lastEventWasDown);
+      ::new (address) DateScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(SaveData.RawRaw(), lastEventWasDown);
+      ::new (address) TimeScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
+    case State::Type::Started:    // Should never happen
     case State::Type::NO_CHANGE:  // Should never happen
       ::new (address) Idle(*this);
       break;
@@ -195,6 +192,26 @@ void Machine::SaveProgrammingSettings() {
   const auto& saveData = SaveData.Raw();
   DriverSaveData(saveData);
   DriverSetTimeFromSaveData(saveData.time, saveData.date);
+}
+
+void Machine::ApplySaveState() {
+  if (SaveData.FanMode() == FanModeT::On) {
+    DriverRelayOn(Relay::Fan);
+  } else {
+    DriverRelayOff(Relay::Fan);
+  }
+
+  switch (SaveData.HeatMode()) {
+    case HeatModeT::Heating:
+      SwitchState(State::Type::Heating, Event::Type::SecondPassed);
+      break;
+    case HeatModeT::Cooling:
+      SwitchState(State::Type::Cooling, Event::Type::SecondPassed);
+      break;
+    case HeatModeT::None:
+      SwitchState(State::Type::Idle, Event::Type::SecondPassed);
+      break;
+  }
 }
 
 void Machine::WriteHaTempStateTopicResponse(uint8_t temp) const {

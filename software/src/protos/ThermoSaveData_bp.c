@@ -54,7 +54,7 @@ int DecodeMqttConfig(struct MqttConfig *m, unsigned char *s) {
 }
 
 int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
-    s[0] = (((unsigned char *)&((*m).magic))[0] ) & 255;
+    s[0] = (((unsigned char *)&((*m).checksum))[0] ) & 255;
     s[1] = (((unsigned char *)&((*m).set_point))[0] ) & 255;
     s[2] = (((unsigned char *)&((*m).temp_display_unit))[0] ) & 1;
     s[2] |= (((unsigned char *)&((*m).date.year))[0] << 1) & 254;
@@ -80,7 +80,7 @@ int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
 }
 
 int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
-    ((unsigned char *)&((*m).magic))[0] = (s[0] ) & 255;
+    ((unsigned char *)&((*m).checksum))[0] = (s[0] ) & 255;
     ((unsigned char *)&((*m).set_point))[0] = (s[1] ) & 255;
     ((unsigned char *)&((*m).temp_display_unit))[0] = (s[2] ) & 1;
     ((unsigned char *)&((*m).date.year))[0] = (s[2] >> 1) & 127;

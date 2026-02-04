@@ -7,7 +7,8 @@
 namespace State {
 
 enum class Type : uint8_t {
-  Idle = 0,
+  Started = 0,
+  Idle,
   Heating,
   Cooling,
   ProgramTemp,

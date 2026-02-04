@@ -20,10 +20,14 @@ class SafeThermoSaveData {
   uint8_t& SetPoint();
 
   const ThermoSaveData& Raw() const;
-  ThermoSaveData& RawRaw();
+  ThermoSaveData& MutableRaw();
 
   FanModeT BumpFanMode();
   HeatModeT BumpHeatingMode();
+
+  uint8_t Checksum() const {
+    return 0;
+  }
 
  private:
   ThermoSaveData Data;

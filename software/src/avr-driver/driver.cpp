@@ -7,6 +7,7 @@
 #include <twi_master.h>
 #include <util/delay.h>
 
+#include "c_api/checksum.hpp"
 #include "c_api/driver_rs_wrapper.hpp"
 
 etl::optional<AvrDrivers> gDriver;
@@ -262,7 +263,8 @@ bool AvrDrivers::LoadData(ThermoSaveData& data) const {
   }
 
   DecodeThermoSaveData(&data, buffer);
-  return data.magic == THERMO_STATE_DATA_MAGIC;
+
+  return checksum(buffer + 1, sizeof(buffer) - 1) == data.checksum;
 }
 
 bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,

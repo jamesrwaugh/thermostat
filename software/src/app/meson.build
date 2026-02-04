@@ -7,6 +7,7 @@ src = files(
   'states/program_autotime.cpp',
   'states/program_screen.cpp',
   'states/program_types.cpp',
+  'states/started.cpp',
   'main.cpp',
   'safe_thermo_safe.cpp',
   'sim.c',

@@ -47,8 +47,13 @@ struct MqttState {
 
 class Machine {
  public:
-  void SetThermoSaveData(const ThermoSaveData& raw);
-  void SetThermoButtonState(const ThermoButtonState& raw);
+  // State machine control
+  void start();
+  void receive(const Event::Base& event);
+  void receive(const HaCommand& command);
+  [[nodiscard]] State::Type get_state_id() const;
+
+  // Themostat operations
   [[nodiscard]] ThermoButtonState& ButtonState();
   [[nodiscard]] const SafeThermoSaveData& SaveState() const;
   [[nodiscard]] SafeThermoSaveData& SaveState();
@@ -60,11 +65,6 @@ class Machine {
   void ReadTemperatureAndReportIfChanged();
   uint8_t LastReadTemerature() const;
 
-  void start();
-  void receive(const Event::Base& event);
-  void receive(const HaCommand& command);
-  [[nodiscard]] State::Type get_state_id() const;
-
   // Home Assist integration
   void WriteHaTempStateTopicResponse(uint8_t temp) const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
@@ -74,6 +74,8 @@ class Machine {
  private:
   void SwitchState(State::Type new_state, Event::Type lastEvent);
   void SaveProgrammingSettings();
+  void ApplySaveState();
+  void SetThermoButtonState(const ThermoButtonState& raw);
   void WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
                              uint8_t byte_two) const;
 

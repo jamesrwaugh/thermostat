@@ -32,6 +32,7 @@ void DriverWriteSerialPortS(const char* message) {
 
 void DriverWriteSerialPortRaw(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
+  gDriver->Serial_.flush();
 }
 
 void DriverWriteSerialPortRawCh(char ch) {

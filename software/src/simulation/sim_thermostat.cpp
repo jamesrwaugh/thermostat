@@ -4,11 +4,14 @@
 #include <simavr/sim_irq.h>
 
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
 #include <simavr-toolbox/sim_gu7000.hpp>
+
+#include "HomeAssistantSerial_bp.h"
 
 void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
   auto cb = (SimAvrThermostat::RelayCb*)param;
@@ -135,7 +138,17 @@ void SimAvrThermostat::BeforeAvrCycleSideEffect() {
 }
 
 void SimAvrThermostat::OnUartByteReceived(int uartNumber, uint8_t byte) {
-  sim_debug_log("[%d] %d", uartNumber, (int)byte);
+  if (uartNumber == 0) {
+    HaCommand c;
+    c.checksum = 0;
+    if (mail.ReceiveByte(byte, c)) {
+      sim_debug_log("[%d] %d %d", c.topic_key, c.payload_byte_one,
+                    c.payload_byte_two);
+    } else if (c.checksum == 0xFF) {
+      sim_debug_log("Bad [%d] %d %d", c.topic_key, c.payload_byte_one,
+                    c.payload_byte_two);
+    }
+  }
 }
 
 const SimGu7000Real::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {

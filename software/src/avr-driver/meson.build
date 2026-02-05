@@ -2,7 +2,6 @@ main_src = files(
   'Serial/HardwareSerial.cpp',
   'Serial/HardwareSerial0.cpp',
   'Serial/Print.cpp',
-  'c_api/checksum.cpp',
   'c_api/driver_rs_wrapper.cpp',
   'c_api/images.cpp',
   'driver.cpp',

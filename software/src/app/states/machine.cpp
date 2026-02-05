@@ -243,7 +243,8 @@ void Machine::WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
   c.topic_key = u8(topic);
   c.payload_byte_one = byte_one;
   c.payload_byte_two = byte_two;
-  uint8_t b[BYTES_LENGTH_HA_COMMAND];
+  uint8_t b[BYTES_LENGTH_HA_COMMAND];  // 0 0 0 0
+  memset(b, 0, sizeof(b));
   EncodeHaCommand(&c, b);
   b[0] = checksum(b + 1, sizeof(b) - 1);
   DriverWriteSerialPortRaw(b, sizeof(b));

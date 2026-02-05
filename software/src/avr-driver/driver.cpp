@@ -7,7 +7,8 @@
 #include <twi_master.h>
 #include <util/delay.h>
 
-#include "c_api/checksum.hpp"
+#include <checksum.hpp>
+
 #include "c_api/driver_rs_wrapper.hpp"
 
 etl::optional<AvrDrivers> gDriver;

@@ -8,6 +8,7 @@
 #include <simavr-toolbox/sim_gu7000.hpp>
 #include <string_view>
 
+#include "HaCommandMailBox.hpp"
 #include "relay.hpp"
 #include "sim_gu7000_i2c.hpp"
 #include "sim_gu7000_real.hpp"
@@ -54,6 +55,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   RelayState Relays_;
   RelayCb RelayCb_;
   std::unique_ptr<Sim47LXX> Eeprom_;
+  HaCommandMailBox mail;
 
   std::chrono::steady_clock::time_point LastMsTick_;
 };

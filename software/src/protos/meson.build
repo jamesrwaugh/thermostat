@@ -1,6 +1,8 @@
 proto_src = files(
+  'HaCommandMailBox.cpp',
   'HomeAssistantSerial_bp.c',
   'ThermoSaveData_bp.c',
+  'checksum.cpp',
 )
 
 proto_include = include_directories('.')
@@ -11,10 +13,8 @@ protos_lib = static_library(
   pic: false,
   dependencies: [bitproto_dep],
   include_directories: [proto_include],
-  c_args: [
-    '-funsigned-char',
-    '-funsigned-bitfields',
-    '-fshort-enums',
+  link_args: [
+    '-Wl,--gc-sections',
   ],
 )
 
@@ -35,6 +35,10 @@ protos_lib_native = static_library(
     '-funsigned-char',
     '-funsigned-bitfields',
     '-fshort-enums',
+  ],
+  override_options: [
+    'buildtype=debug',
+    'optimization=0',
   ],
 )
 

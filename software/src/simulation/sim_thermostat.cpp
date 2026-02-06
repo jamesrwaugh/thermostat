@@ -151,6 +151,6 @@ void SimAvrThermostat::OnUartByteReceived(int uartNumber, uint8_t byte) {
   }
 }
 
-const SimGu7000Real::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {
+const SimGu7000::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {
   return Screen->GetDisplayMemory();
 }

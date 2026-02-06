@@ -1,8 +1,5 @@
 simulation_src = files(
   'main.cpp',
-  'sim_gu7000_i2c.cpp',
-  'sim_gu7000_real.cpp',
-  'sim_i2c_smarter_base.cpp',
   'sim_thermostat.cpp',
   'sim_tmp116.cpp',
   'ui.cpp',
@@ -48,7 +45,6 @@ executable(
 simulation__test_src = files(
   'GU7000/Noritake_VFD_GU7000.cpp',
   'main_test.cpp',
-  'sim_gu7000_real.cpp',
 )
 
 executable(

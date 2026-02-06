@@ -3,12 +3,12 @@
 
 #include <cstdint>
 #include <iostream>
-#include <sim_gu7000_real.hpp>
+#include <simavr-toolbox/sim_gu7000.hpp>
 #include <vector>
 
 #include "./GU7000//Noritake_VFD_GU7000.h"
 
-SimGu7000Real gSimGu7k;
+SimGu7000 gSimGu7k;
 
 void initPort() {}
 
@@ -39,10 +39,10 @@ constexpr uint8_t ImageWidth = 7;
 
 const uint8_t gArrowImageData[ImageWidth] = {
     // clang-format off
-    0b0000'1000, 
-    0b0001'1000, 
-    0b0011'1110, 
-    0b0001'1000, 
+    0b0000'1000,
+    0b0001'1000,
+    0b0011'1110,
+    0b0001'1000,
     0b0000'1000,
     0b0000'0000,
     0b0000'0000,
@@ -60,8 +60,7 @@ int main() {
   const auto& memory = gSimGu7k.GetDisplayMemory();
 
   // generate some image
-  unsigned width = SimGu7000Real::DISPLAY_WIDTH,
-           height = SimGu7000Real::DISPLAY_HEIGHT;
+  unsigned width = SimGu7000::DISPLAY_WIDTH, height = SimGu7000::DISPLAY_HEIGHT;
   std::vector<unsigned char> image;
   image.resize(width * height * 4);
   for (unsigned y = 0; y < height; y++)

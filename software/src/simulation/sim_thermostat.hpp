@@ -6,12 +6,11 @@
 #include <simavr-toolbox/sim_base.hpp>
 #include <simavr-toolbox/sim_bouncy_switch.hpp>
 #include <simavr-toolbox/sim_gu7000.hpp>
+#include <simavr-toolbox/sim_gu7000_i2c.hpp>
 #include <string_view>
 
 #include "HaCommandMailBox.hpp"
 #include "relay.hpp"
-#include "sim_gu7000_i2c.hpp"
-#include "sim_gu7000_real.hpp"
 #include "sim_tmp116.hpp"
 
 extern "C" {
@@ -32,7 +31,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void SwitchReverseValve(bool onForHeat);
   void SendSerialMessage(std::string_view message);
   const RelayState& GetRelayState() const;
-  const SimGu7000Real::DisplayMemory& GetScreenMemory() const;
+  const SimGu7000::DisplayMemory& GetScreenMemory() const;
   avr_t* GetAvr() const;
 
  protected:

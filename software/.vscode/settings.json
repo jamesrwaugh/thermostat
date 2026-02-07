@@ -6,5 +6,5 @@
   ],
   "clangd.path": "clangd_snapshot/bin/clangd",
   "testMate.cpp.test.executables": "builddir/**/test-*",
-  "cSpell.words": ["Coolable", "vect"]
+  "cSpell.words": ["Coolable", "mibicelcius", "vect"]
 }

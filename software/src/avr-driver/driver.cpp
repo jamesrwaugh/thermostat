@@ -267,7 +267,8 @@ bool AvrDrivers::LoadData(ThermoSaveData& data) const {
 
   DecodeThermoSaveData(&data, b);
 
-  return checksum(b + 1, sizeof(b) - 1) == data.checksum;
+  return checksum(b + 1, sizeof(b) - 1) == data.checksum &&
+         data.magic == SAVEDATA_MAGIC;
 }
 
 bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,

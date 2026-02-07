@@ -16,6 +16,8 @@ extern "C" {
 
 #define BITPROTO_OPTIMIZATION_MODE 1
 
+#define SAVEDATA_MAGIC 43996
+
 #define WIFI_NAME_MAX_LEN 32
 
 #define WIFI_NAME_MAX_LEN_W_NULL 33
@@ -84,11 +86,12 @@ struct MqttConfig {
 };
 
 // Number of bytes to encode struct ThermoSaveData
-#define BYTES_LENGTH_THERMO_SAVE_DATA 107
+#define BYTES_LENGTH_THERMO_SAVE_DATA 110
 
 struct ThermoSaveData {
     uint8_t checksum; // 8bit
-    uint8_t set_point; // 8bit
+    uint16_t magic; // 16bit
+    uint16_t set_point_mibicelcius; // 16bit
     TempDisplayUnit temp_display_unit; // 1bit
     struct Date date; // 21bit
     struct Time time; // 22bit

@@ -63,8 +63,9 @@ class Machine {
   void DisplaySetPointAndTemp();
   void ResetAutoTimeData();
   ProgramAutoTimeData& AutoTimeData();
+  void ReadTemperature();
   void ReadTemperatureAndReportIfChanged();
-  Temperature LastReadTemerature() const;
+  Temperature CurrentTemperature() const;
 
   // Home Assist integration
   void WriteHaTempStateTopicResponse(Temperature temp) const;
@@ -85,8 +86,8 @@ class Machine {
   ProgramAutoTimeData AtData;
   MqttState MqttData;
 
-  Temperature LastReadTemp;
-  Temperature LastCommTemp;
+  Temperature CurrentTemp;
+  Temperature PreviousTemp;
   uint8_t LastReadHumidity{0};
   uint8_t LastCommHumidity{0};
 

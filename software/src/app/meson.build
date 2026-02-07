@@ -38,3 +38,21 @@ executable(
     '-mmcu=atmega168p',
   ],
 )
+
+executable(
+  'thermo-app-test',
+  'main_test.cpp',
+  dependencies: [etl_dep, avr_driver_dep, protos_dep],
+  cpp_args: [
+    '-DETL_NO_STL',
+    '-fno-threadsafe-statics',
+    '-funsigned-char',
+    '-funsigned-bitfields',
+    '-fshort-enums',
+  ],
+  include_directories: sim_avr_avr_inc,
+  link_args: [
+    '-Wl,--gc-sections,--undefined=_mmcu,--section-start=.mmcu=0x910000',
+    '-mmcu=atmega168p',
+  ],
+)

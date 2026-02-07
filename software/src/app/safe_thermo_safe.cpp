@@ -12,7 +12,7 @@ SafeThermoSaveData::SafeThermoSaveData() {
   Data.magic = SAVEDATA_MAGIC;
 
   // Good defaults
-  Data.set_point_mibicelcius = 23u * 1000;
+  Data.set_point_mibicelcius = Temperature::FromCelcius(23).GetMibiCelcius();
   Data.temp_display_unit = TEMP_UNIT_FREEDOM;
   Data.fan_mode = FANMODE_AUTO;
   Data.heat_mode = HEATMODE_NONE;
@@ -64,8 +64,7 @@ FanModeT& SafeThermoSaveData::FanMode() {
 }
 
 void SafeThermoSaveData::SetSetPoint(Temperature t) {
-  Data.set_point_mibicelcius =
-      t.GetUnitWhole(TemperatureUnitT::Celsius) * 1024u;
+  Data.set_point_mibicelcius = t.GetMibiCelcius();
 }
 
 const ThermoSaveData& SafeThermoSaveData::Raw() const {

@@ -55,7 +55,7 @@ ProgramAutoTimeData& Machine::AutoTimeData() {
 
 void Machine::ReadTemperature() {
   uint16_t raw = DriverReadRawTemp();
-  CurrentTemp.SetFromCelcius(raw);
+  CurrentTemp.SetFromSht4xSensor(raw);
 }
 
 void Machine::ReadTemperatureAndReportIfChanged() {

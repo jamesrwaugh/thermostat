@@ -47,7 +47,7 @@ int main() {
   machine.start();
 
   ds1307_time_s time = {
-    .year = 25,
+    .year = 2025,
     .month = 9,
     .week = 2,
     .date = 16,

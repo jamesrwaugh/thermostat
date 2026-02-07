@@ -147,17 +147,21 @@ State::Type Machine::get_state_id() const {
   return CurrentState.get_reference<State::Base>().StateId;
 }
 
+bool IsProgrammingState(State::Type s) {
+  return s == State::Type::ProgramTemp || s == State::Type::ProgramDate ||
+         s == State::Type::ProgramTime;
+}
+
 void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
   State::Base* address = CurrentState.get_address<State::Base>();
 
   const auto prevState = address->StateId;
 
-  const bool enteringProgramming = new_state == State::Type::ProgramTemp;
+  const bool enteringProgramming =
+    !IsProgrammingState(prevState) && IsProgrammingState(new_state);
 
-  const bool exitingProgramming = (prevState == State::Type::ProgramTemp ||
-                                   prevState == State::Type::ProgramDate ||
-                                   prevState == State::Type::ProgramTime) &&
-                                  new_state == State::Type::Idle;
+  const bool exitingProgramming =
+    IsProgrammingState(prevState) && !IsProgrammingState(new_state);
 
   if (enteringProgramming) {
     SetupProgramming();

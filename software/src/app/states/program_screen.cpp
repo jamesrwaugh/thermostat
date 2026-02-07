@@ -2,11 +2,11 @@
 
 #include <Noritake_VFD_GU7000.h>
 #include <ThermoSaveData_bp.h>
+#include <driver_ds1307.h>
 #include <etl/algorithm.h>
 #include <etl/placement_new.h>
 #include <stdint.h>
 
-#include "driver_ds1307.h"
 #include "state.hpp"
 
 // ================================================================ //
@@ -172,7 +172,7 @@ DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
                          State::Type::ProgramTemp, State::Type::ProgramTime),
       time_{s} {
   // Copy
-  year_ = s.year;
+  year_ = s.year - 2000;
 
   // Year, Month, Day
   ::new (GetBoxP(0)) TwoDigitScreenBox(5, &s.month, 1, 12);
@@ -192,7 +192,7 @@ DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
 }
 
 DateScreen::~DateScreen() {
-  time_.year = year_;
+  time_.year = year_ + 2000;
 }
 
 // ================================================================ //

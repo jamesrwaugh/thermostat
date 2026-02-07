@@ -150,21 +150,6 @@ bool DriverSetTime(const ds1307_time_s& time) {
   return ds1307_set_time(&gDriver->Rtc, const_cast<ds1307_time_s*>(&time)) == 0;
 }
 
-bool DriverSetTimeFromSaveData(const Time& time, const Date& date) {
-  ds1307_time_s timeStruct{
-      .year = date.year,
-      .month = date.month,
-      .week = date.day_of_week,
-      .date = date.day,
-      .hour = time.hour,
-      .minute = time.minute,
-      .second = time.second,
-      .am_pm = time.am_pm == TIME_AM ? ds1307_am_pm_t::DS1307_AM
-                                     : ds1307_am_pm_t::DS1307_PM,
-  };
-  return DriverSetTime(timeStruct);
-}
-
 bool DriverGetTime(ds1307_time_s& time) {
   return ds1307_get_time(&gDriver->Rtc, &time) == 0;
 }

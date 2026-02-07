@@ -3,44 +3,6 @@
 #include "ThermoSaveData_bp.h"
 #include <string.h>
 
-int EncodeTime(struct Time *m, unsigned char *s) {
-    s[0] = (((unsigned char *)&((*m).hour))[0] ) & 31;
-    s[0] |= (((unsigned char *)&((*m).minute))[0] << 5) & 224;
-    s[1] = (((unsigned char *)&((*m).minute))[0] >> 3) & 31;
-    s[1] |= (((unsigned char *)&((*m).second))[0] << 5) & 224;
-    s[2] = (((unsigned char *)&((*m).second))[0] >> 3) & 31;
-    s[2] |= (((unsigned char *)&((*m).am_pm))[0] << 5) & 32;
-    return 0;
-}
-
-int DecodeTime(struct Time *m, unsigned char *s) {
-    ((unsigned char *)&((*m).hour))[0] = (s[0] ) & 31;
-    ((unsigned char *)&((*m).minute))[0] = (s[0] >> 5) & 7;
-    ((unsigned char *)&((*m).minute))[0] |= (s[1] << 3) & 248;
-    ((unsigned char *)&((*m).second))[0] = (s[1] >> 5) & 7;
-    ((unsigned char *)&((*m).second))[0] |= (s[2] << 3) & 248;
-    ((unsigned char *)&((*m).am_pm))[0] = (s[2] >> 5) & 1;
-    return 0;
-}
-
-int EncodeDate(struct Date *m, unsigned char *s) {
-    s[0] = (((unsigned char *)&((*m).year))[0] ) & 255;
-    s[1] = (((unsigned char *)&((*m).month))[0] ) & 15;
-    s[1] |= (((unsigned char *)&((*m).day))[0] << 4) & 240;
-    s[2] = (((unsigned char *)&((*m).day))[0] >> 4) & 1;
-    s[2] |= (((unsigned char *)&((*m).day_of_week))[0] << 1) & 30;
-    return 0;
-}
-
-int DecodeDate(struct Date *m, unsigned char *s) {
-    ((unsigned char *)&((*m).year))[0] = (s[0] ) & 255;
-    ((unsigned char *)&((*m).month))[0] = (s[1] ) & 15;
-    ((unsigned char *)&((*m).day))[0] = (s[1] >> 4) & 15;
-    ((unsigned char *)&((*m).day))[0] |= (s[2] << 4) & 16;
-    ((unsigned char *)&((*m).day_of_week))[0] = (s[2] >> 1) & 15;
-    return 0;
-}
-
 int EncodeMqttConfig(struct MqttConfig *m, unsigned char *s) {
     memcpy(&s[0], (*m).wifi_name, 33);
     memcpy(&s[33], (*m).wifi_password, 65);
@@ -60,25 +22,13 @@ int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     s[3] = (((unsigned char *)&((*m).set_point_mibicelcius))[0] ) & 255;
     s[4] = (((unsigned char *)&((*m).set_point_mibicelcius))[1] ) & 255;
     s[5] = (((unsigned char *)&((*m).temp_display_unit))[0] ) & 1;
-    s[5] |= (((unsigned char *)&((*m).date.year))[0] << 1) & 254;
-    s[6] = (((unsigned char *)&((*m).date.year))[0] >> 7) & 1;
-    s[6] |= (((unsigned char *)&((*m).date.month))[0] << 1) & 30;
-    s[6] |= (((unsigned char *)&((*m).date.day))[0] << 5) & 224;
-    s[7] = (((unsigned char *)&((*m).date.day))[0] >> 3) & 3;
-    s[7] |= (((unsigned char *)&((*m).date.day_of_week))[0] << 2) & 60;
-    s[7] |= (((unsigned char *)&((*m).time.hour))[0] << 6) & 192;
-    s[8] = (((unsigned char *)&((*m).time.hour))[0] >> 2) & 7;
-    s[8] |= (((unsigned char *)&((*m).time.minute))[0] << 3) & 248;
-    s[9] = (((unsigned char *)&((*m).time.minute))[0] >> 5) & 7;
-    s[9] |= (((unsigned char *)&((*m).time.second))[0] << 3) & 248;
-    s[10] = (((unsigned char *)&((*m).time.second))[0] >> 5) & 7;
-    s[10] |= (((unsigned char *)&((*m).time.am_pm))[0] << 3) & 8;
-    s[10] |= (((unsigned char *)&((*m).fan_mode))[0] << 4) & 16;
-    s[10] |= (((unsigned char *)&((*m).heat_mode))[0] << 5) & 96;
-    s[10] |= (((unsigned char *)&((*m).pad))[0] << 7) & 128;
-    s[11] = (((unsigned char *)&((*m).have_mqtt))[0] ) & 255;
-    memcpy(&s[12], (*m).mqtt.wifi_name, 33);
-    memcpy(&s[45], (*m).mqtt.wifi_password, 65);
+    s[5] |= (((unsigned char *)&((*m).fan_mode))[0] << 1) & 2;
+    s[5] |= (((unsigned char *)&((*m).heat_mode))[0] << 2) & 12;
+    s[5] |= (((unsigned char *)&((*m).have_mqtt))[0] << 4) & 240;
+    s[6] = (((unsigned char *)&((*m).have_mqtt))[0] >> 4) & 15;
+    s[6] |= (((unsigned char *)&((*m).pad))[0] << 4) & 240;
+    memcpy(&s[7], (*m).mqtt.wifi_name, 33);
+    memcpy(&s[40], (*m).mqtt.wifi_password, 65);
     return 0;
 }
 
@@ -89,24 +39,12 @@ int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     ((unsigned char *)&((*m).set_point_mibicelcius))[0] = (s[3] ) & 255;
     ((unsigned char *)&((*m).set_point_mibicelcius))[1] = (s[4] ) & 255;
     ((unsigned char *)&((*m).temp_display_unit))[0] = (s[5] ) & 1;
-    ((unsigned char *)&((*m).date.year))[0] = (s[5] >> 1) & 127;
-    ((unsigned char *)&((*m).date.year))[0] |= (s[6] << 7) & 128;
-    ((unsigned char *)&((*m).date.month))[0] = (s[6] >> 1) & 15;
-    ((unsigned char *)&((*m).date.day))[0] = (s[6] >> 5) & 7;
-    ((unsigned char *)&((*m).date.day))[0] |= (s[7] << 3) & 24;
-    ((unsigned char *)&((*m).date.day_of_week))[0] = (s[7] >> 2) & 15;
-    ((unsigned char *)&((*m).time.hour))[0] = (s[7] >> 6) & 3;
-    ((unsigned char *)&((*m).time.hour))[0] |= (s[8] << 2) & 28;
-    ((unsigned char *)&((*m).time.minute))[0] = (s[8] >> 3) & 31;
-    ((unsigned char *)&((*m).time.minute))[0] |= (s[9] << 5) & 224;
-    ((unsigned char *)&((*m).time.second))[0] = (s[9] >> 3) & 31;
-    ((unsigned char *)&((*m).time.second))[0] |= (s[10] << 5) & 224;
-    ((unsigned char *)&((*m).time.am_pm))[0] = (s[10] >> 3) & 1;
-    ((unsigned char *)&((*m).fan_mode))[0] = (s[10] >> 4) & 1;
-    ((unsigned char *)&((*m).heat_mode))[0] = (s[10] >> 5) & 3;
-    ((unsigned char *)&((*m).pad))[0] = (s[10] >> 7) & 1;
-    ((unsigned char *)&((*m).have_mqtt))[0] = (s[11] ) & 255;
-    memcpy((*m).mqtt.wifi_name, &s[12], 33);
-    memcpy((*m).mqtt.wifi_password, &s[45], 65);
+    ((unsigned char *)&((*m).fan_mode))[0] = (s[5] >> 1) & 1;
+    ((unsigned char *)&((*m).heat_mode))[0] = (s[5] >> 2) & 3;
+    ((unsigned char *)&((*m).have_mqtt))[0] = (s[5] >> 4) & 15;
+    ((unsigned char *)&((*m).have_mqtt))[0] |= (s[6] << 4) & 240;
+    ((unsigned char *)&((*m).pad))[0] = (s[6] >> 4) & 15;
+    memcpy((*m).mqtt.wifi_name, &s[7], 33);
+    memcpy((*m).mqtt.wifi_password, &s[40], 65);
     return 0;
 }

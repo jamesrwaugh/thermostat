@@ -6,6 +6,7 @@
 #include <etl/placement_new.h>
 #include <stdint.h>
 
+#include "driver_ds1307.h"
 #include "state.hpp"
 
 // ================================================================ //
@@ -13,11 +14,10 @@
 Noritake_VFD_GU7000* ProgramScreenState::Screen_ = nullptr;
 
 ProgramScreenState::ProgramScreenState(State::Type stateId, const char* title,
-                                       ThermoSaveData& s, uint8_t boxesCount,
+                                       uint8_t boxesCount,
                                        State::Type prevState,
                                        State::Type nextState)
     : State::Base(stateId),
-      SaveData_{s},
       BoxesCount_{boxesCount},
       Title{title},
       PrevState_{prevState},
@@ -147,15 +147,16 @@ void ProgramScreenState::AddStatic(uint8_t xPosChars, char character) {
 
 // ================================================================ //
 
-constexpr const char* CorFCharSet = "CF";
-constexpr uint8_t CorFLen = 2;
+constexpr const char* FCCharSet = "FC";
+constexpr uint8_t FCCharSetLen = 2;
 
 TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTemp, "Temp Unit", s, 1,
-                         State::Type::Idle, State::Type::ProgramDate) {
+    : ProgramScreenState(State::Type::ProgramTemp, "Temp Unit", 1,
+                         State::Type::Idle, State::Type::ProgramDate),
+      S_{s} {
   // Temp Unit C or F
-  auto& tempUnit = s.temp_display_unit;
-  ::new (GetBoxP(0)) CharSetScreenBox(15, &tempUnit, CorFCharSet, CorFLen, 1);
+  ::new (GetBoxP(0))
+    CharSetScreenBox(15, &s.temp_display_unit, FCCharSet, FCCharSetLen, 1);
 
   // Init
   InitDisplay(startOnEndBox);
@@ -166,19 +167,21 @@ TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
 constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
 
-DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramDate, "Date", s, 4,
-                         State::Type::ProgramTemp, State::Type::ProgramTime) {
-  auto& date = s.date;
+DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
+    : ProgramScreenState(State::Type::ProgramDate, "Date", 4,
+                         State::Type::ProgramTemp, State::Type::ProgramTime),
+      time_{s} {
+  // Copy
+  year_ = s.year;
 
   // Year, Month, Day
-  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &date.month, 1, 12);
-  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &date.day, 1, 31);
-  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &date.year, 0, 99);
+  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &s.month, 1, 12);
+  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &s.date, 1, 31);
+  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &year_, 0, 99);
 
   // Day of Week
   ::new (GetBoxP(3))
-      CharSetScreenBox(14, &date.day_of_week, DaysOfWeek, DaysOfWeekSetLen, 2);
+    CharSetScreenBox(14, &s.week, DaysOfWeek, DaysOfWeekSetLen, 2);
 
   // Separators
   AddStatic(7, '/');
@@ -188,23 +191,29 @@ DateScreen::DateScreen(ThermoSaveData& s, bool startOnEndBox)
   InitDisplay(startOnEndBox);
 }
 
+DateScreen::~DateScreen() {
+  time_.year = year_;
+}
+
 // ================================================================ //
 
 constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;
 
-TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTime, "Time", s, 4,
-                         State::Type::ProgramDate, State::Type::Idle) {
-  auto& time = s.time;
+TimeScreen::TimeScreen(ds1307_time_s& s, bool startOnEndBox)
+    : ProgramScreenState(State::Type::ProgramTime, "Time", 4,
+                         State::Type::ProgramDate, State::Type::Idle),
+      time_{s} {
+  // Copy
+  am_pm_ = s.am_pm == ds1307_am_pm_t::DS1307_AM ? 0 : 1;
 
   // Hour, Minute, Second
-  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &time.hour, 0, 11);
-  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &time.minute, 0, 59);
-  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &time.second, 0, 59);
+  ::new (GetBoxP(0)) TwoDigitScreenBox(5, &s.hour, 0, 11);
+  ::new (GetBoxP(1)) TwoDigitScreenBox(8, &s.minute, 0, 59);
+  ::new (GetBoxP(2)) TwoDigitScreenBox(11, &s.second, 0, 59);
 
   // AM/PM
-  ::new (GetBoxP(3)) CharSetScreenBox(14, &time.am_pm, AmPm, AmPmLen, 2);
+  ::new (GetBoxP(3)) CharSetScreenBox(14, &am_pm_, AmPm, AmPmLen, 2);
 
   // Separators
   AddStatic(7, ':');
@@ -212,6 +221,11 @@ TimeScreen::TimeScreen(ThermoSaveData& s, bool startOnEndBox)
 
   // Init
   InitDisplay(startOnEndBox);
+}
+
+TimeScreen::~TimeScreen() {
+  time_.am_pm =
+    am_pm_ == 0 ? ds1307_am_pm_t::DS1307_AM : ds1307_am_pm_t::DS1307_PM;
 }
 
 /*

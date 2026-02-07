@@ -37,7 +37,6 @@ const uint8_t* const DriverGetSerialRxBuffer();
 void DriverMcuSleep();
 int8_t DriverReadButton();
 bool DriverSetTime(const ds1307_time_s& time);
-bool DriverSetTimeFromSaveData(const Time& time, const Date& date);
 bool DriverGetTime(ds1307_time_s& time);
 bool DriverSaveData(const ThermoSaveData& data);
 bool DriverLoadData(ThermoSaveData& data);

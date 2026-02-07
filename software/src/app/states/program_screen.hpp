@@ -3,14 +3,15 @@
 #include <etl/alignment.h>
 #include <stdint.h>
 
+#include "ThermoSaveData_bp.h"
+#include "driver_ds1307.h"
 #include "program_types.hpp"
 #include "state.hpp"
 
 class ProgramScreenState : public State::Base {
  public:
-  ProgramScreenState(State::Type stateId, const char* title, ThermoSaveData& s,
-                     uint8_t boxesCount, State::Type prevState,
-                     State::Type nextState);
+  ProgramScreenState(State::Type stateId, const char* title, uint8_t boxesCount,
+                     State::Type prevState, State::Type nextState);
 
   void InitDisplay(bool startOnEndBox);
   State::Type handle_event(const Event::Base& event) override;
@@ -23,7 +24,6 @@ class ProgramScreenState : public State::Base {
   static Noritake_VFD_GU7000* Screen_;
 
  protected:
-  ThermoSaveData& SaveData_;
   ScreenBoxStorage Boxes_[5];
   uint8_t BoxesCount_{0};
   StaticScreenBoxStorage Statics_[5];
@@ -53,18 +53,31 @@ class ProgramScreenState : public State::Base {
 class TempScreen final : public ProgramScreenState {
  public:
   TempScreen(ThermoSaveData& s, bool startOnEndBox);
+
+ private:
+  ThermoSaveData& S_;
 };
 
 // ================================================================ //
 
 class DateScreen final : public ProgramScreenState {
  public:
-  DateScreen(ThermoSaveData& s, bool startOnEndBox);
+  DateScreen(ds1307_time_s& s, bool startOnEndBox);
+  ~DateScreen();
+
+ private:
+  uint8_t year_{0};
+  ds1307_time_s& time_;
 };
 
 // ================================================================ //
 
 class TimeScreen final : public ProgramScreenState {
  public:
-  TimeScreen(ThermoSaveData& s, bool startOnEndBox);
+  TimeScreen(ds1307_time_s& s, bool startOnEndBox);
+  ~TimeScreen();
+
+ private:
+  ds1307_time_s& time_;
+  uint8_t am_pm_{0};
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <driver_ds1307.h>
 #include <etl/alignment.h>
 #include <etl/largest.h>
 
@@ -17,6 +18,8 @@
 
 struct ProgramAutoTimeData {
   uint8_t Selection_{0};
+  ds1307_time_s StartTime_;
+  ds1307_time_s ChangedTime_;
 };
 
 struct MqttState {
@@ -75,6 +78,7 @@ class Machine {
 
  private:
   void SwitchState(State::Type new_state, Event::Type lastEvent);
+  void SetupProgramming();
   void SaveProgrammingSettings();
   void ApplySaveState();
   void SetThermoButtonState(const ThermoButtonState& raw);
@@ -92,12 +96,12 @@ class Machine {
   uint8_t LastCommHumidity{0};
 
   static constexpr size_t StatesMaxSize =
-      etl::largest<Idle, Heating, Cooling, TempScreen, DateScreen,
-                   TimeScreen>::size;
+    etl::largest<Idle, Heating, Cooling, TempScreen, DateScreen,
+                 TimeScreen>::size;
 
   static constexpr size_t StatesAlignment =
-      etl::largest<Idle, Heating, Cooling, TempScreen, DateScreen,
-                   TimeScreen>::alignment;
+    etl::largest<Idle, Heating, Cooling, TempScreen, DateScreen,
+                 TimeScreen>::alignment;
 
   etl::aligned_storage<StatesMaxSize, StatesAlignment>::type CurrentState;
 };

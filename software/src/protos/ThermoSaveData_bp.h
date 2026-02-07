@@ -31,21 +31,6 @@ typedef uint8_t TempDisplayUnit; // 1bit
 #define TEMP_UNIT_FREEDOM 0
 #define TEMP_UNIT_CELSIUS 1
 
-typedef uint8_t TimeAmPm; // 1bit
-
-#define TIME_AM 0
-#define TIME_PM 1
-
-// Number of bytes to encode struct Time
-#define BYTES_LENGTH_TIME 3
-
-struct Time {
-    uint8_t hour; // 5bit
-    uint8_t minute; // 8bit
-    uint8_t second; // 8bit
-    TimeAmPm am_pm; // 1bit
-};
-
 typedef uint8_t FanMode; // 1bit
 
 #define FANMODE_AUTO 0
@@ -57,26 +42,6 @@ typedef uint8_t HeatMode; // 2bit
 #define HEATMODE_COOL 1
 #define HEATMODE_NONE 2
 
-typedef uint8_t DateDayOfWeek; // 4bit
-
-#define DAYOFWEEK_SUNDAY 0
-#define DAYOFWEEK_MONDAY 1
-#define DAYOFWEEK_TUESDAY 2
-#define DAYOFWEEK_WEDNESDAY 3
-#define DAYOFWEEK_THURSDAY 4
-#define DAYOFWEEK_FRIDAY 5
-#define DAYOFWEEK_SATURDAY 6
-
-// Number of bytes to encode struct Date
-#define BYTES_LENGTH_DATE 3
-
-struct Date {
-    uint8_t year; // 8bit
-    uint8_t month; // 4bit
-    uint8_t day; // 5bit
-    DateDayOfWeek day_of_week; // 4bit
-};
-
 // Number of bytes to encode struct MqttConfig
 #define BYTES_LENGTH_MQTT_CONFIG 98
 
@@ -86,31 +51,19 @@ struct MqttConfig {
 };
 
 // Number of bytes to encode struct ThermoSaveData
-#define BYTES_LENGTH_THERMO_SAVE_DATA 110
+#define BYTES_LENGTH_THERMO_SAVE_DATA 105
 
 struct ThermoSaveData {
     uint8_t checksum; // 8bit
     uint16_t magic; // 16bit
     uint16_t set_point_mibicelcius; // 16bit
     TempDisplayUnit temp_display_unit; // 1bit
-    struct Date date; // 21bit
-    struct Time time; // 22bit
     FanMode fan_mode; // 1bit
     HeatMode heat_mode; // 2bit
-    uint8_t pad; // 1bit
     uint8_t have_mqtt; // 8bit
+    uint8_t pad; // 4bit
     struct MqttConfig mqtt; // 784bit
 };
-
-// Encode struct Time to given buffer s.
-int EncodeTime(struct Time *m, unsigned char *s);
-// Decode struct Time from given buffer s.
-int DecodeTime(struct Time *m, unsigned char *s);
-
-// Encode struct Date to given buffer s.
-int EncodeDate(struct Date *m, unsigned char *s);
-// Decode struct Date from given buffer s.
-int DecodeDate(struct Date *m, unsigned char *s);
 
 // Encode struct MqttConfig to given buffer s.
 int EncodeMqttConfig(struct MqttConfig *m, unsigned char *s);

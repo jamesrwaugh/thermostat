@@ -12,18 +12,6 @@ enum TempDisplayUnit : uint1 {
     TEMP_UNIT_CELSIUS = 1
 }
 
-enum TimeAmPm : uint1 {
-    TIME_AM = 0
-    TIME_PM = 1
-}
-
-message Time {
-    uint5 hour = 1
-    uint8 minute = 2
-    uint8 second = 3
-    TimeAmPm am_pm = 4
-}
-
 enum FanMode : uint1 {
     FANMODE_AUTO = 0
     FANMODE_ON = 1
@@ -33,23 +21,6 @@ enum HeatMode : uint2 {
     HEATMODE_HEAT = 0
     HEATMODE_COOL = 1
     HEATMODE_NONE = 2
-}
-
-enum DateDayOfWeek : uint4 {
-    DAYOFWEEK_SUNDAY = 0
-    DAYOFWEEK_MONDAY = 1
-    DAYOFWEEK_TUESDAY = 2
-    DAYOFWEEK_WEDNESDAY = 3
-    DAYOFWEEK_THURSDAY = 4
-    DAYOFWEEK_FRIDAY = 5
-    DAYOFWEEK_SATURDAY = 6
-}
-
-message Date {
-    uint8 year = 1
-    uint4 month = 2
-    uint5 day = 3
-    DateDayOfWeek day_of_week = 4
 }
 
 message MqttConfig {
@@ -62,11 +33,9 @@ message ThermoSaveData {
     uint16 magic = 2
     uint16 set_point_mibicelcius = 3
     TempDisplayUnit temp_display_unit = 4
-    Date date = 5
-    Time time = 6
-    FanMode fan_mode = 7
-    HeatMode heat_mode = 8
-    uint1 pad = 9
-    uint8 have_mqtt = 10
-    MqttConfig mqtt = 11
+    FanMode fan_mode = 5
+    HeatMode heat_mode = 6
+    uint8 have_mqtt = 7
+    uint4 pad = 8
+    MqttConfig mqtt = 9
 }

@@ -17,18 +17,6 @@ SafeThermoSaveData::SafeThermoSaveData() {
   Data.fan_mode = FANMODE_AUTO;
   Data.heat_mode = HEATMODE_NONE;
 
-  // Default date of 2000-01-01, was Saturday
-  Data.date.day = 1;
-  Data.date.month = 1;
-  Data.date.year = 0;
-  Data.date.day_of_week = DAYOFWEEK_SATURDAY;
-
-  // Default time of 12:00 AM
-  Data.time.second = 0;
-  Data.time.minute = 0;
-  Data.time.hour = 0;
-  Data.time.am_pm = TIME_AM;
-
   // Empty MQTT data
   Data.have_mqtt = false;
   memset(Data.mqtt.wifi_name, 0, sizeof(Data.mqtt.wifi_name));

@@ -2,6 +2,7 @@
 
 #include <ThermoSaveData_bp.h>
 #include <driver_ds1307.h>
+#include <etl/algorithm.h>
 #include <etl/placement_new.h>
 
 #include <driver_rs_wrapper.hpp>
@@ -151,11 +152,16 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
 
   const auto prevState = address->StateId;
 
-  const bool wasProgramming = prevState == State::Type::ProgramTemp ||
-                              prevState == State::Type::ProgramDate ||
-                              prevState == State::Type::ProgramTime;
+  const bool enteringProgramming = new_state == State::Type::ProgramTemp;
 
-  if (wasProgramming && new_state == State::Type::Idle) {
+  const bool exitingProgramming = (prevState == State::Type::ProgramTemp ||
+                                   prevState == State::Type::ProgramDate ||
+                                   prevState == State::Type::ProgramTime) &&
+                                  new_state == State::Type::Idle;
+
+  if (enteringProgramming) {
+    SetupProgramming();
+  } else if (exitingProgramming) {
     SaveProgrammingSettings();
   }
 
@@ -177,10 +183,10 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       ::new (address) TempScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(SaveData.MutableRaw(), lastEventWasDown);
+      ::new (address) DateScreen(AtData.ChangedTime_, lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(SaveData.MutableRaw(), lastEventWasDown);
+      ::new (address) TimeScreen(AtData.ChangedTime_, lastEventWasDown);
       break;
     case State::Type::Started:    // Should never happen
     case State::Type::NO_CHANGE:  // Should never happen
@@ -195,10 +201,19 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
   }
 }
 
+void Machine::SetupProgramming() {
+  ::new (&AtData) ProgramAutoTimeData();
+  DriverGetTime(AtData.StartTime_);
+  memcpy(&AtData.ChangedTime_, &AtData.StartTime_, sizeof(ds1307_time_s));
+}
+
 void Machine::SaveProgrammingSettings() {
   const auto& saveData = SaveData.Raw();
   DriverSaveData(saveData);
-  DriverSetTimeFromSaveData(saveData.time, saveData.date);
+  if (memcmp(&AtData.StartTime_, &AtData.ChangedTime_, sizeof(ds1307_time_s)) !=
+      0) {
+    DriverSetTime(AtData.ChangedTime_);
+  }
 }
 
 void Machine::ApplySaveState() {

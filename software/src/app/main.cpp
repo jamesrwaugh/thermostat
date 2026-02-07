@@ -33,11 +33,11 @@ void OnButtonPressed(Button b) {
       break;
     case Button::ReverseValveOnHeat:
       machine.receive(
-          Event::ReverseValveModeChanged(ReverseValveModeT::OnForHeating));
+        Event::ReverseValveModeChanged(ReverseValveModeT::OnForHeating));
       break;
     case Button::ReverseValveOnCool:
       machine.receive(
-          Event::ReverseValveModeChanged(ReverseValveModeT::OnForCooling));
+        Event::ReverseValveModeChanged(ReverseValveModeT::OnForCooling));
       break;
   }
 }
@@ -45,6 +45,19 @@ void OnButtonPressed(Button b) {
 int main() {
   DriverInit();
   machine.start();
+
+  ds1307_time_s time = {
+    .year = 25,
+    .month = 9,
+    .week = 2,
+    .date = 16,
+    .hour = 6,
+    .minute = 37,
+    .second = 23,
+    .am_pm = ds1307_am_pm_t::DS1307_PM,
+  };
+
+  DriverSetTime(time);
 
   uint8_t lastHalfSecondCount = 0;
   uint8_t lastSecondCount = 0;

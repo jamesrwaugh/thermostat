@@ -5,10 +5,10 @@ James' interest in making a thermostat
 # Features
 
 - [End Goal] Home Assisstant integration compatible
-- Plugs into standard residential connections
+- Plugs into residential connections offering 24VAC power
 - Programmable time/day-based temperature settings
 - Heating, cooling, and off modes
-- Non-volatile storage for settings and time
+- Battery-backed storage for settings and time
 - Support on-cool and on-heat reverse valve types
 - Auto or always-on fan setting
 - Display in Fahrenheit or Celsius

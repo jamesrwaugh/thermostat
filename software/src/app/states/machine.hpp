@@ -68,7 +68,7 @@ class Machine {
   ProgramAutoTimeData& AutoTimeData();
   void ReadTemperature();
   void ReadTemperatureAndReportIfChanged();
-  Temperature CurrentTemperature() const;
+  const Temperature& CurrentTemperature() const;
 
   // Home Assist integration
   void WriteHaTempStateTopicResponse(Temperature temp) const;

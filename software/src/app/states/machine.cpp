@@ -69,7 +69,7 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   }
 }
 
-Temperature Machine::CurrentTemperature() const {
+const Temperature& Machine::CurrentTemperature() const {
   return CurrentTemp;
 }
 

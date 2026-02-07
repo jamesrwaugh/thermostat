@@ -26,10 +26,10 @@ CoolableParent::~CoolableParent() {}
 State::Type CoolableParent::handle_event(const Event::Base& event) {
   switch (event.id_) {
     case Event::Type::UpButtonPressed: {
-      return ChangeSetPoint(1);
+      return ChangeSetPoint(true);
     }
     case Event::Type::DownButtonPressed: {
-      return ChangeSetPoint(-1);
+      return ChangeSetPoint(false);
     }
     case Event::Type::SelectButtonPressed: {
       return State::Type::ProgramTemp;

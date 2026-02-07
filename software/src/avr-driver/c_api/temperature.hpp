@@ -7,11 +7,17 @@
 
 class Temperature {
  public:
-  static constexpr uint16_t MibiFactor = 1024;
-  static constexpr uint16_t MibiCToFFactor = 568;
+  static constexpr uint16_t MibiFactor = 512;
   static constexpr uint16_t MibiOneHalfDegree = (MibiFactor / 2);
+  static constexpr uint16_t MibiOneForthDegree = (MibiFactor / 4);
   static constexpr uint16_t MibiOneEighthDegree = (MibiFactor / 8);
+  static constexpr uint16_t MibiOneSixteenthDegree = (MibiFactor / 16);
+  static constexpr uint16_t MibiOneTwentyEightDegree = (MibiFactor / 128);
   static constexpr uint16_t MibiThreeEighthsDegrees = 3 * MibiOneEighthDegree;
+  static constexpr uint16_t MibiCToFFactor =
+    (MibiOneHalfDegree + MibiOneSixteenthDegree -
+     MibiOneTwentyEightDegree);  //  0.5546875 - Approximates 5/9 (0.555556)
+  static constexpr uint16_t MaxFahrenheit = 127;
 
   [[nodiscard]] static Temperature FromCelcius(uint16_t celcius) {
     Temperature t;
@@ -41,12 +47,16 @@ class Temperature {
   }
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
-    mibi_celcius_ = ((22411 * (int32_t)device_ticks) >> 13) - 46080;
+    mibi_celcius_ = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
     return *this;
   }
 
   Temperature& ChangeByMibiCelcius(uint16_t amount, bool increment) {
-    mibi_celcius_ += (increment ? amount : -amount);
+    if (increment) {
+      mibi_celcius_ += amount;
+    } else {
+      mibi_celcius_ -= amount;
+    }
     return *this;
   }
 
@@ -97,7 +107,7 @@ class Temperature {
     return mibi_fahrenheight / MibiFactor;
   }
 
-  // Degrees Celsius * 1024.
+  // Degrees Celsius * 512.
   // This allows us to store fractional temperatures as well
   // as only require bitshifts to encode and decode whole values,
   // to save on flash size, instead of divide by 1000 for example.

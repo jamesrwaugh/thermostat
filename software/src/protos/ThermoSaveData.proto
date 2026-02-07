@@ -1,5 +1,7 @@
 proto ThermoSaveData
 
+const SAVEDATA_MAGIC = 0xABDC
+
 const WIFI_NAME_MAX_LEN = 32
 const WIFI_NAME_MAX_LEN_W_NULL = 33
 const WIFI_PASSWORD_MAX_LEN = 64
@@ -57,13 +59,14 @@ message MqttConfig {
 
 message ThermoSaveData {
     uint8 checksum = 1
-    uint8 set_point = 2
-    TempDisplayUnit temp_display_unit = 3
-    Date date = 4
-    Time time = 5
-    FanMode fan_mode = 6
-    HeatMode heat_mode = 7
-    uint1 pad = 8
-    uint8 have_mqtt = 9
-    MqttConfig mqtt = 10
+    uint16 magic = 2
+    uint16 set_point_mibicelcius = 3
+    TempDisplayUnit temp_display_unit = 4
+    Date date = 5
+    Time time = 6
+    FanMode fan_mode = 7
+    HeatMode heat_mode = 8
+    uint1 pad = 9
+    uint8 have_mqtt = 10
+    MqttConfig mqtt = 11
 }

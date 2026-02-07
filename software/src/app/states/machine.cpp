@@ -25,6 +25,7 @@
 
 void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Started();
+  ReadTemperature();
   ReadAndApplySettings();
 }
 
@@ -52,19 +53,23 @@ ProgramAutoTimeData& Machine::AutoTimeData() {
   return AtData;
 }
 
-void Machine::ReadTemperatureAndReportIfChanged() {
+void Machine::ReadTemperature() {
   uint16_t raw = DriverReadRawTemp();
-  LastReadTemp.SetFromSht4xSensor(raw);
+  CurrentTemp.SetFromCelcius(raw);
+}
 
-  if (LastReadTemp != LastCommTemp) {
-    LastCommTemp = LastReadTemp;
-    DriverDisplayTemp(LastCommTemp, SaveState().TemperatureUnit());
-    WriteHaTempStateTopicResponse(LastCommTemp);
+void Machine::ReadTemperatureAndReportIfChanged() {
+  ReadTemperature();
+
+  if (CurrentTemp != PreviousTemp) {
+    PreviousTemp = CurrentTemp;
+    DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
+    WriteHaTempStateTopicResponse(CurrentTemp);
   }
 }
 
-Temperature Machine::LastReadTemerature() const {
-  return LastReadTemp;
+Temperature Machine::CurrentTemperature() const {
+  return CurrentTemp;
 }
 
 void Machine::ReadAndApplySettings() {
@@ -83,13 +88,13 @@ void Machine::ReadAndApplySettings() {
 }
 
 void Machine::DisplayTemperature() {
-  DriverDisplayTemp(LastCommTemp, SaveState().TemperatureUnit());
+  DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
 }
 
 void Machine::DisplaySetPointAndTemp() {
   const auto& save = SaveState();
   DriverDisplaySetPoint(save.SetPoint(), (save.TemperatureUnit()));
-  DriverDisplayTemp(LastCommTemp, SaveState().TemperatureUnit());
+  DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
 }
 
 // Setting: MQTT Config

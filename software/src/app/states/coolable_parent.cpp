@@ -146,7 +146,7 @@ void CoolableParent::TickChangeCounter() {
   const auto& saveData = machine_.SaveState();
   const auto heatMode = saveData.HeatMode();
   const auto setPoint = saveData.SetPoint();
-  const auto temp = machine_.LastReadTemerature();
+  const auto temp = machine_.CurrentTemperature();
 
   if (heatMode == HeatModeT::None) {
     return State::Type::Idle;

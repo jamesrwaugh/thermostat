@@ -8,8 +8,11 @@
 // ===================================================================== //
 
 SafeThermoSaveData::SafeThermoSaveData() {
+  // It's real
+  Data.magic = SAVEDATA_MAGIC;
+
   // Good defaults
-  Data.set_point = 77;
+  Data.set_point_mibicelcius = 23u * 1000;
   Data.temp_display_unit = TEMP_UNIT_FREEDOM;
   Data.fan_mode = FANMODE_AUTO;
   Data.heat_mode = HEATMODE_NONE;
@@ -45,7 +48,7 @@ FanModeT SafeThermoSaveData::FanMode() const {
 }
 
 Temperature SafeThermoSaveData::SetPoint() const {
-  return Temperature::FromCelcius(Data.set_point);
+  return Temperature::FromMibiCelcius(Data.set_point_mibicelcius);
 }
 
 TemperatureUnitT& SafeThermoSaveData::TemperatureUnit() {
@@ -61,7 +64,8 @@ FanModeT& SafeThermoSaveData::FanMode() {
 }
 
 void SafeThermoSaveData::SetSetPoint(Temperature t) {
-  Data.set_point = t.GetUnitWhole(TemperatureUnitT::Celsius);
+  Data.set_point_mibicelcius =
+      t.GetUnitWhole(TemperatureUnitT::Celsius) * 1024u;
 }
 
 const ThermoSaveData& SafeThermoSaveData::Raw() const {

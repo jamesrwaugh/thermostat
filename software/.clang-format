@@ -3,3 +3,4 @@ IndentWidth: 2
 ColumnLimit: 80
 AllowShortFunctionsOnASingleLine: Empty
 PointerAlignment: Left
+ContinuationIndentWidth: 2

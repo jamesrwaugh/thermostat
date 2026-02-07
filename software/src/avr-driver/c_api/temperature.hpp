@@ -35,11 +35,6 @@ class Temperature {
     return *this;
   }
 
-  Temperature& ChangeByMibiCelcius(uint16_t amount, bool increment) {
-    mibi_celcius_ += (increment ? amount : -amount);
-    return *this;
-  }
-
   Temperature& SetFromCelcius(uint16_t celcius) {
     mibi_celcius_ = celcius * MibiFactor;
     return *this;
@@ -47,6 +42,11 @@ class Temperature {
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
     mibi_celcius_ = ((22411 * (int32_t)device_ticks) >> 13) - 46080;
+    return *this;
+  }
+
+  Temperature& ChangeByMibiCelcius(uint16_t amount, bool increment) {
+    mibi_celcius_ += (increment ? amount : -amount);
     return *this;
   }
 
@@ -77,11 +77,11 @@ class Temperature {
 
  private:
   void ChangeBy1C(bool increment) {
-    mibi_celcius_ += (increment ? MibiFactor : -MibiFactor);
+    ChangeByMibiCelcius(MibiFactor, increment);
   }
 
   void ChangeBy1F(bool increment) {
-    mibi_celcius_ += (increment ? MibiCToFFactor : -MibiCToFFactor);
+    ChangeByMibiCelcius(MibiCToFFactor, increment);
   }
 
   int8_t GetCelciusWhole() const {

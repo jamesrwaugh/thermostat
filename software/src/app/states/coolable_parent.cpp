@@ -7,6 +7,7 @@
 #include "event.hpp"
 #include "machine.hpp"
 #include "state.hpp"
+#include "temperature.hpp"
 
 // ===================================================================== //
 
@@ -35,7 +36,6 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     }
     case Event::Type::SecondPassed: {
       machine_.ReadTemperatureAndReportIfChanged();
-      TickChangeCounter();
       if (status_image_a_ && status_image_b_) {
         image_state_ = !image_state_;
         DrawImage(68, true, image_state_ ? *status_image_a_ : *status_image_b_);
@@ -64,7 +64,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     }
     case Event::Type::ReverseValveModeChanged: {
       const auto& valveEvent =
-          static_cast<const Event::ReverseValveModeChanged&>(event);
+        static_cast<const Event::ReverseValveModeChanged&>(event);
       machine_.ButtonState().ReverseValveState = valveEvent.Mode;
       return State::Type::Idle;
     }
@@ -116,16 +116,6 @@ void CoolableParent::ExitHeatingOrCooling() {
   }
 }
 
-void CoolableParent::TickChangeCounter() {
-  if (ChData.StateChangeTimeoutSec < ChData.MaxStateChangeTimeoutSec) {
-    ChData.StateChangeTimeoutSec += 1;
-  }
-}
-
-[[nodiscard]] bool CoolableParent::HasChangeTimeoutPassed() const {
-  return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
-}
-
 [[nodiscard]] State::Type CoolableParent::ChangeSetPoint(bool increment) {
   auto& saveData = machine_.SaveState();
 
@@ -139,10 +129,6 @@ void CoolableParent::TickChangeCounter() {
 }
 
 [[nodiscard]] State::Type CoolableParent::DetermineNextState() {
-  if (!HasChangeTimeoutPassed()) {
-    return State::Type::NO_CHANGE;
-  }
-
   const auto& saveData = machine_.SaveState();
   const auto heatMode = saveData.HeatMode();
   const auto setPoint = saveData.SetPoint();
@@ -152,13 +138,24 @@ void CoolableParent::TickChangeCounter() {
     return State::Type::Idle;
   }
 
-  if (temp >= setPoint && heatMode == HeatModeT::Heating) {
+  Temperature upperLimit;
+  Temperature lowerLimit;
+
+  upperLimit  //
+    .SetFromTemperature(setPoint)
+    .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, true);
+
+  lowerLimit  //
+    .SetFromTemperature(setPoint)
+    .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, false);
+
+  if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
     return State::Type::Idle;
-  } else if (temp <= setPoint && heatMode == HeatModeT::Cooling) {
-    return State::Type::Idle;
-  } else if (temp <= setPoint && heatMode == HeatModeT::Heating) {
+  } else if (temp <= lowerLimit && heatMode == HeatModeT::Heating) {
     return State::Type::Heating;
-  } else if (temp >= setPoint && heatMode == HeatModeT::Cooling) {
+  } else if (temp <= lowerLimit && heatMode == HeatModeT::Cooling) {
+    return State::Type::Idle;
+  } else if (temp >= upperLimit && heatMode == HeatModeT::Cooling) {
     return State::Type::Cooling;
   }
 

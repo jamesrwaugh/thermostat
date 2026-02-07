@@ -1,11 +1,18 @@
 #pragma once
 
+#include <etl/alignment.h>
 #include <stdint.h>
 
 #include "../data_types.hpp"
 
 class Temperature {
  public:
+  static constexpr uint16_t MibiFactor = 1024;
+  static constexpr uint16_t MibiCToFFactor = 568;
+  static constexpr uint16_t MibiOneHalfDegree = (MibiFactor / 2);
+  static constexpr uint16_t MibiOneEighthDegree = (MibiFactor / 8);
+  static constexpr uint16_t MibiThreeEighthsDegrees = 3 * MibiOneEighthDegree;
+
   [[nodiscard]] static Temperature FromCelcius(uint16_t celcius) {
     Temperature t;
     t.SetFromCelcius(celcius);
@@ -18,16 +25,29 @@ class Temperature {
     return t;
   }
 
-  void SetFromMibiCelcius(uint16_t mibi_celcius) {
+  Temperature& SetFromTemperature(Temperature t) {
+    mibi_celcius_ = t.GetMibiCelcius();
+    return *this;
+  }
+
+  Temperature& SetFromMibiCelcius(uint16_t mibi_celcius) {
     mibi_celcius_ = mibi_celcius;
+    return *this;
   }
 
-  void SetFromCelcius(uint16_t celcius) {
+  Temperature& ChangeByMibiCelcius(uint16_t amount, bool increment) {
+    mibi_celcius_ += (increment ? amount : -amount);
+    return *this;
+  }
+
+  Temperature& SetFromCelcius(uint16_t celcius) {
     mibi_celcius_ = celcius * MibiFactor;
+    return *this;
   }
 
-  void SetFromSht4xSensor(uint16_t device_ticks) {
+  Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
     mibi_celcius_ = ((22411 * (int32_t)device_ticks) >> 13) - 46080;
+    return *this;
   }
 
   int8_t GetUnitWhole(TemperatureUnitT unit) const {
@@ -39,9 +59,10 @@ class Temperature {
     return mibi_celcius_;
   }
 
-  void ChangeBy1Unit(TemperatureUnitT unit, bool increment) {
+  Temperature& ChangeBy1Unit(TemperatureUnitT unit, bool increment) {
     unit == TemperatureUnitT::Celsius ? ChangeBy1C(increment)
                                       : ChangeBy1F(increment);
+    return *this;
   }
 
   int8_t operator<=>(const Temperature& other) const {
@@ -55,9 +76,6 @@ class Temperature {
   }
 
  private:
-  static constexpr uint16_t MibiFactor = 1024;
-  static constexpr uint16_t MibiCToFFactor = 568;
-
   void ChangeBy1C(bool increment) {
     mibi_celcius_ += (increment ? MibiFactor : -MibiFactor);
   }

@@ -126,20 +126,12 @@ void CoolableParent::TickChangeCounter() {
   return ChData.StateChangeTimeoutSec >= ChData.MaxStateChangeTimeoutSec;
 }
 
-[[nodiscard]] State::Type CoolableParent::ChangeSetPoint(int8_t change) {
+[[nodiscard]] State::Type CoolableParent::ChangeSetPoint(bool increment) {
   auto& saveData = machine_.SaveState();
 
-  auto& setPoint = saveData.SetPoint();
-
-  if (setPoint == 1 && change < 0) {
-    return State::Type::NO_CHANGE;
-  }
-
-  if (setPoint == 100 && change > 0) {
-    return State::Type::NO_CHANGE;
-  }
-
-  setPoint += change;
+  auto setPoint = saveData.SetPoint();
+  setPoint.ChangeBy1Unit(saveData.TemperatureUnit(), increment);
+  saveData.SetSetPoint(setPoint);
 
   DriverDisplaySetPoint(setPoint, saveData.TemperatureUnit());
 
@@ -154,7 +146,7 @@ void CoolableParent::TickChangeCounter() {
   const auto& saveData = machine_.SaveState();
   const auto heatMode = saveData.HeatMode();
   const auto setPoint = saveData.SetPoint();
-  uint8_t temp = machine_.LastReadTemerature();
+  const auto temp = machine_.LastReadTemerature();
 
   if (heatMode == HeatModeT::None) {
     return State::Type::Idle;

@@ -13,6 +13,7 @@
 #include "program_screen.hpp"
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
+#include "temperature.hpp"
 
 struct ProgramAutoTimeData {
   uint8_t Selection_{0};
@@ -63,10 +64,10 @@ class Machine {
   void ResetAutoTimeData();
   ProgramAutoTimeData& AutoTimeData();
   void ReadTemperatureAndReportIfChanged();
-  uint8_t LastReadTemerature() const;
+  Temperature LastReadTemerature() const;
 
   // Home Assist integration
-  void WriteHaTempStateTopicResponse(uint8_t temp) const;
+  void WriteHaTempStateTopicResponse(Temperature temp) const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;
@@ -84,9 +85,9 @@ class Machine {
   ProgramAutoTimeData AtData;
   MqttState MqttData;
 
-  uint8_t LastReadTemp{0};
+  Temperature LastReadTemp;
+  Temperature LastCommTemp;
   uint8_t LastReadHumidity{0};
-  uint8_t LastCommTemp{0};
   uint8_t LastCommHumidity{0};
 
   static constexpr size_t StatesMaxSize =

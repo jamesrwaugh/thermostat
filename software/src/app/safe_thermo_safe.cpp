@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "casts.hpp"
+#include "temperature.hpp"
 
 // ===================================================================== //
 
@@ -43,8 +44,8 @@ FanModeT SafeThermoSaveData::FanMode() const {
   return static_cast<FanModeT>(Data.fan_mode);
 }
 
-uint8_t SafeThermoSaveData::SetPoint() const {
-  return Data.set_point;
+Temperature SafeThermoSaveData::SetPoint() const {
+  return Temperature::FromCelcius(Data.set_point);
 }
 
 TemperatureUnitT& SafeThermoSaveData::TemperatureUnit() {
@@ -59,8 +60,8 @@ FanModeT& SafeThermoSaveData::FanMode() {
   return reinterpret_cast<FanModeT&>(Data.fan_mode);
 }
 
-uint8_t& SafeThermoSaveData::SetPoint() {
-  return Data.set_point;
+void SafeThermoSaveData::SetSetPoint(Temperature t) {
+  Data.set_point = t.GetUnitWhole(TemperatureUnitT::Celsius);
 }
 
 const ThermoSaveData& SafeThermoSaveData::Raw() const {

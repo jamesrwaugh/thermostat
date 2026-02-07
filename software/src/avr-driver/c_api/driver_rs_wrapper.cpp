@@ -7,6 +7,7 @@
 #include <twi_master.h>
 
 #include "Noritake_VFD_GU7000.h"
+#include "c_api/temperature.hpp"
 #include "driver.hpp"
 
 extern "C" {
@@ -70,16 +71,14 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
   return scratch & 0xFF;
 }
 
-void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
-  auto displayTemp =
-      unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+void DriverDisplayTemp(Temperature tp, TemperatureUnitT unit) {
   auto& screen = gDriver->Screen;
   {
     AutoTwi t;
     screen.GU7000_setFontSize(2, 2, false);
     screen.print(0, 0, "    ");
     screen.GU7000_setCursor(0, 0);
-    screen.print(displayTemp, 10);
+    screen.print(tp.GetUnitWhole(unit), 10);
     screen.GU7000_setFontSize(1, 1, false);
     screen.print(unit == TemperatureUnitT::Freedom ? 'F' : 'C');
   }
@@ -88,20 +87,18 @@ void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit) {
     screen.GU7000_setFontSize(2, 2, false);
     screen.print(30, 0, "   ");
     screen.GU7000_setCursor(30, 0);
-    screen.print(displayTemp, 10);
+    screen.print(tp.GetUnitWhole(unit), 10);
     screen.GU7000_setFontSize(1, 1, false);
     screen.print("RH");
   }
 }
 
-void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT unit) {
-  auto displayTemp =
-      unit == TemperatureUnitT::Freedom ? CelsiusToFreedom(tempC) : tempC;
+void DriverDisplaySetPoint(Temperature tempC, TemperatureUnitT unit) {
   AutoTwi t;
   auto& screen = gDriver->Screen;
   screen.GU7000_setCursor(80, 0);
   screen.print("S@ ");
-  screen.print(displayTemp, 10);
+  screen.print(tempC.GetUnitWhole(unit), 10);
 }
 
 void DriverDisplayIsHeating() {
@@ -127,7 +124,7 @@ void DriverDisplayClearScreen() {
   gDriver->Screen.GU7000_clearScreen();
 }
 
-uint8_t DriverReadTemp() {
+uint16_t DriverReadRawTemp() {
   return gDriver->TempSensor.ReadTempC();
 }
 

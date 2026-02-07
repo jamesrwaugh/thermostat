@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "../data_types.hpp"
+#include "temperature.hpp"
 
 struct ds1307_time_s;
 class Noritake_VFD_GU7000;
@@ -17,13 +18,13 @@ struct ThermoButtonState {
 
 void DriverInit();
 void DriverGetButtonStateNow(ThermoButtonState* data);
-void DriverDisplayTemp(uint8_t tempC, TemperatureUnitT unit);
-void DriverDisplaySetPoint(uint8_t tempC, TemperatureUnitT);
+void DriverDisplayTemp(Temperature temp, TemperatureUnitT unit);
+void DriverDisplaySetPoint(Temperature temp, TemperatureUnitT);
 void DriverDisplayIsHeating();
 void DriverDisplayIsCooling();
 void DriverDisplayIsIdle();
 void DriverDisplayClearScreen();
-uint8_t DriverReadTemp();
+uint16_t DriverReadRawTemp();
 void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);
 void DriverWriteSerialPortRaw(const uint8_t* bytes, uint8_t numBytes);

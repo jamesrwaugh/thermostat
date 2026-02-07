@@ -23,7 +23,7 @@ class CoolableParent : public State::Base {
  private:
   void TickChangeCounter();
   [[nodiscard]] bool HasChangeTimeoutPassed() const;
-  [[nodiscard]] State::Type ChangeSetPoint(int8_t change);
+  [[nodiscard]] State::Type ChangeSetPoint(bool increment);
   [[nodiscard]] State::Type DetermineNextState();
   [[nodiscard]] bool IsHeatingOrCooling() const;
   [[nodiscard]] bool IsIdle() const;

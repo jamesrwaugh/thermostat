@@ -4,6 +4,8 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "temperature.hpp"
+
 class SafeThermoSaveData {
  public:
   SafeThermoSaveData();
@@ -12,22 +14,18 @@ class SafeThermoSaveData {
   TemperatureUnitT TemperatureUnit() const;
   HeatModeT HeatMode() const;
   FanModeT FanMode() const;
-  uint8_t SetPoint() const;
+  Temperature SetPoint() const;
 
   TemperatureUnitT& TemperatureUnit();
   HeatModeT& HeatMode();
   FanModeT& FanMode();
-  uint8_t& SetPoint();
+  void SetSetPoint(Temperature t);
 
   const ThermoSaveData& Raw() const;
   ThermoSaveData& MutableRaw();
 
   FanModeT BumpFanMode();
   HeatModeT BumpHeatingMode();
-
-  uint8_t Checksum() const {
-    return 0;
-  }
 
  private:
   ThermoSaveData Data;

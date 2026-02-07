@@ -18,6 +18,7 @@
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
 #include "states/started.hpp"
+#include "temperature.hpp"
 
 // ===================================================================== //
 //
@@ -52,7 +53,8 @@ ProgramAutoTimeData& Machine::AutoTimeData() {
 }
 
 void Machine::ReadTemperatureAndReportIfChanged() {
-  LastReadTemp = DriverReadTemp();
+  uint16_t raw = DriverReadRawTemp();
+  LastReadTemp.SetFromSht4xSensor(raw);
 
   if (LastReadTemp != LastCommTemp) {
     LastCommTemp = LastReadTemp;
@@ -61,7 +63,7 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   }
 }
 
-uint8_t Machine::LastReadTemerature() const {
+Temperature Machine::LastReadTemerature() const {
   return LastReadTemp;
 }
 
@@ -127,7 +129,7 @@ void Machine::receive(const HaCommand& c) {
     case HaInTopicKey::PresetModeCommandTopic:
       break;
     case HaInTopicKey::TempCommandTopic:
-      SaveState().SetPoint() = c.payload_byte_one;
+      SaveData.SetSetPoint(Temperature::FromCelcius(c.payload_byte_one));
       break;
     case HaInTopicKey::MqttPing:
       MqttData.ResetTimeout();
@@ -214,8 +216,9 @@ void Machine::ApplySaveState() {
   }
 }
 
-void Machine::WriteHaTempStateTopicResponse(uint8_t temp) const {
-  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic, temp, 0);
+void Machine::WriteHaTempStateTopicResponse(Temperature temp) const {
+  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic,
+                        temp.GetUnitWhole(TemperatureUnitT::Celsius), 0);
 }
 
 void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {

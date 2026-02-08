@@ -64,8 +64,12 @@ void Machine::ReadTemperature() {
 void Machine::ReadTemperatureAndReportIfChanged() {
   ReadTemperature();
 
-  const bool TempChanged = CurrentTemp != PreviousTemp;
-  const bool HumidChanged = CurrentHumidity != PreviousHumidity;
+  const bool TempChanged =
+    CurrentTemp.GetUnitWhole(TemperatureUnitT::Celsius) !=
+    PreviousTemp.GetUnitWhole(TemperatureUnitT::Celsius);
+
+  const bool HumidChanged =
+    CurrentHumidity.ToPercent() != PreviousHumidity.ToPercent();
 
   if (TempChanged || HumidChanged) {
     DisplayTemperature();

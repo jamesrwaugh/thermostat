@@ -11,7 +11,7 @@
 
 #include "HaCommandMailBox.hpp"
 #include "relay.hpp"
-#include "sim_tmp116.hpp"
+#include "sim_sht4x.hpp"
 
 extern "C" {
 #include <simavr/parts/ds1338_virt.h>
@@ -50,7 +50,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   std::unique_ptr<SimBouncySwitch> HeatButton;
   std::unique_ptr<SimBouncySwitch> FanButton;
   ds1338_virt_t Rtc_;
-  std::unique_ptr<SimTMP116> Tmp116_;
+  std::unique_ptr<SimSHT4x> Temp_;
   RelayState Relays_;
   RelayCb RelayCb_;
   std::unique_ptr<Sim47LXX> Eeprom_;

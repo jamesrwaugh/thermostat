@@ -65,7 +65,7 @@ class Temperature {
     return t;
   }
 
-  Temperature& SetFromTemperature(Temperature t) {
+  Temperature& SetFromTemperature(const Temperature& t) {
     mibi_celcius_ = t.GetMibiCelcius();
     return *this;
   }

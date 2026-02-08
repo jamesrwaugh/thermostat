@@ -38,20 +38,20 @@ SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
 
   // Buttons
   UpButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 3), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 3), false);
   DownButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 2), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 2), false);
   SelectButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 5), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 5), false);
   ReverseValveSwitch =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('C', 3), false);
   HeatButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 7), false);
   FanButton =
-      std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 6), false);
+    std::make_unique<SimBouncySwitch>(*Avr_, *GetPinIrq('D', 6), false);
 
-  // TMP116
-  Tmp116_ = std::make_unique<SimTMP116>(Avr_);
+  // Temperature
+  Temp_ = std::make_unique<SimSHT4x>(Avr_);
 
   // RTC
   ds1338_virt_init(Avr_, &Rtc_);
@@ -127,14 +127,14 @@ void SimAvrThermostat::SendSerialMessage(std::string_view message) {
 void SimAvrThermostat::BeforeAvrCycleSideEffect() {
   auto now = std::chrono::steady_clock::now();
   auto last_ms_delta =
-      std::chrono::duration_cast<std::chrono::milliseconds>(now - LastMsTick_);
+    std::chrono::duration_cast<std::chrono::milliseconds>(now - LastMsTick_);
 
   if (last_ms_delta > std::chrono::milliseconds(1)) {
     LastMsTick_ = now;
     Screen->OnMillisecondPassed();
   }
 
-  Tmp116_->SimulateTempChange(Relays_);
+  Temp_->SimulateTempChange(Relays_);
 }
 
 void SimAvrThermostat::OnUartByteReceived(int uartNumber, uint8_t byte) {

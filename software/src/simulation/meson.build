@@ -1,5 +1,6 @@
 simulation_src = files(
   'main.cpp',
+  'sim_sht4x.cpp',
   'sim_thermostat.cpp',
   'sim_tmp116.cpp',
   'ui.cpp',

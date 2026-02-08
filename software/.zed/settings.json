@@ -2,14 +2,15 @@
   "lsp": {
     "clangd": {
       "fetch": {
-        "pre_release": true,
+        "pre_release": true
       },
       "binary": {
         "arguments": [
           "--query-driver=/usr/bin/avr-g++",
           "--compile-commands-dir=builddir",
-        ],
-      },
-    },
-  },
+          "--header-insertion=never"
+        ]
+      }
+    }
+  }
 }

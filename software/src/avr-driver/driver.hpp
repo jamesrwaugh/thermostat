@@ -4,7 +4,8 @@
 #include <ThermoSaveData_bp.h>
 #include <driver_ds1307.h>
 #include <etl/optional.h>
-#include <tmp116.h>
+
+#include <SHT4x.hpp>
 
 #include "data_types.hpp"
 
@@ -17,7 +18,7 @@ struct AvrDrivers {
   Noritake_VFD_GU7000 Screen;
   ds1307_handle_t Rtc;
   HardwareSerial& Serial_;
-  TMP116 TempSensor;
+  SHT4x TempSensor;
   SerialRAM ram_;
 
   void Setup();

@@ -5,6 +5,40 @@
 
 #include "../data_types.hpp"
 
+class Humidity {
+ public:
+  static constexpr uint16_t MibiFactor = 1024;
+
+  Humidity& SetFromSht4xSensor(uint16_t device_ticks) {
+    mibi_percent_ = ((16000 * (int32_t)device_ticks) >> 13) - 6144;
+    return *this;
+  }
+
+  uint8_t ToPercent() const {
+    return mibi_percent_ / MibiFactor;
+  }
+
+  int8_t operator<=>(const Humidity& other) const {
+    if (mibi_percent_ < other.mibi_percent_) return -1;
+    if (mibi_percent_ > other.mibi_percent_) return 1;
+    return 0;
+  }
+
+  bool operator==(const Humidity& other) const {
+    return mibi_percent_ == other.mibi_percent_;
+  }
+
+ private:
+  // Percent Humidity * 1024.
+  // This allows us to store fractional humidity as well
+  // as only require bitshifts to encode and decode whole values,
+  // to save on flash size, instead of divide by 1000 for example.
+  int16_t mibi_percent_{0};
+};
+
+static_assert(sizeof(Humidity) <= 2,
+              "Humidity should be small enough to pass by value");
+
 class Temperature {
  public:
   static constexpr uint16_t MibiFactor = 512;

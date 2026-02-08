@@ -47,25 +47,38 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
 }
 
 void Machine::ResetAutoTimeData() {
-  ::new (&AtData) ProgramAutoTimeData();
+  ::new (&ProgData) ProgramData();
 }
 
-ProgramAutoTimeData& Machine::AutoTimeData() {
-  return AtData;
+ProgramData& Machine::AutoTimeData() {
+  return ProgData;
 }
 
 void Machine::ReadTemperature() {
-  uint16_t raw = DriverReadRawTemp();
-  CurrentTemp.SetFromCelcius(raw);
+  uint16_t temperatureTicks = 0, humidityTicks = 0;
+  DriverReadRawTemp(temperatureTicks, humidityTicks);
+  CurrentTemp.SetFromSht4xSensor(temperatureTicks);
+  CurrentHumidity.SetFromSht4xSensor(humidityTicks);
 }
 
 void Machine::ReadTemperatureAndReportIfChanged() {
   ReadTemperature();
 
-  if (CurrentTemp != PreviousTemp) {
-    PreviousTemp = CurrentTemp;
-    DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
-    WriteHaTempStateTopicResponse(CurrentTemp);
+  const bool TempChanged = CurrentTemp != PreviousTemp;
+  const bool HumidChanged = CurrentHumidity != PreviousHumidity;
+
+  if (TempChanged || HumidChanged) {
+    DisplayTemperature();
+
+    if (TempChanged) {
+      PreviousTemp = CurrentTemp;
+      WriteHaTempStateTopicResponse();
+    }
+
+    if (HumidChanged) {
+      PreviousHumidity = CurrentHumidity;
+      WriteHaHumidityStateTopicResponse();
+    }
   }
 }
 
@@ -89,13 +102,15 @@ void Machine::ReadAndApplySettings() {
 }
 
 void Machine::DisplayTemperature() {
-  DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
+  DriverDisplayTemp(CurrentTemp, CurrentHumidity,
+                    SaveState().TemperatureUnit());
 }
 
 void Machine::DisplaySetPointAndTemp() {
   const auto& save = SaveState();
   DriverDisplaySetPoint(save.SetPoint(), (save.TemperatureUnit()));
-  DriverDisplayTemp(CurrentTemp, SaveState().TemperatureUnit());
+  DriverDisplayTemp(CurrentTemp, CurrentHumidity,
+                    SaveState().TemperatureUnit());
 }
 
 // Setting: MQTT Config
@@ -187,10 +202,10 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       ::new (address) TempScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(AtData.ChangedTime_, lastEventWasDown);
+      ::new (address) DateScreen(ProgData.ChangedTime_, lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(AtData.ChangedTime_, lastEventWasDown);
+      ::new (address) TimeScreen(ProgData.ChangedTime_, lastEventWasDown);
       break;
     case State::Type::Started:    // Should never happen
     case State::Type::NO_CHANGE:  // Should never happen
@@ -206,17 +221,16 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
 }
 
 void Machine::SetupProgramming() {
-  ::new (&AtData) ProgramAutoTimeData();
-  DriverGetTime(AtData.StartTime_);
-  memcpy(&AtData.ChangedTime_, &AtData.StartTime_, sizeof(ds1307_time_s));
+  ::new (&ProgData) ProgramData();
+  DriverGetTime(ProgData.StartTime_);
+  memcpy(&ProgData.ChangedTime_, &ProgData.StartTime_, sizeof(ds1307_time_s));
 }
 
 void Machine::SaveProgrammingSettings() {
   const auto& saveData = SaveData.Raw();
   DriverSaveData(saveData);
-  if (memcmp(&AtData.StartTime_, &AtData.ChangedTime_, sizeof(ds1307_time_s)) !=
-      0) {
-    DriverSetTime(AtData.ChangedTime_);
+  if (ProgData.WasTimeChanged()) {
+    DriverSetTime(ProgData.ChangedTime_);
   }
 }
 
@@ -240,9 +254,14 @@ void Machine::ApplySaveState() {
   }
 }
 
-void Machine::WriteHaTempStateTopicResponse(Temperature temp) const {
+void Machine::WriteHaTempStateTopicResponse() const {
   WriteHaSerialResponse(HaOutTopicKey::TempStateTopic,
-                        temp.GetUnitWhole(TemperatureUnitT::Celsius), 0);
+                        CurrentTemp.GetUnitWhole(TemperatureUnitT::Celsius), 0);
+}
+
+void Machine::WriteHaHumidityStateTopicResponse() const {
+  WriteHaSerialResponse(HaOutTopicKey::HumidityStateTopic,
+                        CurrentHumidity.ToPercent(), 0);
 }
 
 void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {

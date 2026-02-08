@@ -16,10 +16,13 @@
 #include "state.hpp"
 #include "temperature.hpp"
 
-struct ProgramAutoTimeData {
+struct ProgramData {
   uint8_t Selection_{0};
   ds1307_time_s StartTime_;
   ds1307_time_s ChangedTime_;
+  bool WasTimeChanged() const {
+    return memcmp(&StartTime_, &ChangedTime_, sizeof(ds1307_time_s)) != 0;
+  }
 };
 
 struct MqttState {
@@ -65,13 +68,14 @@ class Machine {
   void DisplayTemperature();
   void DisplaySetPointAndTemp();
   void ResetAutoTimeData();
-  ProgramAutoTimeData& AutoTimeData();
+  ProgramData& AutoTimeData();
   void ReadTemperature();
   void ReadTemperatureAndReportIfChanged();
   const Temperature& CurrentTemperature() const;
 
   // Home Assist integration
-  void WriteHaTempStateTopicResponse(Temperature temp) const;
+  void WriteHaTempStateTopicResponse() const;
+  void WriteHaHumidityStateTopicResponse() const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;
@@ -87,13 +91,13 @@ class Machine {
 
   SafeThermoSaveData SaveData;
   ThermoButtonState ButtonData;
-  ProgramAutoTimeData AtData;
+  ProgramData ProgData;
   MqttState MqttData;
 
   Temperature CurrentTemp;
   Temperature PreviousTemp;
-  uint8_t LastReadHumidity{0};
-  uint8_t LastCommHumidity{0};
+  Humidity CurrentHumidity;
+  Humidity PreviousHumidity;
 
   static constexpr size_t StatesMaxSize =
     etl::largest<Idle, Heating, Cooling, TempScreen, DateScreen,

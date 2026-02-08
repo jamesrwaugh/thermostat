@@ -71,7 +71,8 @@ uint8_t CelsiusToFreedom(uint8_t celsius) {
   return scratch & 0xFF;
 }
 
-void DriverDisplayTemp(Temperature tp, TemperatureUnitT unit) {
+void DriverDisplayTemp(const Temperature& tp, const Humidity& hum,
+                       TemperatureUnitT unit) {
   auto& screen = gDriver->Screen;
   {
     AutoTwi t;
@@ -87,7 +88,7 @@ void DriverDisplayTemp(Temperature tp, TemperatureUnitT unit) {
     screen.GU7000_setFontSize(2, 2, false);
     screen.print(30, 0, "   ");
     screen.GU7000_setCursor(30, 0);
-    screen.print(tp.GetUnitWhole(unit), 10);
+    screen.print(hum.ToPercent(), 10);
     screen.GU7000_setFontSize(1, 1, false);
     screen.print("RH");
   }
@@ -124,8 +125,10 @@ void DriverDisplayClearScreen() {
   gDriver->Screen.GU7000_clearScreen();
 }
 
-uint16_t DriverReadRawTemp() {
-  return gDriver->TempSensor.ReadTempC();
+void DriverReadRawTemp(uint16_t& outTempTicks, uint16_t& outHumidityTicks) {
+  SHT4x::Reading r = gDriver->TempSensor.ReadHighPrecision();
+  outTempTicks = r.TemperatureTicks;
+  outHumidityTicks = r.HumidityTicks;
 }
 
 void DriverRelayOn(Relay r) {

@@ -18,13 +18,14 @@ struct ThermoButtonState {
 
 void DriverInit();
 void DriverGetButtonStateNow(ThermoButtonState* data);
-void DriverDisplayTemp(Temperature temp, TemperatureUnitT unit);
+void DriverDisplayTemp(const Temperature& temp, const Humidity& hum,
+                       TemperatureUnitT unit);
 void DriverDisplaySetPoint(Temperature temp, TemperatureUnitT);
 void DriverDisplayIsHeating();
 void DriverDisplayIsCooling();
 void DriverDisplayIsIdle();
 void DriverDisplayClearScreen();
-uint16_t DriverReadRawTemp();
+void DriverReadRawTemp(uint16_t& outTempTicks, uint16_t& outHumidityTicks);
 void DriverRelayOn(Relay r);
 void DriverRelayOff(Relay r);
 void DriverWriteSerialPortRaw(const uint8_t* bytes, uint8_t numBytes);

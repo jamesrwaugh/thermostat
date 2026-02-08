@@ -244,7 +244,7 @@ void AvrDrivers::RelayOff(Relay r) const {
 }
 
 void AvrDrivers::SetupTemp() {
-  TempSensor.Init();
+  // Nothing to do
 }
 
 constexpr uint16_t FlashSaveDataAddress = 0;

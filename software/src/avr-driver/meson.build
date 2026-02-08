@@ -12,14 +12,13 @@ drivers_src = files(
   'DS1307/src/driver_ds1307.c',
   'GU7000/Noritake_VFD_GU7000.cpp',
   'I2C/twi/twi_master.c',
-  'TMP116/tmp116.cpp',
 )
 
 drivers_include = include_directories(
   'DS1307/src',
   'GU7000',
   'I2C/twi',
-  'TMP116',
+  'SHT4x',
   '47L04',
   'Serial',
 )

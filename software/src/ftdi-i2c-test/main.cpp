@@ -101,7 +101,6 @@ constexpr uint8_t ImageHeight2x = 16;
 typedef uint8_t Image2xHalf[ImageWidth2xHalfSize];
 typedef uint8_t Image2x[ImageWidth2xFullSize];
 
-/* 12x16 image "6" */
 static const uint8_t image_6_2x[ImageWidth2xFullSize] = {
   0x00, 0x00, 0x00, 0x00, 0x0f, 0xf0, 0x0f, 0xf0, 0x33, 0x0c, 0x33, 0x0c,
   0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x00, 0xf0, 0x00, 0xf0,
@@ -122,9 +121,13 @@ class DownScroller {
   DownScroller(Noritake_VFD_GU7000& screen,
                FT_HANDLE h,
                const Image2x& topImage,
+               const Image2x& middleImage,
                const Image2x& bottomImage)
-      : screen_{screen}, handle_{h}, top_image_{topImage} {
-    memcpy(&image_, bottomImage, sizeof(topImage));
+      : screen_{screen},
+        handle_{h},
+        top_image_{topImage},
+        bottom_image_{bottomImage} {
+    memcpy(&image_, middleImage, sizeof(middleImage));
   }
 
   void ScrollOneDown() {
@@ -141,6 +144,20 @@ class DownScroller {
     scrolled_lines_down_diff += 1;
   }
 
+  void ScrollOneUp() {
+    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+      uint8_t& top = image_[col];
+      uint8_t& bottom = image_[col + 1];
+      uint8_t incoming =
+        bottom_image_[col + (scrolled_lines_up_diff < 8 ? 0 : 1)];
+      top <<= 1;
+      top |= (bottom & (1 << 7)) ? 1 : 0;
+      bottom <<= 1;
+      bottom |= (incoming & (1 << (7 - scrolled_lines_up_diff % 8))) ? (1) : 0;
+    }
+    scrolled_lines_up_diff += 1;
+  }
+
   void Draw() {
     AutoTwi t(handle_);
     screen_.GU7000_drawImage(0, 0, ImageWidth2x, ImageHeight2x, image_);
@@ -149,9 +166,11 @@ class DownScroller {
  private:
   Noritake_VFD_GU7000& screen_;
   FT_HANDLE const handle_;
-  const Image2x& top_image_;
   Image2x image_;
-  int8_t scrolled_lines_down_diff{0};
+  const Image2x& top_image_;
+  const Image2x& bottom_image_;
+  uint8_t scrolled_lines_down_diff{0};
+  uint8_t scrolled_lines_up_diff{0};
 };
 
 class Scroller {
@@ -207,7 +226,7 @@ int main(void) {
   {
     AutoTwi t(handle);
     screen.GU7000_init();
-    screen.GU7000_setScreenBrightness(80);
+    screen.GU7000_setScreenBrightness(20);
   }
 
   // Scroller s(screen, handle, image_7_2x, image_8_2x);
@@ -224,7 +243,7 @@ int main(void) {
   //   usleep(20000);
   // }
 
-  DownScroller s(screen, handle, image_6_2x, image_7_2x);
+  DownScroller s(screen, handle, image_6_2x, image_7_2x, image_8_2x);
 
   {
     AutoTwi t(handle);
@@ -235,7 +254,15 @@ int main(void) {
   for (int i = 0; i < ImageHeight2x; ++i) {
     s.ScrollOneDown();
     s.Draw();
-    usleep(20000);
+    usleep(70000);
+  }
+
+  usleep(100000);
+
+  for (int i = 0; i < ImageHeight2x; ++i) {
+    s.ScrollOneUp();
+    s.Draw();
+    usleep(80000);
   }
 
   // {

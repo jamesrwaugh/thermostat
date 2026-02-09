@@ -138,6 +138,20 @@ class Scroller {
     memcpy(&image_, images[startingNumber], sizeof(Image2x));
   }
 
+  void ScollUpOneLine() {
+    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+      ScollUpColumn(col);
+    }
+
+    scrolled_lines_up += 1;
+
+    if (scrolled_lines_up == ImageHeight2x) {
+      scrolled_lines_down = 0;
+      scrolled_lines_up = 0;
+      current_number_ = current_number_ == 0 ? 9 : current_number_ - 1;
+    }
+  }
+
   void ScrollDownOneLine() {
     for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
       ScrollDownColumn(col);
@@ -148,21 +162,7 @@ class Scroller {
     if (scrolled_lines_down == ImageHeight2x) {
       scrolled_lines_down = 0;
       scrolled_lines_up = 0;
-      current_number_ = current_number_ == 0 ? 9 : current_number_ - 1;
-    }
-  }
-
-  void ScrollUpOneLine() {
-    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      ScrollUpColumn(col);
-    }
-
-    scrolled_lines_up += 1;
-
-    if (scrolled_lines_up == ImageHeight2x) {
-      scrolled_lines_up = 0;
-      scrolled_lines_down = 0;
-      current_number_ = current_number_ == 9 ? 0 : current_number_ + 1;
+      current_number_ = current_number_ < 9 ? current_number_ + 1 : 0;
     }
   }
 
@@ -176,25 +176,25 @@ class Scroller {
   void ScrollDownColumn(uint8_t col) {
     uint8_t& top = image_[col];
     uint8_t& bottom = image_[col + 1];
-    uint8_t prevNumber = current_number_ == 0 ? 9 : current_number_ - 1;
-    const auto& prevImage = *images_[prevNumber];
-    uint8_t prevCol = prevImage[col + (scrolled_lines_down < 8 ? 1 : 0)];
+    uint8 nextNumber = current_number_ < 9 ? current_number_ + 1 : 0;
+    const auto& nextImage = *images_[nextNumber];
+    uint8_t nextCol = nextImage[col + (scrolled_lines_down < 8 ? 1 : 0)];
     bottom >>= 1;
     bottom |= (top & 1) ? (1 << 7) : 0;
     top >>= 1;
-    top |= (prevCol & (1 << scrolled_lines_down % 8)) ? (1 << 7) : 0;
+    top |= (nextCol & (1 << scrolled_lines_down % 8)) ? (1 << 7) : 0;
   }
 
-  void ScrollUpColumn(uint8_t col) {
+  void ScollUpColumn(uint8_t col) {
     uint8_t& top = image_[col];
     uint8_t& bottom = image_[col + 1];
-    uint8 nextNumber = current_number_ < 9 ? current_number_ + 1 : 0;
-    const auto& nextImage = *images_[nextNumber];
-    uint8_t nextCol = nextImage[col + (scrolled_lines_up < 8 ? 0 : 1)];
+    uint8_t prevNumber = current_number_ == 0 ? 9 : current_number_ - 1;
+    const auto& prevImage = *images_[prevNumber];
+    uint8_t prevCol = prevImage[col + (scrolled_lines_up < 8 ? 0 : 1)];
     top <<= 1;
     top |= (bottom & (1 << 7)) ? 1 : 0;
     bottom <<= 1;
-    bottom |= (nextCol & (1 << (7 - scrolled_lines_up % 8))) ? (1) : 0;
+    bottom |= (prevCol & (1 << (7 - scrolled_lines_up % 8))) ? (1) : 0;
   }
 
   Noritake_VFD_GU7000& screen_;
@@ -243,21 +243,21 @@ int main(void) {
   {
     AutoTwi t(handle);
     s.Draw();
-    usleep(250000);
+    usleep(10000);
   }
+
+  for (int i = 0; i < ImageHeight2x * 10 + 5; ++i) {
+    s.ScollUpOneLine();
+    s.Draw();
+    usleep(30000);
+  }
+
+  usleep(500000);
 
   for (int i = 0; i < ImageHeight2x * 10; ++i) {
     s.ScrollDownOneLine();
     s.Draw();
-    usleep(10000);
-  }
-
-  usleep(100000);
-
-  for (int i = 0; i < ImageHeight2x * 10; ++i) {
-    s.ScrollUpOneLine();
-    s.Draw();
-    usleep(80000);
+    usleep(30000);
   }
 
   // {

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cstring>
 #include <ftdi.hpp>
 #include <vector>
 
@@ -49,7 +50,6 @@ struct HandleCleanup {
 
 struct AutoTwi {
   AutoTwi(FT_HANDLE h) : handle_(h) {
-    current_message_.clear();
     current_message_.reserve(32);
   }
 
@@ -57,6 +57,7 @@ struct AutoTwi {
     uint16_t written = 0;
     FT4222_I2CMaster_Write(handle_, 0x50, current_message_.data(),
                            current_message_.size(), &written);
+    current_message_.clear();
   }
 
   static std::vector<uint8> current_message_;
@@ -92,63 +93,105 @@ const uint8_t gFireOneImageData[ImageWidth] = {
   // clang-format on
 };
 
-// void DrawImage(uint8_t xPositionDots, bool bottom, Image image) {
-//   AutoTwi t;
-//   DriverGetScreenHandle().GU7000_drawImage(xPositionDots, ImageHeight,
-//                                            ImageWidth, bottom ? 8 : 0,
-//                                            image);
-// }
-
-/* 10x16 image "Untitled" */
-static const uint8_t image_Untitled2[] = {
-  0xc0, 0x01, 0x40, 0x03, 0x40, 0x0c, 0x40, 0x10, 0x40, 0x20,
-  0x20, 0xc0, 0x21, 0x00, 0x36, 0x00, 0x1c, 0x00, 0x80, 0x01};
-
-/* 10x16 image "Untitled" */
-
-constexpr uint8_t ImageWidth2x = 10;
-constexpr uint8_t ImageWidth2xSize = ImageWidth2x * 2;
+constexpr uint8_t ImageWidth2x = 12;
+constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
+constexpr uint8_t ImageWidth2xFullSize = ImageWidth2x * 2;
 constexpr uint8_t ImageHeight2x = 16;
 
-typedef const uint8_t Image2x[ImageWidth2x];
+typedef uint8_t Image2xHalf[ImageWidth2xHalfSize];
+typedef uint8_t Image2x[ImageWidth2xFullSize];
 
-static const uint8_t image_Untitled[ImageWidth2xSize] = {
-  // clang-format off
-  0b11000000,  // Top
-  0b00000001,  // Bottom
-  0b01000000,  // Top
-  0b00000011,  // Bottom
-  0b01000000, 
-  0b00001100,
-  0b01000000, 
-  0b00010000, 
-  0b01000000, 
-  0b00100000,
-  0b00100000, 
-  0b11000000, 
-  0b00100001, 
-  0b00000000, 
-  0b00110110, 
-  0b00000000,
-  0b00011100, 
-  0b00000000, 
-  0b10000000, 
-  0b00000001,
-  // clang-format on
+/* 12x16 image "6" */
+static const uint8_t image_6_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x0f, 0xf0, 0x0f, 0xf0, 0x33, 0x0c, 0x33, 0x0c,
+  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x00, 0xf0, 0x00, 0xf0,
 };
 
-void GetNthLine(const Image2x& image, uint8_t number) {
-  uint8_t buffer[8];
-  if (number < 8) {
-    uint8_t relativeNumber = number - 8;
-    for (uint8_t i = 0; i < ImageWidth2x; ++i) {
-      buffer[i] = image[2 * i] & (1 << relativeNumber);
-    }
-    // Even bytes
-  } else {
-    // Odd bytes
+static const uint8_t image_7_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0xc0, 0x00, 0xc0, 0x00, 0xc0, 0xfc, 0xc0, 0xfc,
+  0xc3, 0x00, 0xc3, 0x00, 0xcc, 0x00, 0xcc, 0x00, 0xf0, 0x00, 0xf0, 0x00,
+};
+
+static const uint8_t image_8_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x3c, 0xf0, 0x3c, 0xf0, 0xc3, 0x0c, 0xc3, 0x0c,
+  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0xf0, 0x3c, 0xf0,
+};
+
+class DownScroller {
+ public:
+  DownScroller(Noritake_VFD_GU7000& screen,
+               FT_HANDLE h,
+               const Image2x& topImage,
+               const Image2x& bottomImage)
+      : screen_{screen}, handle_{h}, top_image_{topImage} {
+    memcpy(&image_, bottomImage, sizeof(topImage));
   }
-}
+
+  void ScrollOneDown() {
+    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+      uint8_t& top = image_[col];
+      uint8_t& bottom = image_[col + 1];
+      uint8_t incoming =
+        top_image_[col + (scrolled_lines_down_diff < 8 ? 1 : 0)];
+      bottom >>= 1;
+      bottom |= (top & 1) ? (1 << 7) : 0;
+      top >>= 1;
+      top |= (incoming & (1 << scrolled_lines_down_diff % 8)) ? (1 << 7) : 0;
+    }
+    scrolled_lines_down_diff += 1;
+  }
+
+  void Draw() {
+    AutoTwi t(handle_);
+    screen_.GU7000_drawImage(0, 0, ImageWidth2x, ImageHeight2x, image_);
+  }
+
+ private:
+  Noritake_VFD_GU7000& screen_;
+  FT_HANDLE const handle_;
+  const Image2x& top_image_;
+  Image2x image_;
+  int8_t scrolled_lines_down_diff{0};
+};
+
+class Scroller {
+ public:
+  Scroller(Noritake_VFD_GU7000& screen,
+           FT_HANDLE h,
+           const Image2x& middleImage,
+           const Image2x& endImage)
+      : screen_{screen}, handle_{h}, end_image_{endImage} {
+    memcpy(&middle_image_moving_, middleImage, sizeof(middleImage));
+  }
+
+  void ScrollOneUp() {
+    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+      uint8_t& top = middle_image_moving_[col];
+      uint8_t& bottom = middle_image_moving_[col + 1];
+      top <<= 1;
+      top |= (bottom & (1 << 7)) ? 1 : 0;
+      bottom <<= 1;
+    }
+    scrolled_lines_up_diff += 1;
+  }
+
+  void Draw() {
+    AutoTwi t(handle_);
+    screen_.GU7000_drawImage(0, 0, ImageWidth2x, ImageHeight2x,
+                             middle_image_moving_);
+    if (scrolled_lines_up_diff > 0) {
+      screen_.GU7000_drawImage(0, 16 - scrolled_lines_up_diff, ImageWidth2x,
+                               ImageHeight2x, end_image_);
+    }
+  }
+
+ private:
+  Noritake_VFD_GU7000& screen_;
+  FT_HANDLE const handle_;
+  const Image2x& end_image_;
+  Image2x middle_image_moving_;
+  int8_t scrolled_lines_up_diff{0};
+};
 
 int main(void) {
   FT_HANDLE handle = OpenI2CDevice();
@@ -164,33 +207,41 @@ int main(void) {
   {
     AutoTwi t(handle);
     screen.GU7000_init();
-    // screen.GU7000_cursorOn();
+    screen.GU7000_setScreenBrightness(80);
   }
+
+  // Scroller s(screen, handle, image_7_2x, image_8_2x);
 
   // {
   //   AutoTwi t(handle);
-  //   screen.GU7000_setScrollMode(ScrollMode::VertScrollMode);
-  //   // screen.GU7000_defineWindow(1, 0, 0, 5 * 14, 8);
-  //   // screen.GU7000_selectWindow(1);
-  //   // screen.GU7000_setHorizScrollSpeed(1);
-  //   screen.print("NewTextHere");
+  //   s.Draw();
+  //   usleep(250000);
   // }
+
+  // for (int i = 0; i < ImageHeight2x; ++i) {
+  //   s.ScrollOneUp();
+  //   s.Draw();
+  //   usleep(20000);
+  // }
+
+  DownScroller s(screen, handle, image_6_2x, image_7_2x);
 
   {
     AutoTwi t(handle);
-    screen.GU7000_drawImage(10, 16, image_Untitled);
+    s.Draw();
+    usleep(250000);
+  }
+
+  for (int i = 0; i < ImageHeight2x; ++i) {
+    s.ScrollOneDown();
+    s.Draw();
+    usleep(20000);
   }
 
   // {
   //   AutoTwi t(handle);
   //   screen.GU7000_setFontSize(2, 2, false);
-  //   screen.print("77");
-  // }
-
-  // {
-  //   AutoTwi t(handle);
-  //   screen.GU7000_drawImage(10, ImageHeight, ImageWidth, true ? 8 : 0,
-  //                           gFireOneImageData);
+  //   screen.print("69");
   // }
 
   return 0;

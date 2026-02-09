@@ -116,100 +116,95 @@ static const uint8_t image_8_2x[ImageWidth2xFullSize] = {
   0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0xf0, 0x3c, 0xf0,
 };
 
-class DownScroller {
- public:
-  DownScroller(Noritake_VFD_GU7000& screen,
-               FT_HANDLE h,
-               const Image2x& topImage,
-               const Image2x& middleImage,
-               const Image2x& bottomImage)
-      : screen_{screen},
-        handle_{h},
-        top_image_{topImage},
-        bottom_image_{bottomImage} {
-    memcpy(&image_, middleImage, sizeof(middleImage));
-  }
-
-  void ScrollOneDown() {
-    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      uint8_t& top = image_[col];
-      uint8_t& bottom = image_[col + 1];
-      uint8_t incoming =
-        top_image_[col + (scrolled_lines_down_diff < 8 ? 1 : 0)];
-      bottom >>= 1;
-      bottom |= (top & 1) ? (1 << 7) : 0;
-      top >>= 1;
-      top |= (incoming & (1 << scrolled_lines_down_diff % 8)) ? (1 << 7) : 0;
-    }
-    scrolled_lines_down_diff += 1;
-  }
-
-  void ScrollOneUp() {
-    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      uint8_t& top = image_[col];
-      uint8_t& bottom = image_[col + 1];
-      uint8_t incoming =
-        bottom_image_[col + (scrolled_lines_up_diff < 8 ? 0 : 1)];
-      top <<= 1;
-      top |= (bottom & (1 << 7)) ? 1 : 0;
-      bottom <<= 1;
-      bottom |= (incoming & (1 << (7 - scrolled_lines_up_diff % 8))) ? (1) : 0;
-    }
-    scrolled_lines_up_diff += 1;
-  }
-
-  void Draw() {
-    AutoTwi t(handle_);
-    screen_.GU7000_drawImage(0, 0, ImageWidth2x, ImageHeight2x, image_);
-  }
-
- private:
-  Noritake_VFD_GU7000& screen_;
-  FT_HANDLE const handle_;
-  Image2x image_;
-  const Image2x& top_image_;
-  const Image2x& bottom_image_;
-  uint8_t scrolled_lines_down_diff{0};
-  uint8_t scrolled_lines_up_diff{0};
+static const Image2x* const number_2x_images[10] = {
+  &image_6_2x, &image_7_2x, &image_8_2x, &image_6_2x, &image_7_2x,
+  &image_8_2x, &image_6_2x, &image_7_2x, &image_8_2x, &image_8_2x,
 };
+
+typedef const Image2x* const Image2x0Thru9[10];
 
 class Scroller {
  public:
   Scroller(Noritake_VFD_GU7000& screen,
            FT_HANDLE h,
-           const Image2x& middleImage,
-           const Image2x& endImage)
-      : screen_{screen}, handle_{h}, end_image_{endImage} {
-    memcpy(&middle_image_moving_, middleImage, sizeof(middleImage));
+           uint8_t xPositionDots,
+           uint8_t startingNumber,
+           const Image2x0Thru9& images)
+      : screen_{screen},
+        handle_{h},
+        images_{images},
+        x_position_dots_{xPositionDots},
+        current_number_{startingNumber} {
+    memcpy(&image_, images[startingNumber], sizeof(Image2x));
   }
 
-  void ScrollOneUp() {
+  void ScrollDownOneLine() {
     for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      uint8_t& top = middle_image_moving_[col];
-      uint8_t& bottom = middle_image_moving_[col + 1];
-      top <<= 1;
-      top |= (bottom & (1 << 7)) ? 1 : 0;
-      bottom <<= 1;
+      ScrollDownColumn(col);
     }
-    scrolled_lines_up_diff += 1;
+
+    scrolled_lines_down += 1;
+
+    if (scrolled_lines_down == ImageHeight2x) {
+      scrolled_lines_down = 0;
+      scrolled_lines_up = 0;
+      current_number_ = current_number_ == 0 ? 9 : current_number_ - 1;
+    }
+  }
+
+  void ScrollUpOneLine() {
+    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+      ScrollUpColumn(col);
+    }
+
+    scrolled_lines_up += 1;
+
+    if (scrolled_lines_up == ImageHeight2x) {
+      scrolled_lines_up = 0;
+      scrolled_lines_down = 0;
+      current_number_ = current_number_ == 9 ? 0 : current_number_ + 1;
+    }
   }
 
   void Draw() {
     AutoTwi t(handle_);
-    screen_.GU7000_drawImage(0, 0, ImageWidth2x, ImageHeight2x,
-                             middle_image_moving_);
-    if (scrolled_lines_up_diff > 0) {
-      screen_.GU7000_drawImage(0, 16 - scrolled_lines_up_diff, ImageWidth2x,
-                               ImageHeight2x, end_image_);
-    }
+    screen_.GU7000_drawImage(x_position_dots_, 0, ImageWidth2x, ImageHeight2x,
+                             image_);
   }
 
  private:
+  void ScrollDownColumn(uint8_t col) {
+    uint8_t& top = image_[col];
+    uint8_t& bottom = image_[col + 1];
+    uint8_t prevNumber = current_number_ == 0 ? 9 : current_number_ - 1;
+    const auto& prevImage = *images_[prevNumber];
+    uint8_t prevCol = prevImage[col + (scrolled_lines_down < 8 ? 1 : 0)];
+    bottom >>= 1;
+    bottom |= (top & 1) ? (1 << 7) : 0;
+    top >>= 1;
+    top |= (prevCol & (1 << scrolled_lines_down % 8)) ? (1 << 7) : 0;
+  }
+
+  void ScrollUpColumn(uint8_t col) {
+    uint8_t& top = image_[col];
+    uint8_t& bottom = image_[col + 1];
+    uint8 nextNumber = current_number_ < 9 ? current_number_ + 1 : 0;
+    const auto& nextImage = *images_[nextNumber];
+    uint8_t nextCol = nextImage[col + (scrolled_lines_up < 8 ? 0 : 1)];
+    top <<= 1;
+    top |= (bottom & (1 << 7)) ? 1 : 0;
+    bottom <<= 1;
+    bottom |= (nextCol & (1 << (7 - scrolled_lines_up % 8))) ? (1) : 0;
+  }
+
   Noritake_VFD_GU7000& screen_;
   FT_HANDLE const handle_;
-  const Image2x& end_image_;
-  Image2x middle_image_moving_;
-  int8_t scrolled_lines_up_diff{0};
+  Image2x image_;
+  const Image2x0Thru9& images_;
+  const uint8_t x_position_dots_{0};
+  uint8_t current_number_{0};
+  uint8_t scrolled_lines_down{0};
+  uint8_t scrolled_lines_up{0};
 };
 
 int main(void) {
@@ -243,7 +238,7 @@ int main(void) {
   //   usleep(20000);
   // }
 
-  DownScroller s(screen, handle, image_6_2x, image_7_2x, image_8_2x);
+  Scroller s(screen, handle, 20, 5, number_2x_images);
 
   {
     AutoTwi t(handle);
@@ -251,16 +246,16 @@ int main(void) {
     usleep(250000);
   }
 
-  for (int i = 0; i < ImageHeight2x; ++i) {
-    s.ScrollOneDown();
+  for (int i = 0; i < ImageHeight2x * 10; ++i) {
+    s.ScrollDownOneLine();
     s.Draw();
-    usleep(70000);
+    usleep(10000);
   }
 
   usleep(100000);
 
-  for (int i = 0; i < ImageHeight2x; ++i) {
-    s.ScrollOneUp();
+  for (int i = 0; i < ImageHeight2x * 10; ++i) {
+    s.ScrollUpOneLine();
     s.Draw();
     usleep(80000);
   }

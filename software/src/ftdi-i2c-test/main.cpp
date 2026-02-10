@@ -101,6 +101,35 @@ constexpr uint8_t ImageHeight2x = 16;
 typedef uint8_t Image2xHalf[ImageWidth2xHalfSize];
 typedef uint8_t Image2x[ImageWidth2xFullSize];
 
+static const uint8_t image_0_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x3f, 0xf0, 0x3f, 0xf0, 0xc0, 0xcc, 0xc0, 0xcc,
+  0xc3, 0x0c, 0xc3, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0x3f, 0xf0, 0x3f, 0xf0,
+};
+
+static const uint8_t image_1_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x0c, 0x30, 0x0c,
+  0xff, 0xfc, 0xff, 0xfc, 0x00, 0x0c, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t image_2_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x30, 0x0c, 0x30, 0x0c, 0xc0, 0x3c, 0xc0, 0x3c,
+  0xc0, 0xcc, 0xc0, 0xcc, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0x0c, 0x3c, 0x0c};
+
+static const uint8_t image_3_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0xc0, 0x30, 0xc0, 0x30, 0xc0, 0x0c, 0xc0, 0x0c,
+  0xcc, 0x0c, 0xcc, 0x0c, 0xf3, 0x0c, 0xf3, 0x0c, 0xc0, 0xf0, 0xc0, 0xf0,
+};
+
+static const uint8_t image_4_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x03, 0xc0, 0x03, 0xc0, 0x0c, 0xc0, 0x0c, 0xc0,
+  0x30, 0xc0, 0x30, 0xc0, 0xff, 0xfc, 0xff, 0xfc, 0x00, 0xc0, 0x00, 0xc0,
+};
+
+static const uint8_t image_5_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0xfc, 0x30, 0xfc, 0x30, 0xcc, 0x0c, 0xcc, 0x0c,
+  0xcc, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0xc3, 0xf0, 0xc3, 0xf0,
+};
+
 static const uint8_t image_6_2x[ImageWidth2xFullSize] = {
   0x00, 0x00, 0x00, 0x00, 0x0f, 0xf0, 0x0f, 0xf0, 0x33, 0x0c, 0x33, 0x0c,
   0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x00, 0xf0, 0x00, 0xf0,
@@ -116,9 +145,14 @@ static const uint8_t image_8_2x[ImageWidth2xFullSize] = {
   0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0xf0, 0x3c, 0xf0,
 };
 
+static const uint8_t image_9_2x[ImageWidth2xFullSize] = {
+  0x00, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x3c, 0x00, 0xc3, 0x0c, 0xc3, 0x0c,
+  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x30, 0xc3, 0x30, 0x3f, 0xc0, 0x3f, 0xc0,
+};
+
 static const Image2x* const number_2x_images[10] = {
-  &image_6_2x, &image_7_2x, &image_8_2x, &image_6_2x, &image_7_2x,
-  &image_8_2x, &image_6_2x, &image_7_2x, &image_8_2x, &image_8_2x,
+  &image_0_2x, &image_1_2x, &image_2_2x, &image_3_2x, &image_4_2x,
+  &image_5_2x, &image_6_2x, &image_7_2x, &image_8_2x, &image_9_2x,
 };
 
 typedef const Image2x* const Image2x0Thru9[10];
@@ -143,12 +177,11 @@ class Scroller {
       ScollUpColumn(col);
     }
 
-    scrolled_lines_up += 1;
+    scrolled_lines_ += 1;
 
-    if (scrolled_lines_up == ImageHeight2x) {
-      scrolled_lines_down = 0;
-      scrolled_lines_up = 0;
-      current_number_ = current_number_ == 0 ? 9 : current_number_ - 1;
+    if (scrolled_lines_ == ImageHeight2x) {
+      scrolled_lines_ = 0;
+      current_number_ = PrevNumber();
     }
   }
 
@@ -157,13 +190,20 @@ class Scroller {
       ScrollDownColumn(col);
     }
 
-    scrolled_lines_down += 1;
+    scrolled_lines_ -= 1;
 
-    if (scrolled_lines_down == ImageHeight2x) {
-      scrolled_lines_down = 0;
-      scrolled_lines_up = 0;
-      current_number_ = current_number_ < 9 ? current_number_ + 1 : 0;
+    if (scrolled_lines_ == -static_cast<int8_t>(ImageHeight2x)) {
+      scrolled_lines_ = 0;
+      current_number_ = NextNumber();
     }
+  }
+
+  int8_t ScrolledCount() const {
+    return scrolled_lines_;
+  }
+
+  int8_t CurrentNumber() const {
+    return current_number_;
   }
 
   void Draw() {
@@ -176,25 +216,55 @@ class Scroller {
   void ScrollDownColumn(uint8_t col) {
     uint8_t& top = image_[col];
     uint8_t& bottom = image_[col + 1];
-    uint8 nextNumber = current_number_ < 9 ? current_number_ + 1 : 0;
+
+    uint8 nextNumber = HaveScrolledUp() ? current_number_ : NextNumber();
+
     const auto& nextImage = *images_[nextNumber];
-    uint8_t nextCol = nextImage[col + (scrolled_lines_down < 8 ? 1 : 0)];
+
+    uint8_t row =
+      HaveScrolledUp() ? (16 - scrolled_lines_) : abs(scrolled_lines_);
+
+    uint8_t nextCol = nextImage[col + (row < 8 ? 1 : 0)];
+
     bottom >>= 1;
     bottom |= (top & 1) ? (1 << 7) : 0;
     top >>= 1;
-    top |= (nextCol & (1 << scrolled_lines_down % 8)) ? (1 << 7) : 0;
+    top |= (nextCol & (1 << (row % 8))) ? (1 << 7) : 0;
   }
 
   void ScollUpColumn(uint8_t col) {
     uint8_t& top = image_[col];
     uint8_t& bottom = image_[col + 1];
-    uint8_t prevNumber = current_number_ == 0 ? 9 : current_number_ - 1;
+
+    uint8_t prevNumber = HaveScrolledDown() ? current_number_ : PrevNumber();
+
     const auto& prevImage = *images_[prevNumber];
-    uint8_t prevCol = prevImage[col + (scrolled_lines_up < 8 ? 0 : 1)];
+
+    uint8_t row =
+      HaveScrolledDown() ? 16 - abs(scrolled_lines_) : scrolled_lines_;
+
+    uint8_t prevCol = prevImage[col + (row < 8 ? 0 : 1)];
+
     top <<= 1;
     top |= (bottom & (1 << 7)) ? 1 : 0;
     bottom <<= 1;
-    bottom |= (prevCol & (1 << (7 - scrolled_lines_up % 8))) ? (1) : 0;
+    bottom |= (prevCol & (1 << (7 - (row % 8)))) ? 1 : 0;
+  }
+
+  uint8_t NextNumber() const {
+    return current_number_ < 9 ? current_number_ + 1 : 0;
+  }
+
+  uint8_t PrevNumber() const {
+    return current_number_ == 0 ? 9 : current_number_ - 1;
+  }
+
+  bool HaveScrolledUp() const {
+    return scrolled_lines_ > 0;
+  }
+
+  bool HaveScrolledDown() const {
+    return scrolled_lines_ < 0;
   }
 
   Noritake_VFD_GU7000& screen_;
@@ -203,9 +273,16 @@ class Scroller {
   const Image2x0Thru9& images_;
   const uint8_t x_position_dots_{0};
   uint8_t current_number_{0};
-  uint8_t scrolled_lines_down{0};
-  uint8_t scrolled_lines_up{0};
+  int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };
+
+void PrintNumberScrolled(FT_HANDLE handle,
+                         Noritake_VFD_GU7000& screen,
+                         Scroller& s) {
+  AutoTwi t(handle);
+  screen.print(50, 0, "   ");
+  screen.print(50, 0, s.ScrolledCount(), 10);
+}
 
 int main(void) {
   FT_HANDLE handle = OpenI2CDevice();
@@ -242,29 +319,50 @@ int main(void) {
 
   {
     AutoTwi t(handle);
-    s.Draw();
-    usleep(10000);
+    screen.print(50, 0, "  ");
+    screen.print(50, 0, s.ScrolledCount(), 10);
   }
 
-  for (int i = 0; i < ImageHeight2x * 10 + 5; ++i) {
-    s.ScollUpOneLine();
+  s.Draw();
+
+  for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
+    s.ScrollDownOneLine();
     s.Draw();
-    usleep(30000);
+    PrintNumberScrolled(handle, screen, s);
+    usleep(20000 + 1300 * i);
+  }
+
+  for (int i = 0; i < 12; ++i) {
+    s.ScrollDownOneLine();
+    s.Draw();
+    PrintNumberScrolled(handle, screen, s);
+    usleep(30000 - i * 500);
   }
 
   usleep(500000);
 
-  for (int i = 0; i < ImageHeight2x * 10; ++i) {
-    s.ScrollDownOneLine();
+  for (int i = 0; i < ImageHeight2x; ++i) {
+    s.ScollUpOneLine();
     s.Draw();
-    usleep(30000);
+    PrintNumberScrolled(handle, screen, s);
+    usleep(20000 + 1300 * i);
   }
 
-  // {
-  //   AutoTwi t(handle);
-  //   screen.GU7000_setFontSize(2, 2, false);
-  //   screen.print("69");
-  // }
+  usleep(500000);
+
+  for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
+    s.ScrollDownOneLine();
+    s.Draw();
+    PrintNumberScrolled(handle, screen, s);
+    usleep(std::min(40000 - 400 * i, 20000));
+  }
+
+  for (int i = 0; i < (ImageHeight2x * 5); ++i) {
+    s.ScollUpOneLine();
+    s.Draw();
+    PrintNumberScrolled(handle, screen, s);
+    usleep(std::min(30000 - 400 * i, 20000));
+  }
 
   return 0;
 }

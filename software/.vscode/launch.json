@@ -15,6 +15,14 @@
     {
       "type": "lldb",
       "request": "launch",
+      "name": "I2C Test",
+      "program": "${workspaceFolder}/builddir/src/ftdi-i2c-test/ftdi-i2c",
+      "args": [],
+      "cwd": "${workspaceFolder}/builddir/src/ftdi-i2c-test"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
       "name": "Simulate Test",
       "program": "${workspaceFolder}/builddir/src/simulation/thermo-simulation-test",
       "args": [],

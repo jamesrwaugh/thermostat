@@ -159,13 +159,14 @@ typedef const Image2x* const Image2x0Thru9[10];
 
 class Scroller {
  public:
+  static_assert(ImageWidth2xFullSize % 2 == 0,
+                "Image width must be multiple of 2");
+
   Scroller(Noritake_VFD_GU7000& screen,
-           FT_HANDLE h,
            uint8_t xPositionDots,
            uint8_t startingNumber,
            const Image2x0Thru9& images)
       : screen_{screen},
-        handle_{h},
         images_{images},
         x_position_dots_{xPositionDots},
         current_number_{startingNumber} {
@@ -202,12 +203,11 @@ class Scroller {
     return scrolled_lines_;
   }
 
-  int8_t CurrentNumber() const {
+  uint8_t CurrentNumber() const {
     return current_number_;
   }
 
   void Draw() {
-    AutoTwi t(handle_);
     screen_.GU7000_drawImage(x_position_dots_, 0, ImageWidth2x, ImageHeight2x,
                              image_);
   }
@@ -217,12 +217,12 @@ class Scroller {
     uint8_t& top = image_[col];
     uint8_t& bottom = image_[col + 1];
 
-    uint8 nextNumber = HaveScrolledUp() ? current_number_ : NextNumber();
+    uint8_t nextNumber = HaveScrolledUp() ? current_number_ : NextNumber();
 
     const auto& nextImage = *images_[nextNumber];
 
-    uint8_t row =
-      HaveScrolledUp() ? (16 - scrolled_lines_) : abs(scrolled_lines_);
+    uint8_t row = HaveScrolledUp() ? (ImageHeight2x - scrolled_lines_)
+                                   : abs(scrolled_lines_);
 
     uint8_t nextCol = nextImage[col + (row < 8 ? 1 : 0)];
 
@@ -240,8 +240,8 @@ class Scroller {
 
     const auto& prevImage = *images_[prevNumber];
 
-    uint8_t row =
-      HaveScrolledDown() ? 16 - abs(scrolled_lines_) : scrolled_lines_;
+    uint8_t row = HaveScrolledDown() ? ImageHeight2x - abs(scrolled_lines_)
+                                     : scrolled_lines_;
 
     uint8_t prevCol = prevImage[col + (row < 8 ? 0 : 1)];
 
@@ -268,7 +268,6 @@ class Scroller {
   }
 
   Noritake_VFD_GU7000& screen_;
-  FT_HANDLE const handle_;
   Image2x image_;
   const Image2x0Thru9& images_;
   const uint8_t x_position_dots_{0};
@@ -315,7 +314,7 @@ int main(void) {
   //   usleep(20000);
   // }
 
-  Scroller s(screen, handle, 20, 5, number_2x_images);
+  Scroller s(screen, 20, 5, number_2x_images);
 
   {
     AutoTwi t(handle);
@@ -323,9 +322,13 @@ int main(void) {
     screen.print(50, 0, s.ScrolledCount(), 10);
   }
 
-  s.Draw();
+  {
+    AutoTwi t(handle);
+    s.Draw();
+  }
 
   for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
+    AutoTwi t(handle);
     s.ScrollDownOneLine();
     s.Draw();
     PrintNumberScrolled(handle, screen, s);
@@ -333,15 +336,17 @@ int main(void) {
   }
 
   for (int i = 0; i < 12; ++i) {
+    AutoTwi t(handle);
     s.ScrollDownOneLine();
     s.Draw();
     PrintNumberScrolled(handle, screen, s);
-    usleep(30000 - i * 500);
+    usleep(std::min(2000, 30000 - i * 500));
   }
 
   usleep(500000);
 
   for (int i = 0; i < ImageHeight2x; ++i) {
+    AutoTwi t(handle);
     s.ScollUpOneLine();
     s.Draw();
     PrintNumberScrolled(handle, screen, s);
@@ -351,6 +356,7 @@ int main(void) {
   usleep(500000);
 
   for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
+    AutoTwi t(handle);
     s.ScrollDownOneLine();
     s.Draw();
     PrintNumberScrolled(handle, screen, s);
@@ -358,6 +364,7 @@ int main(void) {
   }
 
   for (int i = 0; i < (ImageHeight2x * 5); ++i) {
+    AutoTwi t(handle);
     s.ScollUpOneLine();
     s.Draw();
     PrintNumberScrolled(handle, screen, s);

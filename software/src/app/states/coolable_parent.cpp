@@ -1,5 +1,6 @@
 #include "coolable_parent.hpp"
 
+#include <Noritake_VFD_GU7000.h>
 #include <etl/placement_new.h>
 #include <sys/types.h>
 
@@ -39,6 +40,11 @@ CoolableParent::CoolableParent(Machine& machine,
   t1s_.Draw();
   h10s_.Draw();
   h1s_.Draw();
+
+  {
+    AutoTwi t;
+    DriverGetScreenHandle().GU7000_setScreenBrightness(1);
+  }
 }
 
 CoolableParent::~CoolableParent() {}
@@ -55,15 +61,15 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::TenMillisecondsPassed: {
-      if (move_temperature_ticks_ > 0) {
-        tick_ten_ms_count_ += 1;
-        if (tick_ten_ms_count_ == 10) {
-          tick_ten_ms_count_ = 0;
-          move_temperature_ticks_ -= 1;
-          t1s_.ScollUpOneLine();
-          t1s_.Draw();
-        }
-      }
+      // if (move_temperature_ticks_ > 0) {
+      //   tick_ten_ms_count_ += 1;
+      //   if (tick_ten_ms_count_ == 10) {
+      //     tick_ten_ms_count_ = 0;
+      //     move_temperature_ticks_ -= 1;
+      //     t1s_.ScollUpOneLine();
+      //     t1s_.Draw();
+      //   }
+      // }
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {

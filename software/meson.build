@@ -37,6 +37,12 @@ lodepng_dep = declare_dependency(
   include_directories: ['submodules/lodepng'],
 )
 
+ft4222_dep = dependency(
+  'ft4222',
+  native: true,
+  required: false,
+)
+
 subdir('src/protos')
 subdir('src/avr-driver')
 subdir('src/simulation')

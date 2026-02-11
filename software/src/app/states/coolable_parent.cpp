@@ -11,14 +11,34 @@
 
 // ===================================================================== //
 
-CoolableParent::CoolableParent(Machine& machine, State::Type stateId,
-                               const Image* const a, const Image* const b)
+CoolableParent::CoolableParent(Machine& machine,
+                               State::Type stateId,
+                               const Image* const a,
+                               const Image* const b)
     : State::Base(stateId),
       machine_(machine),
       status_image_a_{a},
-      status_image_b_{b} {
+      status_image_b_{b},
+      t10s_(0, 0),
+      t1s_(13, 0),
+      h10s_(39, 0),
+      h1s_(52, 0) {
   DriverDisplayClearScreen();
-  machine_.DisplaySetPointAndTemp();
+  machine_.DisplaySetPoint();
+
+  const auto& t = machine_.CurrentTemperature().GetUnitWhole(
+    machine.SaveState().TemperatureUnit());
+  t10s_.SetNumber(t / 10);
+  t1s_.SetNumber(t % 10);
+
+  const auto& h = machine_.CurrentHumidity().ToPercent();
+  h10s_.SetNumber(h / 10);
+  h1s_.SetNumber(h % 10);
+
+  t10s_.Draw();
+  t1s_.Draw();
+  h10s_.Draw();
+  h1s_.Draw();
 }
 
 CoolableParent::~CoolableParent() {}
@@ -34,8 +54,24 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     case Event::Type::SelectButtonPressed: {
       return State::Type::ProgramTemp;
     }
+    case Event::Type::TenMillisecondsPassed: {
+      if (move_temperature_ticks_ > 0) {
+        tick_ten_ms_count_ += 1;
+        if (tick_ten_ms_count_ == 10) {
+          tick_ten_ms_count_ = 0;
+          move_temperature_ticks_ -= 1;
+          t1s_.ScollUpOneLine();
+          t1s_.Draw();
+        }
+      }
+      return State::Type::NO_CHANGE;
+    }
     case Event::Type::SecondPassed: {
-      machine_.ReadTemperatureAndReportIfChanged();
+      TemperatureChangeInfo info;
+      machine_.ReadTemperatureAndReportIfChanged(info);
+      if (info.TemperatureChanged) {
+        move_temperature_ticks_ += ImageHeight2x;
+      }
       if (status_image_a_ && status_image_b_) {
         image_state_ = !image_state_;
         DrawImage(68, true, image_state_ ? *status_image_a_ : *status_image_b_);
@@ -73,7 +109,8 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
   }
 }
 
-void CoolableParent::ActivateCoolingRelays(Relay onRelay, Relay offRelay,
+void CoolableParent::ActivateCoolingRelays(Relay onRelay,
+                                           Relay offRelay,
                                            ReverseValveModeT onIfType) {
   if (machine_.ButtonState().ReverseValveState == onIfType) {
     DriverRelayOn(Relay::ReversingValve);

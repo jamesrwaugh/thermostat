@@ -11,6 +11,7 @@
 
 #include "HaCommandMailBox.hpp"
 #include "relay.hpp"
+#include "sim_ftdi_gu7000.hpp"
 #include "sim_sht4x.hpp"
 
 extern "C" {
@@ -42,7 +43,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   void OnRelayChange(Relay r, bool value);
 
   TaskSender S_;
-  std::unique_ptr<SimGu7000I2C> Screen;
+  std::unique_ptr<SimFtdiGu7000> Screen;
   std::unique_ptr<SimBouncySwitch> UpButton;
   std::unique_ptr<SimBouncySwitch> DownButton;
   std::unique_ptr<SimBouncySwitch> SelectButton;

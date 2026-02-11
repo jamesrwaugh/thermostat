@@ -58,10 +58,10 @@ void Machine::ReadTemperature() {
   uint16_t temperatureTicks = 0, humidityTicks = 0;
   DriverReadRawTemp(temperatureTicks, humidityTicks);
   CurrentTemp.SetFromSht4xSensor(temperatureTicks);
-  CurrentHumidity.SetFromSht4xSensor(humidityTicks);
+  CurrentHumid.SetFromSht4xSensor(humidityTicks);
 }
 
-void Machine::ReadTemperatureAndReportIfChanged() {
+void Machine::ReadTemperatureAndReportIfChanged(TemperatureChangeInfo& info) {
   ReadTemperature();
 
   const bool TempChanged =
@@ -69,25 +69,30 @@ void Machine::ReadTemperatureAndReportIfChanged() {
     PreviousTemp.GetUnitWhole(TemperatureUnitT::Celsius);
 
   const bool HumidChanged =
-    CurrentHumidity.ToPercent() != PreviousHumidity.ToPercent();
+    CurrentHumid.ToPercent() != PreviousHumidity.ToPercent();
 
-  if (TempChanged || HumidChanged) {
-    DisplayTemperature();
+  info.TemperatureChanged = TempChanged;
+  info.TemperatureChangeDirection = CurrentTemp <=> PreviousTemp;
+  info.HumidityChanged = HumidChanged;
+  info.HumidChangedDirection = CurrentHumid <=> PreviousHumidity;
 
-    if (TempChanged) {
-      PreviousTemp = CurrentTemp;
-      WriteHaTempStateTopicResponse();
-    }
+  if (TempChanged) {
+    PreviousTemp = CurrentTemp;
+    WriteHaTempStateTopicResponse();
+  }
 
-    if (HumidChanged) {
-      PreviousHumidity = CurrentHumidity;
-      WriteHaHumidityStateTopicResponse();
-    }
+  if (HumidChanged) {
+    PreviousHumidity = CurrentHumid;
+    WriteHaHumidityStateTopicResponse();
   }
 }
 
 const Temperature& Machine::CurrentTemperature() const {
   return CurrentTemp;
+}
+
+const Humidity& Machine::CurrentHumidity() const {
+  return CurrentHumid;
 }
 
 void Machine::ReadAndApplySettings() {
@@ -105,16 +110,9 @@ void Machine::ReadAndApplySettings() {
   ApplySaveState();
 }
 
-void Machine::DisplayTemperature() {
-  DriverDisplayTemp(CurrentTemp, CurrentHumidity,
-                    SaveState().TemperatureUnit());
-}
-
-void Machine::DisplaySetPointAndTemp() {
+void Machine::DisplaySetPoint() {
   const auto& save = SaveState();
   DriverDisplaySetPoint(save.SetPoint(), (save.TemperatureUnit()));
-  DriverDisplayTemp(CurrentTemp, CurrentHumidity,
-                    SaveState().TemperatureUnit());
 }
 
 // Setting: MQTT Config
@@ -265,7 +263,7 @@ void Machine::WriteHaTempStateTopicResponse() const {
 
 void Machine::WriteHaHumidityStateTopicResponse() const {
   WriteHaSerialResponse(HaOutTopicKey::HumidityStateTopic,
-                        CurrentHumidity.ToPercent(), 0);
+                        CurrentHumid.ToPercent(), 0);
 }
 
 void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {
@@ -286,7 +284,8 @@ void Machine::WriteHaFanModeTopicResponse() const {
                         u8(SaveState().FanMode()), 0);
 }
 
-void Machine::WriteHaSerialResponse(HaOutTopicKey topic, uint8_t byte_one,
+void Machine::WriteHaSerialResponse(HaOutTopicKey topic,
+                                    uint8_t byte_one,
                                     uint8_t byte_two) const {
   HaCommand c;
   c.checksum = 0;

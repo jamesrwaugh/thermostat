@@ -10,6 +10,7 @@ src = files(
   'states/started.cpp',
   'main.cpp',
   'safe_thermo_safe.cpp',
+  'scoller.cpp',
   'sim.c',
 )
 

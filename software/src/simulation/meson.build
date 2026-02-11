@@ -23,6 +23,7 @@ executable(
   simulation_src,
   native: true,
   dependencies: [
+    ft4222_dep,
     simavr_dep,
     ftxui_dep,
     simavr_toolbox_dep,

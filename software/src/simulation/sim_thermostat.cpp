@@ -30,11 +30,12 @@ void FakeCb(struct avr_irq_t* irq, uint32_t value, void* param) {
   }
 }
 
-SimAvrThermostat::SimAvrThermostat(std::string_view filename, bool gdb,
+SimAvrThermostat::SimAvrThermostat(std::string_view filename,
+                                   bool gdb,
                                    TaskReceiver& receiver)
     : FtxUiSimulatedAvr(filename, gdb, receiver) {
   // Screen
-  Screen = std::make_unique<SimGu7000I2C>(Avr_);
+  Screen = std::make_unique<SimFtdiGu7000>(Avr_);
 
   // Buttons
   UpButton =
@@ -131,7 +132,7 @@ void SimAvrThermostat::BeforeAvrCycleSideEffect() {
 
   if (last_ms_delta > std::chrono::milliseconds(1)) {
     LastMsTick_ = now;
-    Screen->OnMillisecondPassed();
+    // Screen->OnMillisecondPassed();
   }
 
   Temp_->SimulateTempChange(Relays_);
@@ -152,5 +153,6 @@ void SimAvrThermostat::OnUartByteReceived(int uartNumber, uint8_t byte) {
 }
 
 const SimGu7000::DisplayMemory& SimAvrThermostat::GetScreenMemory() const {
-  return Screen->GetDisplayMemory();
+  static SimGu7000::DisplayMemory s;
+  return s;
 }

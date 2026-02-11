@@ -65,29 +65,6 @@ bool DriverLoadData(ThermoSaveData& data) {
   return gDriver->LoadData(data);
 }
 
-void DriverDisplayTemp(const Temperature& tp, const Humidity& hum,
-                       TemperatureUnitT unit) {
-  auto& screen = gDriver->Screen;
-  {
-    AutoTwi t;
-    screen.GU7000_setFontSize(2, 2, false);
-    screen.print(0, 0, "    ");
-    screen.GU7000_setCursor(0, 0);
-    screen.print(tp.GetUnitWhole(unit), 10);
-    screen.GU7000_setFontSize(1, 1, false);
-    screen.print(unit == TemperatureUnitT::Freedom ? 'F' : 'C');
-  }
-  {
-    AutoTwi t;
-    screen.GU7000_setFontSize(2, 2, false);
-    screen.print(30, 0, "   ");
-    screen.GU7000_setCursor(30, 0);
-    screen.print(hum.ToPercent(), 10);
-    screen.GU7000_setFontSize(1, 1, false);
-    screen.print("%RH");
-  }
-}
-
 void DriverDisplaySetPoint(const Temperature& temp, TemperatureUnitT unit) {
   AutoTwi t;
   auto& screen = gDriver->Screen;

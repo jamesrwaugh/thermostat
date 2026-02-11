@@ -157,15 +157,15 @@ static const Image2x* const number_2x_images[10] = {
 
 typedef const Image2x* const Image2x0Thru9[10];
 
-class Scroller {
+class ScrollerT {
  public:
   static_assert(ImageWidth2xFullSize % 2 == 0,
                 "Image width must be multiple of 2");
 
-  Scroller(Noritake_VFD_GU7000& screen,
-           uint8_t xPositionDots,
-           uint8_t startingNumber,
-           const Image2x0Thru9& images)
+  ScrollerT(Noritake_VFD_GU7000& screen,
+            uint8_t xPositionDots,
+            uint8_t startingNumber,
+            const Image2x0Thru9& images)
       : screen_{screen},
         images_{images},
         x_position_dots_{xPositionDots},
@@ -277,7 +277,7 @@ class Scroller {
 
 void PrintNumberScrolled(FT_HANDLE handle,
                          Noritake_VFD_GU7000& screen,
-                         Scroller& s) {
+                         ScrollerT& s) {
   AutoTwi t(handle);
   screen.print(50, 0, "   ");
   screen.print(50, 0, s.ScrolledCount(), 10);
@@ -314,7 +314,7 @@ int main(void) {
   //   usleep(20000);
   // }
 
-  Scroller s(screen, 20, 5, number_2x_images);
+  ScrollerT s(screen, 20, 5, number_2x_images);
 
   {
     AutoTwi t(handle);

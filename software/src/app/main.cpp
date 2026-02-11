@@ -73,6 +73,7 @@ int main() {
       if (button != -1) {
         OnButtonPressed(static_cast<Button>(button));
       }
+      machine.receive(Event::TenMillisecondsPassed());
       g10MillisecondPassed = false;
       lastHalfSecondCount += 1;
       lastSecondCount += 1;

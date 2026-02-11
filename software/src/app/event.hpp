@@ -10,6 +10,7 @@ enum class Type : uint8_t {
   SelectButtonPressed,
   FanButtonPushed,
   HeatButtonPushed,
+  TenMillisecondsPassed,
   HalfSecondPassed,
   SecondPassed,
   ReverseValveModeChanged,
@@ -40,6 +41,10 @@ struct HeatButtonPressed : Base {
 
 struct FanButtonPressed : Base {
   FanButtonPressed() : Base(Event::Type::FanButtonPushed) {}
+};
+
+struct TenMillisecondsPassed : Base {
+  TenMillisecondsPassed() : Base(Event::Type::TenMillisecondsPassed) {}
 };
 
 struct HalfSecondPassed : Base {

@@ -18,8 +18,6 @@ struct ThermoButtonState {
 
 void DriverInit();
 void DriverGetButtonStateNow(ThermoButtonState* data);
-void DriverDisplayTemp(const Temperature& temp, const Humidity& hum,
-                       TemperatureUnitT unit);
 void DriverDisplaySetPoint(const Temperature& temp, TemperatureUnitT);
 void DriverDisplayIsHeating();
 void DriverDisplayIsCooling();

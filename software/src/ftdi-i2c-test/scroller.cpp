@@ -73,15 +73,16 @@ const Image2x* const number_2x_images[10] = {
 // ================================================================= //
 
 ScrollerT::ScrollerT(Image2x& image, const Image2x& nextImage)
-    : image_{image}, next_image_{nextImage} {
+    : image_{image}, next_image_{&nextImage} {
   memcpy(&original_image_, &image, sizeof(Image2x));
 }
 
-void ScrollerT::ScrollInDirection(ScrollDirection dir) {
-  dir == ScrollDirection::Down ? ScrollDownOneLine() : ScrollDownOneLine();
+bool ScrollerT::ScrollInDirection(ScrollDirection dir) {
+  return dir == ScrollDirection::Down ? ScrollDownOneLine()
+                                      : ScrollDownOneLine();
 }
 
-void ScrollerT::ScollUpOneLine() {
+bool ScrollerT::ScollUpOneLine() {
   for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
     ScollUpColumn(col);
   }
@@ -90,10 +91,13 @@ void ScrollerT::ScollUpOneLine() {
 
   if (scrolled_lines_ == ImageHeight2x) {
     scrolled_lines_ = 0;
+    return true;
   }
+
+  return false;
 }
 
-void ScrollerT::ScrollDownOneLine() {
+bool ScrollerT::ScrollDownOneLine() {
   for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
     ScrollDownColumn(col);
   }
@@ -102,7 +106,14 @@ void ScrollerT::ScrollDownOneLine() {
 
   if (scrolled_lines_ == -static_cast<int8_t>(ImageHeight2x)) {
     scrolled_lines_ = 0;
+    return true;
   }
+
+  return false;
+}
+
+void ScrollerT::SetNextImage(const Image2x& image) {
+  next_image_ = &image;
 }
 
 int8_t ScrollerT::ScrolledCount() const {
@@ -113,7 +124,7 @@ void ScrollerT::ScrollDownColumn(uint8_t col) {
   uint8_t& top = image_[col];
   uint8_t& bottom = image_[col + 1];
 
-  const auto& nextImage = HaveScrolledUp() ? original_image_ : next_image_;
+  const auto& nextImage = HaveScrolledUp() ? original_image_ : *next_image_;
 
   uint8_t row =
     HaveScrolledUp() ? (ImageHeight2x - scrolled_lines_) : abs(scrolled_lines_);
@@ -130,7 +141,7 @@ void ScrollerT::ScollUpColumn(uint8_t col) {
   uint8_t& top = image_[col];
   uint8_t& bottom = image_[col + 1];
 
-  const auto& prevImage = HaveScrolledDown() ? original_image_ : next_image_;
+  const auto& prevImage = HaveScrolledDown() ? original_image_ : *next_image_;
 
   uint8_t row =
     HaveScrolledDown() ? ImageHeight2x - abs(scrolled_lines_) : scrolled_lines_;

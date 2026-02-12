@@ -39,9 +39,10 @@ class ScrollerT {
 
   ScrollerT(Image2x& image, const Image2x& nextImage);
 
-  void ScrollInDirection(ScrollDirection dir);
-  void ScollUpOneLine();
-  void ScrollDownOneLine();
+  bool ScrollInDirection(ScrollDirection dir);
+  bool ScollUpOneLine();
+  bool ScrollDownOneLine();
+  void SetNextImage(const Image2x& image);
   int8_t ScrolledCount() const;
 
  private:
@@ -52,6 +53,6 @@ class ScrollerT {
 
   Image2x& image_;
   Image2x original_image_;
-  const Image2x& next_image_;
+  const Image2x* next_image_;
   int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };

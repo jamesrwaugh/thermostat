@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <cstring>
 #include <ftdi.hpp>
 #include <vector>
 
@@ -90,68 +91,6 @@ const uint8_t gFireOneImageData[Image1xWidth] = {
   // clang-format on
 };
 
-class TwoDigitScroller {
- public:
-  TwoDigitScroller(uint8_t number)
-      : s_tens_(tens_, number / 10), s_ones(ones_, number % 10) {}
-
-  void TeleportToNumber(uint8_t newNumber) {
-    const uint8_t tens = newNumber / 10;
-    const uint8_t ones = newNumber % 10;
-
-    s_tens_.SetNumber(tens);
-    s_ones.SetNumber(ones);
-  }
-
-  void EmplaceScrollToNumber(uint8_t newNumber) {
-    const uint8_t tens = newNumber / 10;
-    const uint8_t ones = newNumber % 10;
-
-    const int8_t tens_diff = s_tens_.CurrentNumber() - tens;
-    const int8_t ones_diff = s_ones.CurrentNumber() - ones;
-
-    ::new (&ss_tens_) ScrollState(tens_diff);
-    ::new (&ss_ones_) ScrollState(ones_diff);
-  }
-
-  void Process() {
-    if (ss_tens_.remaining_lines_ > 0) {
-      s_tens_.ScrollInDirection(ss_tens_.direction_);
-      ss_tens_.remaining_lines_ -= 1;
-    }
-
-    if (ss_ones_.remaining_lines_ > 0) {
-      s_ones.ScrollInDirection(ss_ones_.direction_);
-      ss_ones_.remaining_lines_ -= 1;
-    }
-  }
-
-  const Image2x& TensImage() const {
-    return tens_;
-  }
-
-  const Image2x& OnesImage() const {
-    return ones_;
-  }
-
- private:
-  struct ScrollState {
-    ScrollState();
-    ScrollState(int8_t diff)
-        : remaining_lines_(abs(diff)),
-          direction_(diff > 0 ? ScrollDirection::Up : ScrollDirection::Down) {}
-    uint8_t remaining_lines_{0};
-    ScrollDirection direction_{false};
-  };
-
-  Image2x tens_;
-  Image2x ones_;
-  Scroller s_tens_;
-  Scroller s_ones;
-  ScrollState ss_tens_;
-  ScrollState ss_ones_;
-};
-
 class Renderer {
  public:
   static constexpr uint8_t CharacterWidth1x = 7;
@@ -160,30 +99,56 @@ class Renderer {
   static constexpr uint8_t HumidityXPos =
     TemperatureXPos + (3 * ImageWidth2x) + CharacterWidth1x + CharacterWidth1x;
 
-  Renderer(Noritake_VFD_GU7000& s)
-      : screen_(s), temperature_(0), humidity_(0) {}
+  struct Images {
+    Image2x temperature_hundreds_or_minus_;
+    Image2x temperature_tens_;
+    Image2x temperature_ones_;
+    Image2x humidity_tens_;
+    Image2x humidity_ones_;
+  };
 
-  void DrawTemperature(int8_t number, char suffix) {
-    AutoTwi t;
+  Renderer(Noritake_VFD_GU7000& s) : screen_(s) {}
 
-    const uint8_t hundredsOrMinusSpot = TemperatureXPos;
-    const uint8_t posNumber = abs(number);
+  void InitializeImages(int8_t temperature, uint8_t humidity) {
+    const uint8_t posTemp = abs(temperature);
 
-    if (number < 0) {
-      screen_.print(hundredsOrMinusSpot, 0, "-");
-    } else if (number >= 100) {
-      screen_.GU7000_drawImage(hundredsOrMinusSpot, 0, ImageWidth2x,
-                               ImageHeight2x,
-                               *number_2x_images[posNumber / 100]);
+    const Image2x* hundreds_image = &blank_2x;
+
+    if (temperature < 0) {
+      hundreds_image = &minus_2x;
+    } else if (temperature >= 100) {
+      hundreds_image = number_2x_images[posTemp / 100];
+    } else {
+      hundreds_image = &blank_2x;
     }
 
-    DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x, temperature_,
-                             suffix);
+    memcpy(&images_.temperature_hundreds_or_minus_, hundreds_image,
+           sizeof(Image2x));
+    memcpy(&images_.temperature_tens_, number_2x_images[(posTemp % 100) / 10],
+           sizeof(Image2x));
+    memcpy(&images_.temperature_ones_, number_2x_images[posTemp % 10],
+           sizeof(Image2x));
+    memcpy(&images_.humidity_tens_, number_2x_images[humidity / 10],
+           sizeof(Image2x));
+    memcpy(&images_.humidity_ones_, number_2x_images[humidity % 10],
+           sizeof(Image2x));
   }
 
-  void DrawHumidity(uint8_t number) {
+  void DrawTemperature(char suffix) {
     AutoTwi t;
-    DrawPositive2DigitNumber(HumidityXPos, humidity_, '%');
+
+    screen_.GU7000_drawImage(TemperatureXPos, 0, ImageWidth2x, ImageHeight2x,
+                             images_.temperature_hundreds_or_minus_);
+
+    DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x,
+                             images_.temperature_tens_,
+                             images_.temperature_ones_, suffix);
+  }
+
+  void DrawHumidity() {
+    AutoTwi t;
+    DrawPositive2DigitNumber(HumidityXPos, images_.humidity_tens_,
+                             images_.humidity_ones_, '%');
   }
 
   void DrawSetPoint(int8_t setPoint) {
@@ -220,19 +185,22 @@ class Renderer {
     Draw1xImage(imagePosition, true, gFireOneImageData);
   }
 
+  Images& GetImages() {
+    return images_;
+  }
+
  private:
   void DrawPositive2DigitNumber(uint8_t xPos,
-                                TwoDigitScroller& number,
+                                const Image2x& tens,
+                                const Image2x& ones,
                                 char suffix) {
     const uint8_t tensSpot = xPos;
     const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
     const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
 
-    screen_.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
-                             number.TensImage());
+    screen_.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x, tens);
 
-    screen_.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
-                             number.OnesImage());
+    screen_.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x, ones);
 
     screen_.print(suffixSpot, 0, suffix);
   }
@@ -242,9 +210,8 @@ class Renderer {
                              bottom ? 8 : 0, image);
   }
 
+  Images images_;
   Noritake_VFD_GU7000& screen_;
-  TwoDigitScroller temperature_;
-  TwoDigitScroller humidity_;
 };
 
 int main(void) {
@@ -267,86 +234,43 @@ int main(void) {
 
   Renderer r(screen);
 
-  r.DrawTemperature(-2, 'F');
-  r.DrawHumidity(1);
+  r.InitializeImages(-23, 2);
+
+  r.DrawTemperature('F');
+  r.DrawHumidity();
   r.DrawSetPoint(-32);
   r.DrawHeatingStatus(false);
 
-  // {
-  //   AutoTwi t;
-  //   screen.print(10 - 5 - 1, 0, "-");
-  //   screen.GU7000_drawImage(10, 0, ImageWidth2x, ImageHeight2x, image_7_2x);
-  //   screen.GU7000_drawImage(10 + ImageWidth2x + 1, 0, ImageWidth2x,
-  //                           ImageHeight2x, image_7_2x);
-  //   screen.GU7000_drawImage(10 + ImageWidth2x + 1 + ImageWidth2x + 1, 0,
-  //                           ImageWidth2x, ImageHeight2x, image_7_2x);
-  //   screen.print(10 + ImageWidth2x + 1 + ImageWidth2x + 1 + ImageWidth2x + 2,
-  //   0,
-  //                "F");
-  // }
+  auto& images = r.GetImages();
 
-  // for (int i = 0; i < ImageHeight2x; ++i) {
-  //   s.ScrollOneUp();
-  //   s.Draw();
-  //   usleep(20000);
-  // }
+  ScrollerT s(images.temperature_ones_, *number_2x_images[3 + 1]);
 
-  // ScrollerT s(screen, 20, 5, number_2x_images);
+  for (int i = 0; i < 10; ++i) {
+    AutoTwi t;
+    s.ScrollDownOneLine();
+    r.DrawTemperature('F');
+    usleep(20000);
+  }
 
-  // {
-  //   AutoTwi t;
-  //   screen.print(50, 0, "  ");
-  //   screen.print(50, 0, s.ScrolledCount(), 10);
-  // }
+  usleep(200000);
 
-  // {
-  //   AutoTwi t;
-  //   s.Draw();
-  // }
+  for (int i = 0; i < 10; ++i) {
+    AutoTwi t;
+    s.ScollUpOneLine();
+    r.DrawTemperature('F');
+    usleep(20000);
+  }
 
-  // for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
-  //   AutoTwi t;
-  //   s.ScrollDownOneLine();
-  //   s.Draw();
-  //   PrintNumberScrolled(handle, screen, s);
-  //   usleep(20000 + 1300 * i);
-  // }
+  ScrollerT s2(images.temperature_hundreds_or_minus_, blank_2x);
 
-  // for (int i = 0; i < 12; ++i) {
-  //   AutoTwi t;
-  //   s.ScrollDownOneLine();
-  //   s.Draw();
-  //   PrintNumberScrolled(handle, screen, s);
-  //   usleep(std::min(2000, 30000 - i * 500));
-  // }
+  usleep(200000);
 
-  // usleep(500000);
-
-  // for (int i = 0; i < ImageHeight2x; ++i) {
-  //   AutoTwi t;
-  //   s.ScollUpOneLine();
-  //   s.Draw();
-  //   PrintNumberScrolled(handle, screen, s);
-  //   usleep(20000 + 1300 * i);
-  // }
-
-  // usleep(500000);
-
-  // for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
-  //   AutoTwi t;
-  //   s.ScrollDownOneLine();
-  //   s.Draw();
-  //   PrintNumberScrolled(handle, screen, s);
-  //   usleep(std::min(40000 - 400 * i, 20000));
-  // }
-
-  // for (int i = 0; i < (ImageHeight2x * 5); ++i) {
-  //   AutoTwi t;
-  //   s.ScollUpOneLine();
-  //   s.Draw();
-  //   PrintNumberScrolled(handle, screen, s);
-  //   usleep(std::min(30000 - 400 * i, 20000));
-  // }
+  for (int i = 0; i < 10; ++i) {
+    AutoTwi t;
+    s2.ScollUpOneLine();
+    r.DrawTemperature('F');
+    usleep(20000);
+  }
 
   return 0;
 }

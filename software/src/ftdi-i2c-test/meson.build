@@ -2,6 +2,7 @@ src = files(
   'GU7000/Noritake_VFD_GU7000.cpp',
   'ftdi.cpp',
   'main.cpp',
+  'scroller.cpp',
 )
 
 ft4222_dep = dependency(

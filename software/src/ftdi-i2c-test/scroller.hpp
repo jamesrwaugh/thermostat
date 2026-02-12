@@ -17,7 +17,7 @@ class Scroller {
   static_assert(ImageWidth2xFullSize % 2 == 0,
                 "Image width must be multiple of 2");
 
-  Scroller(uint8_t xPositionDots, uint8_t startingNumber);
+  Scroller(Image2x& image, uint8_t startingNumber);
 
   void ScrollInDirection(bool positive);
   void ScollUpOneLine();
@@ -25,8 +25,6 @@ class Scroller {
   int8_t ScrolledCount() const;
   uint8_t CurrentNumber() const;
   void SetNumber(uint8_t n);
-  const Image2x& GetImage() const;
-  void Draw();
 
  private:
   void ScrollDownColumn(uint8_t col);
@@ -36,8 +34,7 @@ class Scroller {
   bool HaveScrolledUp() const;
   bool HaveScrolledDown() const;
 
-  Image2x image_;
-  const uint8_t x_position_dots_{0};
+  Image2x& image_;
   uint8_t current_number_{0};
   int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };

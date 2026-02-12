@@ -1,11 +1,8 @@
-#include "scoller.hpp"
+#include "scroller.hpp"
 
-#include <Noritake_VFD_GU7000.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <driver_rs_wrapper.hpp>
 
 // ================================================================= //
 
@@ -65,8 +62,8 @@ static const Image2x* const number_2x_images[10] = {
 
 // ================================================================= //
 
-Scroller::Scroller(uint8_t xPositionDots, uint8_t startingNumber)
-    : x_position_dots_{xPositionDots}, current_number_{startingNumber} {
+Scroller::Scroller(Image2x& image, uint8_t startingNumber)
+    : image_{image}, current_number_{startingNumber} {
   SetNumber(current_number_);
 }
 
@@ -112,16 +109,6 @@ void Scroller::SetNumber(uint8_t n) {
   current_number_ = n;
   scrolled_lines_ = 0;
   memcpy(&image_, number_2x_images[current_number_], sizeof(Image2x));
-}
-
-const Image2x& Scroller::GetImage() const {
-  return image_;
-}
-
-void Scroller::Draw() {
-  AutoTwi t;
-  DriverGetScreenHandle().GU7000_drawImage(x_position_dots_, 0, ImageWidth2x,
-                                           ImageHeight2x, image_);
 }
 
 void Scroller::ScrollDownColumn(uint8_t col) {

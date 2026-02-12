@@ -28,40 +28,37 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <cstring>
 #include <ftdi.hpp>
 #include <vector>
 
 #include "GU7000/Noritake_VFD_GU7000.h"
+#include "scroller.hpp"
 
 // ==================================================== //
 
-struct HandleCleanup {
-  HandleCleanup(FT_HANDLE h) : handle_(h) {}
+FT_HANDLE gHandle = nullptr;
 
+struct HandleCleanup {
   ~HandleCleanup() {
-    if (handle_) {
-      CloseI2CDevice(handle_);
+    if (gHandle) {
+      CloseI2CDevice(gHandle);
     }
   }
-
-  FT_HANDLE const handle_;
 };
 
 struct AutoTwi {
-  AutoTwi(FT_HANDLE h) : handle_(h) {
+  AutoTwi() {
     current_message_.reserve(32);
   }
 
   ~AutoTwi() {
     uint16_t written = 0;
-    FT4222_I2CMaster_Write(handle_, 0x50, current_message_.data(),
+    FT4222_I2CMaster_Write(gHandle, 0x50, current_message_.data(),
                            current_message_.size(), &written);
     current_message_.clear();
   }
 
   static std::vector<uint8> current_message_;
-  FT_HANDLE const handle_;
 };
 
 std::vector<uint8> AutoTwi::current_message_;
@@ -78,12 +75,12 @@ void hardReset() {}
 
 // ==================================================== //
 
-constexpr uint8_t ImageWidth = 5;
-constexpr uint8_t ImageHeight = 7;
+constexpr uint8_t Image1xWidth = 5;
+constexpr uint8_t Image1xHeight = 7;
 
-typedef const uint8_t Image[ImageWidth];
+typedef const uint8_t Image1x[Image1xWidth];
 
-const uint8_t gFireOneImageData[ImageWidth] = {
+const uint8_t gFireOneImageData[Image1xWidth] = {
   // clang-format off
     0b00011110,
     0b01111111,
@@ -93,293 +90,132 @@ const uint8_t gFireOneImageData[ImageWidth] = {
   // clang-format on
 };
 
-constexpr uint8_t ImageWidth2x = 12;
-constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
-constexpr uint8_t ImageWidth2xFullSize = ImageWidth2x * 2;
-constexpr uint8_t ImageHeight2x = 16;
-
-typedef uint8_t Image2xHalf[ImageWidth2xHalfSize];
-typedef uint8_t Image2x[ImageWidth2xFullSize];
-
-static const uint8_t image_0_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x3f, 0xf0, 0x3f, 0xf0, 0xc0, 0xcc, 0xc0, 0xcc,
-  0xc3, 0x0c, 0xc3, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0x3f, 0xf0, 0x3f, 0xf0,
+class TwoDigitScroller {
+  Image2x tens_;
+  Image2x ones_;
 };
 
-static const uint8_t image_1_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x0c, 0x30, 0x0c,
-  0xff, 0xfc, 0xff, 0xfc, 0x00, 0x0c, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x00,
-};
-
-static const uint8_t image_2_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x30, 0x0c, 0x30, 0x0c, 0xc0, 0x3c, 0xc0, 0x3c,
-  0xc0, 0xcc, 0xc0, 0xcc, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0x0c, 0x3c, 0x0c};
-
-static const uint8_t image_3_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0xc0, 0x30, 0xc0, 0x30, 0xc0, 0x0c, 0xc0, 0x0c,
-  0xcc, 0x0c, 0xcc, 0x0c, 0xf3, 0x0c, 0xf3, 0x0c, 0xc0, 0xf0, 0xc0, 0xf0,
-};
-
-static const uint8_t image_4_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x03, 0xc0, 0x03, 0xc0, 0x0c, 0xc0, 0x0c, 0xc0,
-  0x30, 0xc0, 0x30, 0xc0, 0xff, 0xfc, 0xff, 0xfc, 0x00, 0xc0, 0x00, 0xc0,
-};
-
-static const uint8_t image_5_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0xfc, 0x30, 0xfc, 0x30, 0xcc, 0x0c, 0xcc, 0x0c,
-  0xcc, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0xcc, 0x0c, 0xc3, 0xf0, 0xc3, 0xf0,
-};
-
-static const uint8_t image_6_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x0f, 0xf0, 0x0f, 0xf0, 0x33, 0x0c, 0x33, 0x0c,
-  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x00, 0xf0, 0x00, 0xf0,
-};
-
-static const uint8_t image_7_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0xc0, 0x00, 0xc0, 0x00, 0xc0, 0xfc, 0xc0, 0xfc,
-  0xc3, 0x00, 0xc3, 0x00, 0xcc, 0x00, 0xcc, 0x00, 0xf0, 0x00, 0xf0, 0x00,
-};
-
-static const uint8_t image_8_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x3c, 0xf0, 0x3c, 0xf0, 0xc3, 0x0c, 0xc3, 0x0c,
-  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x0c, 0x3c, 0xf0, 0x3c, 0xf0,
-};
-
-static const uint8_t image_9_2x[ImageWidth2xFullSize] = {
-  0x00, 0x00, 0x00, 0x00, 0x3c, 0x00, 0x3c, 0x00, 0xc3, 0x0c, 0xc3, 0x0c,
-  0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x30, 0xc3, 0x30, 0x3f, 0xc0, 0x3f, 0xc0,
-};
-
-static const Image2x* const number_2x_images[10] = {
-  &image_0_2x, &image_1_2x, &image_2_2x, &image_3_2x, &image_4_2x,
-  &image_5_2x, &image_6_2x, &image_7_2x, &image_8_2x, &image_9_2x,
-};
-
-typedef const Image2x* const Image2x0Thru9[10];
-
-class ScrollerT {
+class Renderer {
  public:
-  static_assert(ImageWidth2xFullSize % 2 == 0,
-                "Image width must be multiple of 2");
+  static constexpr uint8_t CharacterWidth1x = 7;
+  static constexpr uint8_t ScreenWidth = 112;
+  static constexpr uint8_t TemperatureXPos = 0;
+  static constexpr uint8_t HumidityXPos =
+    TemperatureXPos + (3 * ImageWidth2x) + CharacterWidth1x + CharacterWidth1x;
 
-  ScrollerT(Noritake_VFD_GU7000& screen,
-            uint8_t xPositionDots,
-            uint8_t startingNumber,
-            const Image2x0Thru9& images)
-      : screen_{screen},
-        images_{images},
-        x_position_dots_{xPositionDots},
-        current_number_{startingNumber} {
-    memcpy(&image_, images[startingNumber], sizeof(Image2x));
-  }
+  Renderer(Noritake_VFD_GU7000& s) : screen_(s) {}
 
-  void ScollUpOneLine() {
-    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      ScollUpColumn(col);
+  void DrawTemperature(int8_t number, char suffix) {
+    AutoTwi t;
+
+    const uint8_t hundredsOrMinusSpot = TemperatureXPos;
+    const uint8_t posNumber = abs(number);
+
+    if (number < 0) {
+      screen_.print(hundredsOrMinusSpot, 0, "-");
+    } else if (number >= 100) {
+      screen_.GU7000_drawImage(hundredsOrMinusSpot, 0, ImageWidth2x,
+                               ImageHeight2x,
+                               *number_2x_images[posNumber / 100]);
     }
 
-    scrolled_lines_ += 1;
+    DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x, posNumber % 100,
+                             suffix);
+  }
 
-    if (scrolled_lines_ == ImageHeight2x) {
-      scrolled_lines_ = 0;
-      current_number_ = PrevNumber();
+  void DrawHumidity(uint8_t number) {
+    AutoTwi t;
+    DrawPositive2DigitNumber(HumidityXPos, number, '%');
+  }
+
+  void DrawSetPoint(int8_t setPoint) {
+    AutoTwi t;
+
+    uint8_t setPointPos = ScreenWidth;
+
+    if (setPoint < 0) {
+      setPointPos -= CharacterWidth1x;
     }
-  }
 
-  void ScrollDownOneLine() {
-    for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
-      ScrollDownColumn(col);
+    static const uint8_t posSetPoint = abs(setPoint);
+
+    if (posSetPoint >= 100) {
+      setPointPos -= 3 * CharacterWidth1x;
+    } else if (posSetPoint >= 10) {
+      setPointPos -= 2 * CharacterWidth1x;
+    } else {
+      setPointPos -= 1 * CharacterWidth1x;
     }
 
-    scrolled_lines_ -= 1;
+    screen_.print(setPointPos, 0, setPoint, 10);
+  }
 
-    if (scrolled_lines_ == -static_cast<int8_t>(ImageHeight2x)) {
-      scrolled_lines_ = 0;
-      current_number_ = NextNumber();
+  void DrawHeatingStatus(bool active) {
+    AutoTwi t;
+
+    const uint8_t imagePosition = ScreenWidth - Image1xWidth - 1;
+
+    if (active) {
+      screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 8, "ON");
     }
-  }
 
-  int8_t ScrolledCount() const {
-    return scrolled_lines_;
-  }
-
-  uint8_t CurrentNumber() const {
-    return current_number_;
-  }
-
-  void Draw() {
-    screen_.GU7000_drawImage(x_position_dots_, 0, ImageWidth2x, ImageHeight2x,
-                             image_);
+    Draw1xImage(imagePosition, true, gFireOneImageData);
   }
 
  private:
-  void ScrollDownColumn(uint8_t col) {
-    uint8_t& top = image_[col];
-    uint8_t& bottom = image_[col + 1];
+  void DrawPositive2DigitNumber(uint8_t xPos, uint8_t number, char suffix) {
+    const uint8_t tensSpot = xPos;
+    const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
+    const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
 
-    uint8_t nextNumber = HaveScrolledUp() ? current_number_ : NextNumber();
+    screen_.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
+                             *number_2x_images[number / 10]);
 
-    const auto& nextImage = *images_[nextNumber];
+    screen_.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
+                             *number_2x_images[number % 10]);
 
-    uint8_t row = HaveScrolledUp() ? (ImageHeight2x - scrolled_lines_)
-                                   : abs(scrolled_lines_);
-
-    uint8_t nextCol = nextImage[col + (row < 8 ? 1 : 0)];
-
-    bottom >>= 1;
-    bottom |= (top & 1) ? (1 << 7) : 0;
-    top >>= 1;
-    top |= (nextCol & (1 << (row % 8))) ? (1 << 7) : 0;
+    screen_.print(suffixSpot, 0, suffix);
   }
 
-  void ScollUpColumn(uint8_t col) {
-    uint8_t& top = image_[col];
-    uint8_t& bottom = image_[col + 1];
-
-    uint8_t prevNumber = HaveScrolledDown() ? current_number_ : PrevNumber();
-
-    const auto& prevImage = *images_[prevNumber];
-
-    uint8_t row = HaveScrolledDown() ? ImageHeight2x - abs(scrolled_lines_)
-                                     : scrolled_lines_;
-
-    uint8_t prevCol = prevImage[col + (row < 8 ? 0 : 1)];
-
-    top <<= 1;
-    top |= (bottom & (1 << 7)) ? 1 : 0;
-    bottom <<= 1;
-    bottom |= (prevCol & (1 << (7 - (row % 8)))) ? 1 : 0;
-  }
-
-  uint8_t NextNumber() const {
-    return current_number_ < 9 ? current_number_ + 1 : 0;
-  }
-
-  uint8_t PrevNumber() const {
-    return current_number_ == 0 ? 9 : current_number_ - 1;
-  }
-
-  bool HaveScrolledUp() const {
-    return scrolled_lines_ > 0;
-  }
-
-  bool HaveScrolledDown() const {
-    return scrolled_lines_ < 0;
+  void Draw1xImage(uint8_t xPositionDots, bool bottom, Image1x image) {
+    screen_.GU7000_drawImage(xPositionDots, Image1xHeight, Image1xWidth,
+                             bottom ? 8 : 0, image);
   }
 
   Noritake_VFD_GU7000& screen_;
-  Image2x image_;
-  const Image2x0Thru9& images_;
-  const uint8_t x_position_dots_{0};
-  uint8_t current_number_{0};
-  int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
+  Image2x temperature_tens_;
+  Image2x temperature_ones_;
+  Image2x humidity_tens_;
+  Image2x humidity_ones_;
 };
 
-void PrintNumberScrolled(FT_HANDLE handle,
-                         Noritake_VFD_GU7000& screen,
-                         ScrollerT& s) {
-  AutoTwi t(handle);
-  screen.print(50, 0, "   ");
-  screen.print(50, 0, s.ScrolledCount(), 10);
-}
-
-constexpr uint8_t CharacterWidth1x = 7;
-
-uint8_t Digit(FT_HANDLE handle,
-              Noritake_VFD_GU7000& screen,
-              uint8_t x,
-              int8_t number) {
-  AutoTwi t(handle);
-
-  uint8_t hundredsOrMinusSpot = x;
-  uint8_t tensSpot = hundredsOrMinusSpot + ImageWidth2x + 1;
-  uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
-  uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
-
-  uint8_t plusNumber = abs(number);
-
-  if (number < 0) {
-    screen.print(hundredsOrMinusSpot, 0, "-");
-  } else if (number >= 100) {
-    screen.GU7000_drawImage(hundredsOrMinusSpot, 0, ImageWidth2x, ImageHeight2x,
-                            *number_2x_images[plusNumber / 100]);
-  }
-
-  screen.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
-                          *number_2x_images[(plusNumber % 100) / 10]);
-
-  screen.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
-                          *number_2x_images[plusNumber % 10]);
-
-  screen.print(suffixSpot, 0, "F");
-
-  return x + suffixSpot + CharacterWidth1x;
-}
-
-void HumDigit(FT_HANDLE handle,
-              Noritake_VFD_GU7000& screen,
-              uint8_t x,
-              uint8_t number) {
-  AutoTwi t(handle);
-
-  uint8_t tensSpot = x;
-  uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
-  uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
-
-  screen.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
-                          *number_2x_images[number / 10]);
-
-  screen.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
-                          *number_2x_images[number % 10]);
-
-  screen.print(suffixSpot, 0, "%");
-}
-
-void DrawImage(Noritake_VFD_GU7000& screen,
-               uint8_t xPositionDots,
-               bool bottom,
-               Image image) {
-  screen.GU7000_drawImage(xPositionDots, ImageHeight, ImageWidth,
-                          bottom ? 8 : 0, image);
-}
-
 int main(void) {
-  FT_HANDLE handle = OpenI2CDevice();
+  gHandle = OpenI2CDevice();
 
-  HandleCleanup c(handle);
+  HandleCleanup c;
 
-  if (!handle) {
+  if (!gHandle) {
     return 1;
   }
 
   Noritake_VFD_GU7000 screen;
 
   {
-    AutoTwi t(handle);
+    AutoTwi t;
     screen.GU7000_init();
     screen.GU7000_clearScreen();
     screen.GU7000_setScreenBrightness(10);
   }
 
-  // Scroller s(screen, handle, image_7_2x, image_8_2x);
+  Renderer r(screen);
 
-  {
-    uint8_t nextSpot = Digit(handle, screen, 2, 79);
-    HumDigit(handle, screen, nextSpot + 2, 23);
-  }
-
-  {
-    AutoTwi t(handle);
-
-    uint8_t imagePosition = 112 - ImageWidth - 1;
-
-    screen.print(112 - (2 * 7), 0, "72");
-    screen.print(imagePosition - (CharacterWidth1x * 2) - 2, 8, "ON");
-    DrawImage(screen, imagePosition, true, gFireOneImageData);
-  }
+  r.DrawTemperature(-2, 'F');
+  r.DrawHumidity(1);
+  r.DrawSetPoint(-32);
+  r.DrawHeatingStatus(false);
 
   // {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   screen.print(10 - 5 - 1, 0, "-");
   //   screen.GU7000_drawImage(10, 0, ImageWidth2x, ImageHeight2x, image_7_2x);
   //   screen.GU7000_drawImage(10 + ImageWidth2x + 1, 0, ImageWidth2x,
@@ -400,18 +236,18 @@ int main(void) {
   // ScrollerT s(screen, 20, 5, number_2x_images);
 
   // {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   screen.print(50, 0, "  ");
   //   screen.print(50, 0, s.ScrolledCount(), 10);
   // }
 
   // {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.Draw();
   // }
 
   // for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.ScrollDownOneLine();
   //   s.Draw();
   //   PrintNumberScrolled(handle, screen, s);
@@ -419,7 +255,7 @@ int main(void) {
   // }
 
   // for (int i = 0; i < 12; ++i) {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.ScrollDownOneLine();
   //   s.Draw();
   //   PrintNumberScrolled(handle, screen, s);
@@ -429,7 +265,7 @@ int main(void) {
   // usleep(500000);
 
   // for (int i = 0; i < ImageHeight2x; ++i) {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.ScollUpOneLine();
   //   s.Draw();
   //   PrintNumberScrolled(handle, screen, s);
@@ -439,7 +275,7 @@ int main(void) {
   // usleep(500000);
 
   // for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.ScrollDownOneLine();
   //   s.Draw();
   //   PrintNumberScrolled(handle, screen, s);
@@ -447,7 +283,7 @@ int main(void) {
   // }
 
   // for (int i = 0; i < (ImageHeight2x * 5); ++i) {
-  //   AutoTwi t(handle);
+  //   AutoTwi t;
   //   s.ScollUpOneLine();
   //   s.Draw();
   //   PrintNumberScrolled(handle, screen, s);

@@ -86,9 +86,9 @@ typedef const uint8_t Image[ImageWidth];
 const uint8_t gFireOneImageData[ImageWidth] = {
   // clang-format off
     0b00011110,
-    0b11111111,
-    0b11111111,
     0b01111111,
+    0b01111111,
+    0b00011111,
     0b00000110,
   // clang-format on
 };
@@ -283,6 +283,66 @@ void PrintNumberScrolled(FT_HANDLE handle,
   screen.print(50, 0, s.ScrolledCount(), 10);
 }
 
+constexpr uint8_t CharacterWidth1x = 7;
+
+uint8_t Digit(FT_HANDLE handle,
+              Noritake_VFD_GU7000& screen,
+              uint8_t x,
+              int8_t number) {
+  AutoTwi t(handle);
+
+  uint8_t hundredsOrMinusSpot = x;
+  uint8_t tensSpot = hundredsOrMinusSpot + ImageWidth2x + 1;
+  uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
+  uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
+
+  uint8_t plusNumber = abs(number);
+
+  if (number < 0) {
+    screen.print(hundredsOrMinusSpot, 0, "-");
+  } else if (number >= 100) {
+    screen.GU7000_drawImage(hundredsOrMinusSpot, 0, ImageWidth2x, ImageHeight2x,
+                            *number_2x_images[plusNumber / 100]);
+  }
+
+  screen.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
+                          *number_2x_images[(plusNumber % 100) / 10]);
+
+  screen.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
+                          *number_2x_images[plusNumber % 10]);
+
+  screen.print(suffixSpot, 0, "F");
+
+  return x + suffixSpot + CharacterWidth1x;
+}
+
+void HumDigit(FT_HANDLE handle,
+              Noritake_VFD_GU7000& screen,
+              uint8_t x,
+              uint8_t number) {
+  AutoTwi t(handle);
+
+  uint8_t tensSpot = x;
+  uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
+  uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
+
+  screen.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
+                          *number_2x_images[number / 10]);
+
+  screen.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
+                          *number_2x_images[number % 10]);
+
+  screen.print(suffixSpot, 0, "%");
+}
+
+void DrawImage(Noritake_VFD_GU7000& screen,
+               uint8_t xPositionDots,
+               bool bottom,
+               Image image) {
+  screen.GU7000_drawImage(xPositionDots, ImageHeight, ImageWidth,
+                          bottom ? 8 : 0, image);
+}
+
 int main(void) {
   FT_HANDLE handle = OpenI2CDevice();
 
@@ -297,15 +357,38 @@ int main(void) {
   {
     AutoTwi t(handle);
     screen.GU7000_init();
-    screen.GU7000_setScreenBrightness(20);
+    screen.GU7000_clearScreen();
+    screen.GU7000_setScreenBrightness(10);
   }
 
   // Scroller s(screen, handle, image_7_2x, image_8_2x);
 
+  {
+    uint8_t nextSpot = Digit(handle, screen, 2, 79);
+    HumDigit(handle, screen, nextSpot + 2, 23);
+  }
+
+  {
+    AutoTwi t(handle);
+
+    uint8_t imagePosition = 112 - ImageWidth - 1;
+
+    screen.print(112 - (2 * 7), 0, "72");
+    screen.print(imagePosition - (CharacterWidth1x * 2) - 2, 8, "ON");
+    DrawImage(screen, imagePosition, true, gFireOneImageData);
+  }
+
   // {
   //   AutoTwi t(handle);
-  //   s.Draw();
-  //   usleep(250000);
+  //   screen.print(10 - 5 - 1, 0, "-");
+  //   screen.GU7000_drawImage(10, 0, ImageWidth2x, ImageHeight2x, image_7_2x);
+  //   screen.GU7000_drawImage(10 + ImageWidth2x + 1, 0, ImageWidth2x,
+  //                           ImageHeight2x, image_7_2x);
+  //   screen.GU7000_drawImage(10 + ImageWidth2x + 1 + ImageWidth2x + 1, 0,
+  //                           ImageWidth2x, ImageHeight2x, image_7_2x);
+  //   screen.print(10 + ImageWidth2x + 1 + ImageWidth2x + 1 + ImageWidth2x + 2,
+  //   0,
+  //                "F");
   // }
 
   // for (int i = 0; i < ImageHeight2x; ++i) {
@@ -314,62 +397,62 @@ int main(void) {
   //   usleep(20000);
   // }
 
-  ScrollerT s(screen, 20, 5, number_2x_images);
+  // ScrollerT s(screen, 20, 5, number_2x_images);
 
-  {
-    AutoTwi t(handle);
-    screen.print(50, 0, "  ");
-    screen.print(50, 0, s.ScrolledCount(), 10);
-  }
+  // {
+  //   AutoTwi t(handle);
+  //   screen.print(50, 0, "  ");
+  //   screen.print(50, 0, s.ScrolledCount(), 10);
+  // }
 
-  {
-    AutoTwi t(handle);
-    s.Draw();
-  }
+  // {
+  //   AutoTwi t(handle);
+  //   s.Draw();
+  // }
 
-  for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
-    AutoTwi t(handle);
-    s.ScrollDownOneLine();
-    s.Draw();
-    PrintNumberScrolled(handle, screen, s);
-    usleep(20000 + 1300 * i);
-  }
+  // for (int i = 0; i < (ImageHeight2x * 2) + 8; ++i) {
+  //   AutoTwi t(handle);
+  //   s.ScrollDownOneLine();
+  //   s.Draw();
+  //   PrintNumberScrolled(handle, screen, s);
+  //   usleep(20000 + 1300 * i);
+  // }
 
-  for (int i = 0; i < 12; ++i) {
-    AutoTwi t(handle);
-    s.ScrollDownOneLine();
-    s.Draw();
-    PrintNumberScrolled(handle, screen, s);
-    usleep(std::min(2000, 30000 - i * 500));
-  }
+  // for (int i = 0; i < 12; ++i) {
+  //   AutoTwi t(handle);
+  //   s.ScrollDownOneLine();
+  //   s.Draw();
+  //   PrintNumberScrolled(handle, screen, s);
+  //   usleep(std::min(2000, 30000 - i * 500));
+  // }
 
-  usleep(500000);
+  // usleep(500000);
 
-  for (int i = 0; i < ImageHeight2x; ++i) {
-    AutoTwi t(handle);
-    s.ScollUpOneLine();
-    s.Draw();
-    PrintNumberScrolled(handle, screen, s);
-    usleep(20000 + 1300 * i);
-  }
+  // for (int i = 0; i < ImageHeight2x; ++i) {
+  //   AutoTwi t(handle);
+  //   s.ScollUpOneLine();
+  //   s.Draw();
+  //   PrintNumberScrolled(handle, screen, s);
+  //   usleep(20000 + 1300 * i);
+  // }
 
-  usleep(500000);
+  // usleep(500000);
 
-  for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
-    AutoTwi t(handle);
-    s.ScrollDownOneLine();
-    s.Draw();
-    PrintNumberScrolled(handle, screen, s);
-    usleep(std::min(40000 - 400 * i, 20000));
-  }
+  // for (int i = 0; i < (ImageHeight2x * 3) + 2; ++i) {
+  //   AutoTwi t(handle);
+  //   s.ScrollDownOneLine();
+  //   s.Draw();
+  //   PrintNumberScrolled(handle, screen, s);
+  //   usleep(std::min(40000 - 400 * i, 20000));
+  // }
 
-  for (int i = 0; i < (ImageHeight2x * 5); ++i) {
-    AutoTwi t(handle);
-    s.ScollUpOneLine();
-    s.Draw();
-    PrintNumberScrolled(handle, screen, s);
-    usleep(std::min(30000 - 400 * i, 20000));
-  }
+  // for (int i = 0; i < (ImageHeight2x * 5); ++i) {
+  //   AutoTwi t(handle);
+  //   s.ScollUpOneLine();
+  //   s.Draw();
+  //   PrintNumberScrolled(handle, screen, s);
+  //   usleep(std::min(30000 - 400 * i, 20000));
+  // }
 
   return 0;
 }

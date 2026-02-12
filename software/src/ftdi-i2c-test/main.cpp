@@ -34,6 +34,7 @@
 
 #include "GU7000/Noritake_VFD_GU7000.h"
 #include "scroller.hpp"
+#include "temperature.hpp"
 
 // ==================================================== //
 
@@ -214,6 +215,50 @@ class Renderer {
   Noritake_VFD_GU7000& screen_;
 };
 
+class ScollManager {
+ public:
+  void Calculate(int8_t theNew, int8_t old) {
+    the_new_ = theNew;
+    the_old_ = old;
+    the_old_current_ = abs(old);
+    const int16_t diff = theNew - old;
+    diff_direction_ = diff > 0 ? ScrollDirection::Down : ScrollDirection::Up;
+    total_diff_ = abs(diff);
+    tens_diff_ = (total_diff_ % 100) / 10;
+    ones_diff_ = total_diff_ % 10;
+  }
+
+  bool Finished() const {
+    return total_diff_ == 0;
+  }
+
+  void ApplyOnce(Image2x& tens, Image2x& ones) {
+    uint8_t current_tens = (the_old_current_ % 100) / 10;
+    uint8_t current_ones = the_old_current_ % 10;
+    ScrollerT tensScroll(tens, *number_2x_images[current_tens]);
+    ScrollerT onesScroll(ones, *number_2x_images[current_ones]);
+    for (uint8_t lines = 0; lines < ImageHeight2x; ++lines) {
+      onesScroll.ScrollInDirection(diff_direction_);
+      if (current_ones == 0) {
+        tensScroll.ScrollInDirection(diff_direction_);
+      }
+      usleep(100000);
+    }
+    the_old_current_ += diff_direction_ == ScrollDirection::Down ? 1 : -1;
+    usleep(300000);
+    total_diff_ -= 1;
+  }
+
+ private:
+  int8_t the_new_{0};
+  int8_t the_old_{0};
+  int8_t the_old_current_{0};
+  ScrollDirection diff_direction_{ScrollDirection::Down};
+  uint8_t total_diff_{0};
+  uint8_t tens_diff_{0};
+  uint8_t ones_diff_{0};
+};
+
 int main(void) {
   gHandle = OpenI2CDevice();
 
@@ -243,33 +288,12 @@ int main(void) {
 
   auto& images = r.GetImages();
 
-  ScrollerT s(images.temperature_ones_, *number_2x_images[3 + 1]);
+  ScollManager m;
+  m.Calculate(-15, -23);
 
-  for (int i = 0; i < 10; ++i) {
-    AutoTwi t;
-    s.ScrollDownOneLine();
+  while (!m.Finished()) {
+    m.ApplyOnce(images.temperature_tens_, images.temperature_ones_);
     r.DrawTemperature('F');
-    usleep(20000);
-  }
-
-  usleep(200000);
-
-  for (int i = 0; i < 10; ++i) {
-    AutoTwi t;
-    s.ScollUpOneLine();
-    r.DrawTemperature('F');
-    usleep(20000);
-  }
-
-  ScrollerT s2(images.temperature_hundreds_or_minus_, blank_2x);
-
-  usleep(200000);
-
-  for (int i = 0; i < 10; ++i) {
-    AutoTwi t;
-    s2.ScollUpOneLine();
-    r.DrawTemperature('F');
-    usleep(20000);
   }
 
   return 0;

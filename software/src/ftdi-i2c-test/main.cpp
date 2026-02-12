@@ -223,31 +223,25 @@ class ScollManager {
         ones_scroller_(ones, blank_2x) {}
 
   void Calculate(int8_t theNew, int8_t old) {
-    original_old_ = old;
-    original_new_ = theNew;
     diff_direction_ =
       (theNew - old) > 0 ? ScrollDirection::Down : ScrollDirection::Up;
     current_number_ = abs(old);
-    const uint8_t old_ones = current_number_ % 10;
-    ones_lines_left_till_10_ = diff_direction_ == ScrollDirection::Down
-                                 ? (10 - old_ones)
-                                 : (old_ones - 0);
-    current_diff_magnitude_ = abs(theNew - old);
+    goal_number_ = abs(theNew);
+    RecalculateHundredsLines();
+    RecalculateTensLines();
   }
 
   bool Finished() const {
-    return false;
+    return (goal_number_ - current_number_) == 0;
   }
 
-  // 28
-  // 29 // Add ticks to 10s, and apply in ApplyOnce
-  // 20
-
   void ApplyOnce() {
-    const uint8_t tens = (current_number_ % 100) / 10;
-    const uint8_t ones = (current_number_ % 10);
-
     bool ones_done = ones_scroller_.ScrollInDirection(diff_direction_);
+
+    if (hundreds_lines_left_ > 0) {
+      hundreds_lines_left_ -= 1;
+      hundreds_scroller_.ScrollInDirection(diff_direction_);
+    }
 
     if (tens_lines_left_ > 0) {
       tens_lines_left_ -= 1;
@@ -255,25 +249,54 @@ class ScollManager {
     }
 
     if (ones_done) {
-      const uint8_t now_tens = (current_number_ % 100) / 10;
-      current_number_ += diff_direction_ == ScrollDirection::Down ? 1 : -1;
-      const uint8_t current_tens = (current_number_ % 100) / 10;
-
-      ones_scroller_.SetNextImage(*number_2x_images[current_number_ % 10]);
-
-      if (current_tens != now_tens) {
-        tens_lines_left_ += ImageHeight2x;
-      }
+      current_number_ += Delta();
+      ones_scroller_.SetNextImage(*number_2x_images[Ones(current_number_)]);
+      RecalculateHundredsLines();
+      RecalculateTensLines();
     }
   }
 
+  void RecalculateHundredsLines() {
+    const uint8_t nextHundreds = Hundreds(current_number_ + Delta());
+    if (Hundreds(current_number_) != nextHundreds) {
+      hundreds_lines_left_ += ImageHeight2x;
+      hundreds_scroller_.SetNextImage(*number_2x_images[nextHundreds]);
+    } else {
+      hundreds_lines_left_ = 0;
+    }
+  }
+
+  void RecalculateTensLines() {
+    const uint8_t nextTens = Tens(current_number_ + Delta());
+    if (Tens(current_number_) != nextTens) {
+      tens_lines_left_ += ImageHeight2x;
+      tens_scroller_.SetNextImage(*number_2x_images[nextTens]);
+    } else {
+      tens_lines_left_ = 0;
+    }
+  }
+
+  static inline uint8_t Hundreds(uint8_t number) {
+    return number / 100;
+  }
+
+  static inline uint8_t Tens(uint8_t number) {
+    return (number % 100) / 10;
+  }
+
+  static inline uint8_t Ones(uint8_t number) {
+    return number % 10;
+  }
+
+  int8_t Delta() const {
+    return diff_direction_ == ScrollDirection::Down ? 1 : -1;
+  }
+
  private:
-  int8_t original_old_{0};
-  int8_t original_new_{0};
+  uint8_t goal_number_{0};
   uint8_t current_number_{0};
-  uint8_t current_diff_magnitude_{0};
-  uint8_t ones_lines_left_till_10_{0};
   uint8_t tens_lines_left_{0};
+  uint8_t hundreds_lines_left_{0};
   ScrollDirection diff_direction_{ScrollDirection::Down};
   ScrollerT hundreds_scroller_;
   ScrollerT tens_scroller_;
@@ -311,11 +334,13 @@ int main(void) {
 
   ScollManager m(images.temperature_hundreds_or_minus_,
                  images.temperature_tens_, images.temperature_ones_);
+
   m.Calculate(-15, -23);
 
   while (!m.Finished()) {
     m.ApplyOnce();
     r.DrawTemperature('F');
+    usleep(50000);
   }
 
   return 0;

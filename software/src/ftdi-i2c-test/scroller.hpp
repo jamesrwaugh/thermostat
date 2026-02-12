@@ -12,6 +12,11 @@ typedef uint8_t Image2x[ImageWidth2xFullSize];
 
 typedef const Image2x* const Image2x0Thru9[10];
 
+enum class ScrollDirection : uint8_t {
+  Up = 0,
+  Down,
+};
+
 class Scroller {
  public:
   static_assert(ImageWidth2xFullSize % 2 == 0,
@@ -19,7 +24,7 @@ class Scroller {
 
   Scroller(Image2x& image, uint8_t startingNumber);
 
-  void ScrollInDirection(bool positive);
+  void ScrollInDirection(ScrollDirection dir);
   void ScollUpOneLine();
   void ScrollDownOneLine();
   int8_t ScrolledCount() const;

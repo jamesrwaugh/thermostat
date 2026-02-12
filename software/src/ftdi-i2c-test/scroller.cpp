@@ -67,8 +67,8 @@ Scroller::Scroller(Image2x& image, uint8_t startingNumber)
   SetNumber(current_number_);
 }
 
-void Scroller::ScrollInDirection(bool positive) {
-  positive ? ScrollDownOneLine() : ScrollDownOneLine();
+void Scroller::ScrollInDirection(ScrollDirection dir) {
+  dir == ScrollDirection::Down ? ScrollDownOneLine() : ScrollDownOneLine();
 }
 
 void Scroller::ScollUpOneLine() {

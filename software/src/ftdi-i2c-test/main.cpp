@@ -91,8 +91,65 @@ const uint8_t gFireOneImageData[Image1xWidth] = {
 };
 
 class TwoDigitScroller {
+ public:
+  TwoDigitScroller(uint8_t number)
+      : s_tens_(tens_, number / 10), s_ones(ones_, number % 10) {}
+
+  void TeleportToNumber(uint8_t newNumber) {
+    const uint8_t tens = newNumber / 10;
+    const uint8_t ones = newNumber % 10;
+
+    s_tens_.SetNumber(tens);
+    s_ones.SetNumber(ones);
+  }
+
+  void EmplaceScrollToNumber(uint8_t newNumber) {
+    const uint8_t tens = newNumber / 10;
+    const uint8_t ones = newNumber % 10;
+
+    const int8_t tens_diff = s_tens_.CurrentNumber() - tens;
+    const int8_t ones_diff = s_ones.CurrentNumber() - ones;
+
+    ::new (&ss_tens_) ScrollState(tens_diff);
+    ::new (&ss_ones_) ScrollState(ones_diff);
+  }
+
+  void Process() {
+    if (ss_tens_.remaining_lines_ > 0) {
+      s_tens_.ScrollInDirection(ss_tens_.direction_);
+      ss_tens_.remaining_lines_ -= 1;
+    }
+
+    if (ss_ones_.remaining_lines_ > 0) {
+      s_ones.ScrollInDirection(ss_ones_.direction_);
+      ss_ones_.remaining_lines_ -= 1;
+    }
+  }
+
+  const Image2x& TensImage() const {
+    return tens_;
+  }
+
+  const Image2x& OnesImage() const {
+    return ones_;
+  }
+
+ private:
+  struct ScrollState {
+    ScrollState();
+    ScrollState(int8_t diff)
+        : remaining_lines_(abs(diff)),
+          direction_(diff > 0 ? ScrollDirection::Up : ScrollDirection::Down) {}
+    uint8_t remaining_lines_{0};
+    ScrollDirection direction_{false};
+  };
+
   Image2x tens_;
   Image2x ones_;
+  Scroller s_tens_;
+  Scroller s_ones;
+  ScrollState ss_tens_;
+  ScrollState ss_ones_;
 };
 
 class Renderer {
@@ -103,7 +160,8 @@ class Renderer {
   static constexpr uint8_t HumidityXPos =
     TemperatureXPos + (3 * ImageWidth2x) + CharacterWidth1x + CharacterWidth1x;
 
-  Renderer(Noritake_VFD_GU7000& s) : screen_(s) {}
+  Renderer(Noritake_VFD_GU7000& s)
+      : screen_(s), temperature_(0), humidity_(0) {}
 
   void DrawTemperature(int8_t number, char suffix) {
     AutoTwi t;
@@ -119,13 +177,13 @@ class Renderer {
                                *number_2x_images[posNumber / 100]);
     }
 
-    DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x, posNumber % 100,
+    DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x, temperature_,
                              suffix);
   }
 
   void DrawHumidity(uint8_t number) {
     AutoTwi t;
-    DrawPositive2DigitNumber(HumidityXPos, number, '%');
+    DrawPositive2DigitNumber(HumidityXPos, humidity_, '%');
   }
 
   void DrawSetPoint(int8_t setPoint) {
@@ -163,16 +221,18 @@ class Renderer {
   }
 
  private:
-  void DrawPositive2DigitNumber(uint8_t xPos, uint8_t number, char suffix) {
+  void DrawPositive2DigitNumber(uint8_t xPos,
+                                TwoDigitScroller& number,
+                                char suffix) {
     const uint8_t tensSpot = xPos;
     const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
     const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
 
     screen_.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x,
-                             *number_2x_images[number / 10]);
+                             number.TensImage());
 
     screen_.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x,
-                             *number_2x_images[number % 10]);
+                             number.OnesImage());
 
     screen_.print(suffixSpot, 0, suffix);
   }
@@ -183,10 +243,8 @@ class Renderer {
   }
 
   Noritake_VFD_GU7000& screen_;
-  Image2x temperature_tens_;
-  Image2x temperature_ones_;
-  Image2x humidity_tens_;
-  Image2x humidity_ones_;
+  TwoDigitScroller temperature_;
+  TwoDigitScroller humidity_;
 };
 
 int main(void) {

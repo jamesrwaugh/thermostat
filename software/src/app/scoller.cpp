@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <driver_rs_wrapper.hpp>
+
 // ================================================================= //
 
 static const uint8_t image_0_2x[ImageWidth2xFullSize] = {
@@ -66,6 +68,10 @@ static const Image2x* const number_2x_images[10] = {
 Scroller::Scroller(uint8_t xPositionDots, uint8_t startingNumber)
     : x_position_dots_{xPositionDots}, current_number_{startingNumber} {
   SetNumber(current_number_);
+}
+
+void Scroller::ScrollInDirection(bool positive) {
+  positive ? ScrollDownOneLine() : ScrollDownOneLine();
 }
 
 void Scroller::ScollUpOneLine() {

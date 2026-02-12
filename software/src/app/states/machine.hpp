@@ -15,6 +15,7 @@
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
 #include "temperature.hpp"
+#include "temperature_change.hpp"
 
 struct ProgramData {
   uint8_t Selection_{0};
@@ -54,13 +55,6 @@ struct MqttState {
 
   SmartMode Mode{SmartMode::Controller};
   uint8_t MqttDisconnectedSeconds{0};
-};
-
-struct TemperatureChangeInfo {
-  bool TemperatureChanged;
-  bool HumidityChanged;
-  int8_t TemperatureChangeDirection;
-  int8_t HumidChangedDirection;
 };
 
 class Machine {

@@ -32,7 +32,7 @@ CoolableParent::CoolableParent(Machine& machine,
   t10s_.SetNumber(t / 10);
   t1s_.SetNumber(t % 10);
 
-  const auto& h = machine_.CurrentHumidity().ToPercent();
+  const auto& h = machine_.CurrentHumidity().ToWholePercent();
   h10s_.SetNumber(h / 10);
   h1s_.SetNumber(h % 10);
 
@@ -49,6 +49,34 @@ CoolableParent::CoolableParent(Machine& machine,
 
 CoolableParent::~CoolableParent() {}
 
+void ApplyScrollAndRedraw(Scroller& s, int8_t& remainingAmount) {
+  if (remainingAmount != 0) {
+    s.ScrollInDirection(remainingAmount > 0);
+    s.Draw();
+    if (remainingAmount > 0) {
+      remainingAmount -= 1;
+    } else {
+      remainingAmount += 1;
+    }
+  }
+}
+
+class TwoNumberScroller {
+  void TeleportSetNumber(int8_t number) {
+    tens_.SetNumber(number / 10);
+    ones_.SetNumber(number % 10);
+  }
+
+  void BeginScrollToNumber(int8_t number) {}
+
+  void Draw() {
+    AutoTwi t;
+  }
+
+  Scroller tens_;
+  Scroller ones_;
+};
+
 State::Type CoolableParent::handle_event(const Event::Base& event) {
   switch (event.id_) {
     case Event::Type::UpButtonPressed: {
@@ -61,22 +89,31 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::TenMillisecondsPassed: {
-      // if (move_temperature_ticks_ > 0) {
-      //   tick_ten_ms_count_ += 1;
-      //   if (tick_ten_ms_count_ == 10) {
-      //     tick_ten_ms_count_ = 0;
-      //     move_temperature_ticks_ -= 1;
-      //     t1s_.ScollUpOneLine();
-      //     t1s_.Draw();
-      //   }
-      // }
+      auto& s = scroll_state_;
+      s.tick_ten_ms_count += 1;
+      if (s.tick_ten_ms_count == 10) {
+        s.tick_ten_ms_count = 0;
+        ApplyScrollAndRedraw(t10s_, scroll_state_.t10s_lines_);
+        ApplyScrollAndRedraw(t1s_, scroll_state_.t1s_lines_);
+        ApplyScrollAndRedraw(h10s_, scroll_state_.h10s_lines_);
+        ApplyScrollAndRedraw(h1s_, scroll_state_.h1s_lines_);
+      }
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {
       TemperatureChangeInfo info;
       machine_.ReadTemperatureAndReportIfChanged(info);
-      if (info.TemperatureChanged) {
-        move_temperature_ticks_ += ImageHeight2x;
+      if (info.TemperatureChanged()) {
+        const auto& n = info.NewTemperature.GetCelciusWhole();
+        const auto& o = info.OldTemperature.GetCelciusWhole();
+        scroll_state_.t10s_lines_ += ((n / 10) - (o / 10)) * ImageHeight2x;
+        scroll_state_.t1s_lines_ += ((n & 10) - (o & 10)) * ImageHeight2x;
+      }
+      if (info.HumidityChanged()) {
+        const auto& n = info.NewHumidity.ToWholePercent();
+        const auto& o = info.OldHumidity.ToWholePercent();
+        scroll_state_.h10s_lines_ += ((n / 10) - (o / 10)) * ImageHeight2x;
+        scroll_state_.h1s_lines_ += ((n & 10) - (o & 10)) * ImageHeight2x;
       }
       if (status_image_a_ && status_image_b_) {
         image_state_ = !image_state_;

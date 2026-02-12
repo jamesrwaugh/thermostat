@@ -1,6 +1,6 @@
 #pragma once
 
-#include <driver_rs_wrapper.hpp>
+#include <stdint.h>
 
 constexpr uint8_t ImageWidth2x = 12;
 constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
@@ -19,6 +19,7 @@ class Scroller {
 
   Scroller(uint8_t xPositionDots, uint8_t startingNumber);
 
+  void ScrollInDirection(bool positive);
   void ScollUpOneLine();
   void ScrollDownOneLine();
   int8_t ScrolledCount() const;

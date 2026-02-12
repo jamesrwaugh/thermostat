@@ -14,7 +14,7 @@ class Humidity {
     return *this;
   }
 
-  uint8_t ToPercent() const {
+  uint8_t ToWholePercent() const {
     return mibi_percent_ / MibiFactor;
   }
 
@@ -99,6 +99,10 @@ class Temperature {
                                              : GetFahrenheitWhole();
   }
 
+  int8_t GetCelciusWhole() const {
+    return mibi_celcius_ / MibiFactor;
+  }
+
   int16_t GetMibiCelcius() const {
     return mibi_celcius_;
   }
@@ -126,10 +130,6 @@ class Temperature {
 
   void ChangeBy1F(bool increment) {
     ChangeByMibiCelcius(MibiCToFFactor, increment);
-  }
-
-  int8_t GetCelciusWhole() const {
-    return mibi_celcius_ / MibiFactor;
   }
 
   int8_t GetFahrenheitWhole() const {

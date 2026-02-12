@@ -64,24 +64,15 @@ void Machine::ReadTemperature() {
 void Machine::ReadTemperatureAndReportIfChanged(TemperatureChangeInfo& info) {
   ReadTemperature();
 
-  const bool TempChanged =
-    CurrentTemp.GetUnitWhole(TemperatureUnitT::Celsius) !=
-    PreviousTemp.GetUnitWhole(TemperatureUnitT::Celsius);
+  ::new (&info) TemperatureChangeInfo(PreviousTemp, CurrentTemp,
+                                      PreviousHumidity, CurrentHumid);
 
-  const bool HumidChanged =
-    CurrentHumid.ToPercent() != PreviousHumidity.ToPercent();
-
-  info.TemperatureChanged = TempChanged;
-  info.TemperatureChangeDirection = CurrentTemp <=> PreviousTemp;
-  info.HumidityChanged = HumidChanged;
-  info.HumidChangedDirection = CurrentHumid <=> PreviousHumidity;
-
-  if (TempChanged) {
+  if (info.TemperatureChanged()) {
     PreviousTemp = CurrentTemp;
     WriteHaTempStateTopicResponse();
   }
 
-  if (HumidChanged) {
+  if (info.HumidityChanged()) {
     PreviousHumidity = CurrentHumid;
     WriteHaHumidityStateTopicResponse();
   }
@@ -263,7 +254,7 @@ void Machine::WriteHaTempStateTopicResponse() const {
 
 void Machine::WriteHaHumidityStateTopicResponse() const {
   WriteHaSerialResponse(HaOutTopicKey::HumidityStateTopic,
-                        CurrentHumid.ToPercent(), 0);
+                        CurrentHumid.ToWholePercent(), 0);
 }
 
 void Machine::WriteHaActionStateTopicResponse(HaActionKey key) const {

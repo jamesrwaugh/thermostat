@@ -1,5 +1,7 @@
 #pragma once
 
+#include <temperature_change.hpp>
+
 #include "event.hpp"
 #include "images.hpp"
 #include "scoller.hpp"
@@ -34,8 +36,15 @@ class CoolableParent : public State::Base {
   const Image* const status_image_a_;
   const Image* const status_image_b_;
 
-  uint8_t tick_ten_ms_count_{0};
-  uint8_t move_temperature_ticks_{0};
+  struct ScrollState {
+    uint8_t tick_ten_ms_count{0};
+    int8_t t10s_lines_{0};
+    int8_t t1s_lines_{0};
+    int8_t h10s_lines_{0};
+    int8_t h1s_lines_{0};
+  };
+
+  ScrollState scroll_state_;
 
   Scroller t10s_;
   Scroller t1s_;

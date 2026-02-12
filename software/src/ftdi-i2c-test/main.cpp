@@ -227,6 +227,8 @@ class ScollManager {
       (theNew - old) > 0 ? ScrollDirection::Down : ScrollDirection::Up;
     current_number_ = abs(old);
     goal_number_ = abs(theNew);
+    ones_scroller_.SetNextImage(
+      *number_2x_images[Ones(current_number_ + Delta())]);
     RecalculateHundredsLines();
     RecalculateTensLines();
   }

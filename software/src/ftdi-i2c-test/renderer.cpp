@@ -8,6 +8,9 @@
 
 // ==================================================== //
 
+static constexpr uint8_t AnimationSetCount = 9;
+typedef Image1x* Animation1xSet[AnimationSetCount];
+
 static const Image1x image_fire0 = {0x4e, 0x3f, 0x7f, 0x1f, 0x0e};
 static const Image1x image_fire1 = {0x8e, 0x3f, 0x7f, 0x3f, 0x0e};
 static const Image1x image_fire2 = {0x0e, 0x3f, 0x7f, 0xff, 0x06};
@@ -18,17 +21,31 @@ static const Image1x image_fire6 = {0x3e, 0x1f, 0x7f, 0x1f, 0x06};
 static const Image1x image_fire7 = {0x06, 0x1f, 0xbf, 0x1f, 0x0e};
 static const Image1x image_fire8 = {0x2e, 0x1f, 0x7f, 0x3f, 0x0e};
 
-static constexpr uint8_t FiresImagesCount = 9;
-
-static const Image1x* fire_images[FiresImagesCount] = {
+static const Animation1xSet fire_images = {
   &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
   &image_fire5, &image_fire6, &image_fire7, &image_fire8,
 };
 
 static constexpr uint8_t DefaultHeatImageIdx = 3;
 
-static_assert(DefaultHeatImageIdx < FiresImagesCount,
+static_assert(DefaultHeatImageIdx < AnimationSetCount,
               "Default fire index out of bounds");
+
+// ==================================================== //
+
+static const Animation1xSet snowflake_images = {
+  &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
+  &image_fire5, &image_fire6, &image_fire7, &image_fire8,
+};
+
+static constexpr uint8_t DefaultSnowImageIdx = 0;
+
+static_assert(DefaultSnowImageIdx < AnimationSetCount,
+              "Default snow index out of bounds");
+
+// ==================================================== //
+
+static const Image1x image_idle = {0x4e, 0x3f, 0x7f, 0x1f, 0x0e};
 
 // ==================================================== //
 
@@ -98,20 +115,27 @@ void Renderer::DrawSetPoint(int8_t setPoint) {
   screen_.print(setPointPos, 0, setPoint, 10);
 }
 
-void Renderer::DrawHeatingStatus(bool active) {
+void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
   AutoTwi t;
 
   const uint8_t imagePosition = ScreenWidth - Image1xWidth - 1;
 
-  if (active) {
-    screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
-    fire_state_ += 1;
-    if (fire_state_ == FiresImagesCount) {
-      fire_state_ = 0;
-    }
-    Draw1xImage(imagePosition, true, *fire_images[fire_state_]);
+  if (heatMode == HeatModeT::None) {
+    Draw1xImage(imagePosition, true, image_idle);
   } else {
-    Draw1xImage(imagePosition, true, *fire_images[DefaultHeatImageIdx]);
+    const uint8_t defaultIndex = heatMode == HeatModeT::Heating
+                                   ? DefaultHeatImageIdx
+                                   : DefaultSnowImageIdx;
+    const auto& imageSet =
+      heatMode == HeatModeT::Heating ? fire_images : snowflake_images;
+
+    if (active) {
+      screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
+      status_image_idx_ = (status_image_idx_ + 1) % AnimationSetCount;
+      Draw1xImage(imagePosition, true, *imageSet[status_image_idx_]);
+    } else {
+      Draw1xImage(imagePosition, true, *imageSet[defaultIndex]);
+    }
   }
 }
 

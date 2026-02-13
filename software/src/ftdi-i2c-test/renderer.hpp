@@ -1,5 +1,6 @@
 #pragma once
 
+#include "data_types.hpp"
 #include "scroller.hpp"
 
 class Noritake_VFD_GU7000;
@@ -30,7 +31,7 @@ class Renderer {
   void DrawTemperature(char suffix);
   void DrawHumidity();
   void DrawSetPoint(int8_t setPoint);
-  void DrawHeatingStatus(bool active);
+  void DrawHeatingStatus(HeatModeT heatMode, bool active);
   Images& GetImages();
 
  private:
@@ -41,7 +42,7 @@ class Renderer {
 
   void Draw1xImage(uint8_t xPositionDots, bool bottom, const Image1x& image);
 
-  uint8_t fire_state_{0};
+  uint8_t status_image_idx_{0};
   Images images_;
   Noritake_VFD_GU7000& screen_;
 };

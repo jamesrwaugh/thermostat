@@ -104,11 +104,13 @@ int main(void) {
   // }
 
   while (1) {
-    r.DrawHeatingStatus(true);
+    r.DrawHeatingStatus(HeatModeT::Heating, true);
+
     if (!m.Finished()) {
       m.ApplyOnce();
       r.DrawTemperature('F');
     }
+
     usleep(75000);
   }
 

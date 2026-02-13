@@ -7,25 +7,24 @@ constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
 constexpr uint8_t ImageWidth2xFullSize = ImageWidth2x * 2;
 constexpr uint8_t ImageHeight2x = 16;
 
-typedef uint8_t Image2xHalf[ImageWidth2xHalfSize];
 typedef uint8_t Image2x[ImageWidth2xFullSize];
 
-typedef const Image2x* const Image2x0Thru9[10];
+typedef const Image2x* const Image2x_0Thru9[10];
 
-extern const uint8_t minus_2x[ImageWidth2xFullSize];
-extern const uint8_t blank_2x[ImageWidth2xFullSize];
-extern const uint8_t image_0_2x[ImageWidth2xFullSize];
-extern const uint8_t image_1_2x[ImageWidth2xFullSize];
-extern const uint8_t image_2_2x[ImageWidth2xFullSize];
-extern const uint8_t image_3_2x[ImageWidth2xFullSize];
-extern const uint8_t image_4_2x[ImageWidth2xFullSize];
-extern const uint8_t image_5_2x[ImageWidth2xFullSize];
-extern const uint8_t image_6_2x[ImageWidth2xFullSize];
-extern const uint8_t image_7_2x[ImageWidth2xFullSize];
-extern const uint8_t image_8_2x[ImageWidth2xFullSize];
-extern const uint8_t image_9_2x[ImageWidth2xFullSize];
+extern const Image2x minus_2x;
+extern const Image2x blank_2x;
+extern const Image2x image_0_2x;
+extern const Image2x image_1_2x;
+extern const Image2x image_2_2x;
+extern const Image2x image_3_2x;
+extern const Image2x image_4_2x;
+extern const Image2x image_5_2x;
+extern const Image2x image_6_2x;
+extern const Image2x image_7_2x;
+extern const Image2x image_8_2x;
+extern const Image2x image_9_2x;
 
-extern const Image2x* const number_2x_images[10];
+extern const Image2x_0Thru9 number_2x_images;
 
 enum class ScrollDirection : uint8_t {
   Up = 0,

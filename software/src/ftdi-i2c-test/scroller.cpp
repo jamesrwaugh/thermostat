@@ -78,8 +78,7 @@ ScrollerT::ScrollerT(Image2x& image, const Image2x& nextImage)
 }
 
 bool ScrollerT::ScrollInDirection(ScrollDirection dir) {
-  return dir == ScrollDirection::Down ? ScrollDownOneLine()
-                                      : ScrollDownOneLine();
+  return dir == ScrollDirection::Down ? ScrollDownOneLine() : ScollUpOneLine();
 }
 
 bool ScrollerT::ScollUpOneLine() {

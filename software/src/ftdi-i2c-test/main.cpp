@@ -28,13 +28,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstring>
 #include <ftdi.hpp>
 #include <vector>
 
 #include "GU7000/Noritake_VFD_GU7000.h"
 #include "scroller.hpp"
-#include "temperature.hpp"
 
 // ==================================================== //
 
@@ -222,19 +222,16 @@ class ScollManager {
         tens_scroller_(tens, blank_2x),
         ones_scroller_(ones, blank_2x) {}
 
-  void Calculate(int8_t theNew, int8_t old) {
+  void Calculate(int8_t old, int8_t theNew) {
     diff_direction_ =
-      (theNew - old) > 0 ? ScrollDirection::Down : ScrollDirection::Up;
-    current_number_ = abs(old);
-    goal_number_ = abs(theNew);
-    ones_scroller_.SetNextImage(
-      *number_2x_images[Ones(current_number_ + Delta())]);
-    RecalculateHundredsLines();
-    RecalculateTensLines();
+      (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
+    current_number_ = old;
+    goal_number_ = theNew;
+    RecalculateImages();
   }
 
   bool Finished() const {
-    return (goal_number_ - current_number_) == 0;
+    return current_number_ == goal_number_;
   }
 
   void ApplyOnce() {
@@ -252,17 +249,30 @@ class ScollManager {
 
     if (ones_done) {
       current_number_ += Delta();
-      ones_scroller_.SetNextImage(*number_2x_images[Ones(current_number_)]);
-      RecalculateHundredsLines();
-      RecalculateTensLines();
+      RecalculateImages();
     }
   }
 
+  void RecalculateImages() {
+    ones_scroller_.SetNextImage(
+      *number_2x_images[Ones(current_number_ + Delta())]);
+    RecalculateHundredsLines();
+    RecalculateTensLines();
+  }
+
   void RecalculateHundredsLines() {
-    const uint8_t nextHundreds = Hundreds(current_number_ + Delta());
-    if (Hundreds(current_number_) != nextHundreds) {
+    const uint8_t curentHundreds = Hundreds(current_number_);
+    const int8_t nextNumber = current_number_ + Delta();
+    const uint8_t nextHundreds = Hundreds(nextNumber);
+    if (curentHundreds != nextHundreds) {
       hundreds_lines_left_ += ImageHeight2x;
       hundreds_scroller_.SetNextImage(*number_2x_images[nextHundreds]);
+    } else if (current_number_ < 0 && nextNumber >= 0) {
+      hundreds_lines_left_ += ImageHeight2x;
+      hundreds_scroller_.SetNextImage(blank_2x);
+    } else if (current_number_ >= 0 && nextNumber < 0) {
+      hundreds_lines_left_ += ImageHeight2x;
+      hundreds_scroller_.SetNextImage(minus_2x);
     } else {
       hundreds_lines_left_ = 0;
     }
@@ -278,25 +288,28 @@ class ScollManager {
     }
   }
 
-  static inline uint8_t Hundreds(uint8_t number) {
+  static inline uint8_t Hundreds(int8_t number) {
+    if (number < 0) number = -number;
     return number / 100;
   }
 
-  static inline uint8_t Tens(uint8_t number) {
+  static inline uint8_t Tens(int8_t number) {
+    if (number < 0) number = -number;
     return (number % 100) / 10;
   }
 
-  static inline uint8_t Ones(uint8_t number) {
+  static inline uint8_t Ones(int8_t number) {
+    if (number < 0) number = -number;
     return number % 10;
   }
 
   int8_t Delta() const {
-    return diff_direction_ == ScrollDirection::Down ? 1 : -1;
+    return diff_direction_ == ScrollDirection::Up ? -1 : 1;
   }
 
  private:
-  uint8_t goal_number_{0};
-  uint8_t current_number_{0};
+  int8_t goal_number_{0};
+  int8_t current_number_{0};
   uint8_t tens_lines_left_{0};
   uint8_t hundreds_lines_left_{0};
   ScrollDirection diff_direction_{ScrollDirection::Down};
@@ -325,7 +338,10 @@ int main(void) {
 
   Renderer r(screen);
 
-  r.InitializeImages(-23, 2);
+  int8_t oldTemp = -2;
+  int8_t newTemp = 40;
+
+  r.InitializeImages(oldTemp, 2);
 
   r.DrawTemperature('F');
   r.DrawHumidity();
@@ -337,12 +353,24 @@ int main(void) {
   ScollManager m(images.temperature_hundreds_or_minus_,
                  images.temperature_tens_, images.temperature_ones_);
 
-  m.Calculate(-15, -23);
+  //                      old   new
+  // 000 neg,neg,newless  -10 ? -11  1 up 1
+  // 001 neg,neg,newmore  -10 ? -9   1 down -1
+  // 010 neg,pos,newless  N/A
+  // 011 neg,pos,newmore  -10 ?  10 20 down -1
+  // 100 pos,neg,newless   10 ? -10 20 up 1
+  // 101 pos,neg,newmore  N/A
+  // 110 pos,pos,newless   10 ?   5  5 up 1
+  // 111 pos,pos,newmore   10 ?  20  5 up -1
 
+  m.Calculate(oldTemp, newTemp);
+
+  unsigned count = 0;
   while (!m.Finished()) {
     m.ApplyOnce();
     r.DrawTemperature('F');
-    usleep(50000);
+    usleep(std::clamp(50000u - (count * 500), 25000u, 50000u));
+    count += 1;
   }
 
   return 0;

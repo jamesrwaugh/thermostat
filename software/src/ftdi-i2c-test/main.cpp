@@ -82,14 +82,30 @@ constexpr uint8_t Image1xHeight = 7;
 
 typedef const uint8_t Image1x[Image1xWidth];
 
-const uint8_t gFireOneImageData[Image1xWidth] = {
-  // clang-format off
-    0b00011110,
-    0b01111111,
-    0b01111111,
-    0b00011111,
-    0b00000110,
-  // clang-format on
+/* 5x8 image "fire0" */
+static const Image1x image_fire0 = {0x4e, 0x3f, 0x7f, 0x1f, 0x0e};
+/* 5x8 image "fire1" */
+static const Image1x image_fire1 = {0x8e, 0x3f, 0x7f, 0x3f, 0x0e};
+/* 5x8 image "fire2" */
+static const Image1x image_fire2 = {0x0e, 0x3f, 0x7f, 0xff, 0x06};
+/* 5x8 image "fire3" */
+static const Image1x image_fire3 = {0x0e, 0xbf, 0xff, 0x7f, 0x26};
+/* 5x8 image "fire4" */
+static const Image1x image_fire4 = {0x0e, 0xff, 0x3f, 0x1f, 0x4e};
+/* 5x8 image "fire5" */
+static const Image1x image_fire5 = {0x3e, 0x7f, 0xbf, 0x1f, 0x8e};
+/* 5x8 image "fire6" */
+static const Image1x image_fire6 = {0x3e, 0x1f, 0x7f, 0x1f, 0x06};
+/* 5x8 image "fire7" */
+static const Image1x image_fire7 = {0x06, 0x1f, 0xbf, 0x1f, 0x0e};
+/* 5x8 image "fire8" */
+static const Image1x image_fire8 = {0x2e, 0x1f, 0x7f, 0x3f, 0x0e};
+
+static constexpr uint8_t FiresImagesCount = 9;
+
+static const Image1x* fire_images[FiresImagesCount] = {
+  &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
+  &image_fire5, &image_fire6, &image_fire7, &image_fire8,
 };
 
 class Renderer {
@@ -99,6 +115,10 @@ class Renderer {
   static constexpr uint8_t TemperatureXPos = 0;
   static constexpr uint8_t HumidityXPos =
     TemperatureXPos + (3 * ImageWidth2x) + CharacterWidth1x + CharacterWidth1x;
+  static constexpr uint8_t UnactiveHeatImageIdx = 3;
+
+  static_assert(UnactiveHeatImageIdx < FiresImagesCount,
+                "Default fire index out of bounds");
 
   struct Images {
     Image2x temperature_hundreds_or_minus_;
@@ -180,10 +200,15 @@ class Renderer {
     const uint8_t imagePosition = ScreenWidth - Image1xWidth - 1;
 
     if (active) {
-      screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 8, "ON");
+      screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
+      fire_state_ += 1;
+      if (fire_state_ == FiresImagesCount) {
+        fire_state_ = 0;
+      }
+      Draw1xImage(imagePosition, true, *fire_images[fire_state_]);
+    } else {
+      Draw1xImage(imagePosition, true, *fire_images[UnactiveHeatImageIdx]);
     }
-
-    Draw1xImage(imagePosition, true, gFireOneImageData);
   }
 
   Images& GetImages() {
@@ -199,18 +224,19 @@ class Renderer {
     const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
     const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
 
-    screen_.GU7000_drawImage(tensSpot, 0, ImageWidth2x, ImageHeight2x, tens);
+    screen_.GU7000_drawImage(tensSpot, 1, ImageWidth2x, ImageHeight2x, tens);
 
-    screen_.GU7000_drawImage(onesSpot, 0, ImageWidth2x, ImageHeight2x, ones);
+    screen_.GU7000_drawImage(onesSpot, 1, ImageWidth2x, ImageHeight2x, ones);
 
-    screen_.print(suffixSpot, 0, suffix);
+    screen_.print(suffixSpot, 1, suffix);
   }
 
-  void Draw1xImage(uint8_t xPositionDots, bool bottom, Image1x image) {
-    screen_.GU7000_drawImage(xPositionDots, Image1xHeight, Image1xWidth,
+  void Draw1xImage(uint8_t xPositionDots, bool bottom, const Image1x& image) {
+    screen_.GU7000_drawImage(xPositionDots, Image1xHeight + 1, Image1xWidth,
                              bottom ? 8 : 0, image);
   }
 
+  uint8_t fire_state_{0};
   Images images_;
   Noritake_VFD_GU7000& screen_;
 };
@@ -346,7 +372,7 @@ int main(void) {
   r.DrawTemperature('F');
   r.DrawHumidity();
   r.DrawSetPoint(-32);
-  r.DrawHeatingStatus(false);
+  r.DrawHeatingStatus(true);
 
   auto& images = r.GetImages();
 
@@ -365,12 +391,21 @@ int main(void) {
 
   m.Calculate(oldTemp, newTemp);
 
-  unsigned count = 0;
-  while (!m.Finished()) {
-    m.ApplyOnce();
-    r.DrawTemperature('F');
-    usleep(std::clamp(50000u - (count * 500), 25000u, 50000u));
-    count += 1;
+  // unsigned count = 0;
+  // while (!m.Finished()) {
+  //   m.ApplyOnce();
+  //   r.DrawTemperature('F');
+  //   usleep(std::clamp(50000u - (count * 500), 25000u, 50000u));
+  //   count += 1;
+  // }
+
+  while (1) {
+    r.DrawHeatingStatus(true);
+    if (!m.Finished()) {
+      m.ApplyOnce();
+      r.DrawTemperature('F');
+    }
+    usleep(75000);
   }
 
   return 0;

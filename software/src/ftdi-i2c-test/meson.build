@@ -2,6 +2,8 @@ src = files(
   'GU7000/Noritake_VFD_GU7000.cpp',
   'ftdi.cpp',
   'main.cpp',
+  'renderer.cpp',
+  'scroll_manager.cpp',
   'scroller.cpp',
 )
 

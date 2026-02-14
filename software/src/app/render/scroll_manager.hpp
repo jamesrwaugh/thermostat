@@ -11,6 +11,7 @@ class ScrollManager {
   void Calculate(int8_t old, int8_t theNew);
   bool IsFinished() const;
   void ScrollOnce();
+  uint16_t RemainingLines() const;
 
  private:
   void RecalculateDigits();
@@ -21,6 +22,7 @@ class ScrollManager {
 
   int8_t goal_number_{0};
   int8_t current_number_{0};
+  uint16_t remaining_lines_{0};
   uint8_t tens_lines_left_{0};
   uint8_t hundreds_lines_left_{0};
   ScrollDirection scroll_direction_{ScrollDirection::Down};

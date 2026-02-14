@@ -1,5 +1,7 @@
 #include "scroll_manager.hpp"
 
+#include <stdlib.h>
+
 #include "digit_ops.hpp"
 
 ScrollManager::ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
@@ -10,8 +12,7 @@ ScrollManager::ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
 void ScrollManager::Calculate(int8_t old, int8_t theNew) {
   current_number_ = old;
   goal_number_ = theNew;
-  tens_lines_left_ = 0;
-  hundreds_lines_left_ = 0;
+  remaining_lines_ = abs(goal_number_ - current_number_) * Image2xHeight;
   if (current_number_ != goal_number_) {
     scroll_direction_ =
         (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
@@ -23,8 +24,16 @@ bool ScrollManager::IsFinished() const {
   return current_number_ == goal_number_;
 }
 
+uint16_t ScrollManager::RemainingLines() const {
+  return remaining_lines_;
+}
+
 void ScrollManager::ScrollOnce() {
   bool ones_done = ones_scroller_.ScrollInDirection(scroll_direction_);
+
+  if (remaining_lines_ >= 0) {
+    remaining_lines_ -= 1;
+  }
 
   if (hundreds_lines_left_ > 0) {
     hundreds_lines_left_ -= 1;

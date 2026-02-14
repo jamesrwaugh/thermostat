@@ -7,6 +7,18 @@
 
 class Machine;
 class RenderContext;
+class ScrollManager;
+
+struct FrictionScrollManager {
+ public:
+  FrictionScrollManager(ScrollManager& s);
+  bool AttemptScroll();
+
+ private:
+  uint8_t scroll_attempts_{0};
+  uint8_t current_friction_{0};
+  ScrollManager& s_;
+};
 
 class CoolableParent : public State::Base {
  public:
@@ -25,7 +37,10 @@ class CoolableParent : public State::Base {
   Machine& machine_;
   RenderContext& rctx_;
   Temperature last_set_point_;
-  uint8_t render_count_{0};
+  HeatModeT last_heating_mode{HeatModeT::None};
+  uint8_t heating_render_count_{0};
+  FrictionScrollManager temp_;
+  FrictionScrollManager humid_;
 
  private:
   [[nodiscard]] State::Type ChangeSetPoint(bool increment);

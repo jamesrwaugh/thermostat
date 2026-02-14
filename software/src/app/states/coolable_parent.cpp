@@ -15,7 +15,9 @@
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
     : State::Base(stateId),
       machine_(machine),
-      rctx_{machine.GetRenderContext()} {}
+      rctx_{machine.GetRenderContext()},
+      temp_{rctx_.temperature_manager_},
+      humid_{rctx_.humidity_manager_} {}
 
 CoolableParent::~CoolableParent() {}
 
@@ -31,10 +33,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::TenMillisecondsPassed: {
-      if (render_count_++ >= 5) {
-        render_count_ = 0;
-        Render();
-      }
+      Render();
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {
@@ -75,22 +74,30 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
 void CoolableParent::Render() {
   const auto& saveData = machine_.SaveState();
 
-  if (!rctx_.temperature_manager_.IsFinished()) {
-    rctx_.temperature_manager_.ScrollOnce();
-    rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
+  const auto heatMode = saveData.HeatMode();
+  const auto setPoint = saveData.SetPoint();
+  const auto tempUnit = saveData.TemperatureUnit();
+
+  if (temp_.AttemptScroll()) {
+    rctx_.renderer_.DrawTemperature(tempUnit);
   }
 
-  if (!rctx_.humidity_manager_.IsFinished()) {
-    rctx_.humidity_manager_.ScrollOnce();
+  if (humid_.AttemptScroll()) {
     rctx_.renderer_.DrawHumidity();
   }
 
-  rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(), IsHeatingOrCooling());
+  if (IsHeatingOrCooling()) {
+    if (heating_render_count_++ >= 10) {
+      heating_render_count_ = 0;
+      rctx_.renderer_.DrawHeatingStatus(heatMode, true);
+    }
+  } else {
+    rctx_.renderer_.DrawHeatingStatus(heatMode, false);
+  }
 
-  if (last_set_point_ != saveData.SetPoint()) {
-    last_set_point_ = saveData.SetPoint();
-    rctx_.renderer_.DrawSetPoint(
-        saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
+  if (last_set_point_ != setPoint) {
+    last_set_point_ = setPoint;
+    rctx_.renderer_.DrawSetPoint(setPoint.GetUnitWhole(tempUnit));
   }
 }
 
@@ -187,4 +194,29 @@ bool CoolableParent::IsHeatingOrCooling() const {
 
 bool CoolableParent::IsIdle() const {
   return !IsHeatingOrCooling();
+}
+
+// ===================================================================== //
+
+uint16_t max(uint16_t a, uint16_t b) {
+  return a > b ? a : b;
+}
+
+FrictionScrollManager::FrictionScrollManager(ScrollManager& s) : s_{s} {}
+
+bool FrictionScrollManager::AttemptScroll() {
+  if (!s_.IsFinished()) {
+    scroll_attempts_ += 8;
+    if (scroll_attempts_ >= current_friction_) {
+      scroll_attempts_ = 0;
+      s_.ScrollOnce();
+      bool addAggressive = s_.RemainingLines() < (Image2xHeight / 2);
+      current_friction_ = max(20, current_friction_ + (addAggressive ? 24 : 1));
+      return true;
+    }
+  } else {
+    scroll_attempts_ = 0;
+    current_friction_ = 0;
+  }
+  return false;
 }

@@ -36,7 +36,8 @@ void Renderer::InitializeDigitImages(int8_t temperature, uint8_t humidity) {
 void Renderer::DrawTemperature(TemperatureUnitT unit) {
   AutoTwi t;
 
-  screen_.GU7000_drawImage(TemperatureXPos, 0, Image2xWidth, Image2xHeight,
+  screen_.GU7000_drawImage(TemperatureXPos, BigDigitYPos, Image2xWidth,
+                           Image2xHeight,
                            images_.temperature_hundreds_or_minus_);
 
   DrawPositive2DigitNumber(TemperatureXPos + Image2xWidth,
@@ -103,9 +104,11 @@ void Renderer::DrawPositive2DigitNumber(uint8_t xPos,
   const uint8_t onesSpot = tensSpot + Image2xWidth + 1;
   const uint8_t suffixSpot = onesSpot + Image2xWidth + 1;
 
-  screen_.GU7000_drawImage(tensSpot, 1, Image2xWidth, Image2xHeight, tens);
+  screen_.GU7000_drawImage(tensSpot, BigDigitYPos, Image2xWidth, Image2xHeight,
+                           tens);
 
-  screen_.GU7000_drawImage(onesSpot, 1, Image2xWidth, Image2xHeight, ones);
+  screen_.GU7000_drawImage(onesSpot, BigDigitYPos, Image2xWidth, Image2xHeight,
+                           ones);
 
   screen_.print(suffixSpot, 1, suffix);
 }

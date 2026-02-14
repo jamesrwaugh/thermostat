@@ -18,6 +18,7 @@ struct DigitImages {
 
 class Renderer {
  public:
+  static constexpr uint8_t BigDigitYPos = 1;
   static constexpr uint8_t CharacterWidth1x = 7;
   static constexpr uint8_t ScreenWidth = 112;
   static constexpr uint8_t TemperatureXPos = 0;

@@ -12,6 +12,7 @@ class SimFtdiGu7000 final : public SimAvrI2CSmarterComponent {
   SimFtdiGu7000(avr_t* avr)
       : SimAvrI2CSmarterComponent(avr, 0x50), handle_(OpenI2CDevice()) {
     if (!handle_) {
+      printf("No I2C handle\n");
       std::abort();
     }
   }
@@ -61,7 +62,7 @@ class SimFtdiGu7000 final : public SimAvrI2CSmarterComponent {
 
     FT_HANDLE handle;
     status =
-      FT_OpenEx((PVOID)(uintptr_t)device.LocId, FT_OPEN_BY_LOCATION, &handle);
+        FT_OpenEx((PVOID)(uintptr_t)device.LocId, FT_OPEN_BY_LOCATION, &handle);
     if (status != FT_OK) {
       printf("FT_OpenEx failed (error %d)\n", (int)status);
       return NULL;

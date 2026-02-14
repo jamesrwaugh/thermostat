@@ -8,11 +8,15 @@ ScrollManager::ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
       ones_scroller_(ones, Image2xId::Blank, Image2xId::Blank) {}
 
 void ScrollManager::Calculate(int8_t old, int8_t theNew) {
-  diff_direction_ =
-      (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
   current_number_ = old;
   goal_number_ = theNew;
-  RecalculateDigits();
+  tens_lines_left_ = 0;
+  hundreds_lines_left_ = 0;
+  if (current_number_ != goal_number_) {
+    scroll_direction_ =
+        (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
+    RecalculateDigits();
+  }
 }
 
 bool ScrollManager::IsFinished() const {
@@ -20,16 +24,16 @@ bool ScrollManager::IsFinished() const {
 }
 
 void ScrollManager::ScrollOnce() {
-  bool ones_done = ones_scroller_.ScrollInDirection(diff_direction_);
+  bool ones_done = ones_scroller_.ScrollInDirection(scroll_direction_);
 
   if (hundreds_lines_left_ > 0) {
     hundreds_lines_left_ -= 1;
-    hundreds_scroller_.ScrollInDirection(diff_direction_);
+    hundreds_scroller_.ScrollInDirection(scroll_direction_);
   }
 
   if (tens_lines_left_ > 0) {
     tens_lines_left_ -= 1;
-    tens_scroller_.ScrollInDirection(diff_direction_);
+    tens_scroller_.ScrollInDirection(scroll_direction_);
   }
 
   if (ones_done) {
@@ -88,5 +92,5 @@ void ScrollManager::RecalculateOnes() {
 }
 
 int8_t ScrollManager::Delta() const {
-  return diff_direction_ == ScrollDirection::Up ? -1 : 1;
+  return scroll_direction_ == ScrollDirection::Up ? -1 : 1;
 }

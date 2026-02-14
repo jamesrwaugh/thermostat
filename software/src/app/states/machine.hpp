@@ -18,7 +18,6 @@
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
 #include "temperature.hpp"
-#include "temperature_change.hpp"
 
 struct ProgramData {
   uint8_t Selection_{0};
@@ -69,7 +68,7 @@ class Machine {
   void ResetAutoTimeData();
   ProgramData& AutoTimeData();
   void ReadTemperature();
-  void ReadTemperatureAndReportIfChanged(TemperatureChangeInfo& info);
+  void ReadTemperatureAndReportIfChanged();
   const Temperature& CurrentTemperature() const;
   const Humidity& CurrentHumidity() const;
 
@@ -86,6 +85,7 @@ class Machine {
 
  private:
   void SwitchState(State::Type new_state, Event::Type lastEvent);
+  void InitialRender();
   void SetupProgramming();
   void SaveProgrammingSettings();
   void ApplySaveState();

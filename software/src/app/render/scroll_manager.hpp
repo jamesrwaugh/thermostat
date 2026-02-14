@@ -23,7 +23,7 @@ class ScrollManager {
   int8_t current_number_{0};
   uint8_t tens_lines_left_{0};
   uint8_t hundreds_lines_left_{0};
-  ScrollDirection diff_direction_{ScrollDirection::Down};
+  ScrollDirection scroll_direction_{ScrollDirection::Down};
   Scroller hundreds_scroller_;
   Scroller tens_scroller_;
   Scroller ones_scroller_;

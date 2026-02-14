@@ -6,11 +6,12 @@
 #include <etl/algorithm.h>
 #include <etl/placement_new.h>
 
+#include <HomeAssistantSerial.hpp>
+#include <checksum.hpp>
 #include <driver_rs_wrapper.hpp>
+#include <temperature.hpp>
 
-#include "HomeAssistantSerial.hpp"
 #include "casts.hpp"
-#include "checksum.hpp"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "event.hpp"
@@ -20,31 +21,25 @@
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
 #include "states/started.hpp"
-#include "temperature.hpp"
 
 // ===================================================================== //
 //
 
 void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Started();
+
   ReadTemperature();
   ReadAndApplySettings();
+
+  PreviousTemp = CurrentTemp;
+  PreviousHumidity = CurrentHumid;
 
   {
     AutoTwi t;
     DriverGetScreenHandle().GU7000_setScreenBrightness(1);
   }
 
-  const auto& saveData = SaveState();
-
-  rctx_.renderer_.InitializeDigitImages(
-      CurrentTemp.GetUnitWhole(SaveData.TemperatureUnit()),
-      CurrentHumid.ToWholePercent());
-  rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
-  rctx_.renderer_.DrawHumidity();
-  rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(), false);
-  rctx_.renderer_.DrawSetPoint(
-      saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
+  InitialRender();
 }
 
 void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
@@ -78,21 +73,23 @@ void Machine::ReadTemperature() {
   CurrentHumid.SetFromSht4xSensor(humidityTicks);
 }
 
-void Machine::ReadTemperatureAndReportIfChanged(TemperatureChangeInfo& info) {
+void Machine::ReadTemperatureAndReportIfChanged() {
   ReadTemperature();
 
-  ::new (&info) TemperatureChangeInfo(PreviousTemp, CurrentTemp,
-                                      PreviousHumidity, CurrentHumid);
+  const auto unit = SaveData.TemperatureUnit();
+  const auto prevTemp = PreviousTemp.GetUnitWhole(unit);
+  const auto nowTemp = CurrentTemp.GetUnitWhole(unit);
 
-  if (info.TemperatureChanged()) {
-    auto unit = SaveData.TemperatureUnit();
-    rctx_.temperature_manager_.Calculate(PreviousTemp.GetUnitWhole(unit),
-                                         CurrentTemp.GetUnitWhole(unit));
+  const auto prevHumid = PreviousHumidity.ToWholePercent();
+  const auto nowHumid = CurrentHumid.ToWholePercent();
+
+  if (nowTemp != prevTemp) {
+    rctx_.temperature_manager_.Calculate(prevTemp, nowTemp);
     WriteHaTempStateTopicResponse();
     PreviousTemp = CurrentTemp;
   }
 
-  if (info.HumidityChanged()) {
+  if (nowHumid != prevHumid) {
     WriteHaHumidityStateTopicResponse();
     rctx_.humidity_manager_.Calculate(PreviousHumidity.ToWholePercent(),
                                       CurrentHumid.ToWholePercent());
@@ -192,6 +189,7 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
     SetupProgramming();
   } else if (exitingProgramming) {
     SaveProgrammingSettings();
+    InitialRender();
   }
 
   const bool lastEventWasDown = lastEvent == Event::Type::DownButtonPressed;
@@ -228,6 +226,23 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
     case State::Type::ProgramAutoTimeTemps:
       break;
   }
+}
+
+void Machine::InitialRender() {
+  const auto unit = SaveData.TemperatureUnit();
+  const auto currentTemp = CurrentTemp.GetUnitWhole(unit);
+  const auto currentHumid = CurrentHumid.ToWholePercent();
+  const auto setPoint = SaveData.SetPoint().GetUnitWhole(unit);
+
+  DriverDisplayClearScreen();
+
+  rctx_.renderer_.InitializeDigitImages(currentTemp, currentHumid);
+  rctx_.renderer_.DrawTemperature(unit);
+  rctx_.renderer_.DrawHumidity();
+  rctx_.renderer_.DrawHeatingStatus(SaveData.HeatMode(), false);
+  rctx_.renderer_.DrawSetPoint(setPoint);
+  rctx_.temperature_manager_.Calculate(currentTemp, currentTemp);
+  rctx_.humidity_manager_.Calculate(currentHumid, currentHumid);
 }
 
 void Machine::SetupProgramming() {

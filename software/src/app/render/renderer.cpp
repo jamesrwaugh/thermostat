@@ -77,22 +77,26 @@ void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
   AutoTwi t;
 
   const uint8_t imagePosition = ScreenWidth - Image1xWidth - 1;
+  const uint8_t onPositionX = imagePosition - (CharacterWidth1x * 2) - 2;
+  const uint8_t onPositionY = 9;
 
-  if (heatMode == HeatModeT::None) {
-    Draw1xImage(imagePosition, true, Image1xId::Idle0);
+  if (active) {
+    const Image1xId startIndex =
+        heatMode == HeatModeT::Heating ? Image1xId::Fire0 : Image1xId::Cold0;
+    screen_.print(onPositionX, onPositionY, "ON");
+    status_image_idx_ = (status_image_idx_ + 1) % 9;
+    Draw1xImage(imagePosition, true,
+                static_cast<Image1xId>(startIndex + status_image_idx_));
   } else {
-    if (active) {
-      const Image1xId startIndex =
-          heatMode == HeatModeT::Heating ? Image1xId::Fire0 : Image1xId::Cold0;
-      screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
-      status_image_idx_ = (status_image_idx_ + 1) % 9;
-      Draw1xImage(imagePosition, true,
-                  static_cast<Image1xId>(startIndex + status_image_idx_));
-    } else {
-      const Image1xId defaultIndex =
-          heatMode == HeatModeT::Heating ? Image1xId::Fire3 : Image1xId::Cold0;
-      Draw1xImage(imagePosition, true, defaultIndex);
+    auto img = Image1xId::Idle0;
+    if (heatMode == HeatModeT::Heating) {
+      img = Image1xId::Fire3;
+    } else if (heatMode == HeatModeT::Cooling) {
+      img = Image1xId::Cold0;
     }
+
+    Draw1xImage(imagePosition, true, img);
+    screen_.print(onPositionX, onPositionY, "  ");
   }
 }
 

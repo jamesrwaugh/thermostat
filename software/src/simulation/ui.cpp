@@ -114,6 +114,10 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
 
   auto logs_panel = LogsRenderer(logs);
 
+  // I2C Listener Panel
+  //   auto i2c_listener_panel = I2CListenerRenderer(Thermostat_.GetAvr()) |
+  //                             size(ftxui::WIDTH, ftxui::LESS_THAN, 80);
+
   // Main layout - four panels side by side with horizontal divider
   auto bottom_items = Container::Horizontal({
                           left_panel,

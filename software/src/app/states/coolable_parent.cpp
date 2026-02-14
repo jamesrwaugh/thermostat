@@ -38,8 +38,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {
-      TemperatureChangeInfo info;
-      machine_.ReadTemperatureAndReportIfChanged(info);
+      machine_.ReadTemperatureAndReportIfChanged();
       return DetermineNextState();
     }
     case Event::Type::FanButtonPushed: {

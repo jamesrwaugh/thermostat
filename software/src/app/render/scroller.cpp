@@ -55,10 +55,10 @@ void Scroller::ScrollDownColumn(uint8_t col) {
 
   const auto& nextImageId = HaveScrolledUp() ? original_image_ : next_image_;
 
-  uint8_t row = HaveScrolledUp() ? (Image2xHeight - scrolled_lines_)
-                                 : abs(scrolled_lines_);
+  const uint8_t row = HaveScrolledUp() ? (Image2xHeight - scrolled_lines_)
+                                       : abs(scrolled_lines_);
 
-  uint8_t nextCol = LoadImage2xByte(nextImageId, col + (row < 8 ? 1 : 0));
+  const uint8_t nextCol = LoadImage2xByte(nextImageId, col + (row < 8 ? 1 : 0));
 
   bottom >>= 1;
   bottom |= (top & 1) ? (1 << 7) : 0;
@@ -72,10 +72,10 @@ void Scroller::ScollUpColumn(uint8_t col) {
 
   const auto& prevImageId = HaveScrolledDown() ? original_image_ : next_image_;
 
-  uint8_t row = HaveScrolledDown() ? Image2xHeight - abs(scrolled_lines_)
-                                   : scrolled_lines_;
+  const uint8_t row = HaveScrolledDown() ? Image2xHeight - abs(scrolled_lines_)
+                                         : scrolled_lines_;
 
-  uint8_t prevCol = LoadImage2xByte(prevImageId, col + (row < 8 ? 0 : 1));
+  const uint8_t prevCol = LoadImage2xByte(prevImageId, col + (row < 8 ? 0 : 1));
 
   top <<= 1;
   top |= (bottom & (1 << 7)) ? 1 : 0;

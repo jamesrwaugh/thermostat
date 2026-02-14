@@ -6,6 +6,8 @@
 
 #include <driver_rs_wrapper.hpp>
 
+#include "digit_ops.hpp"
+
 // ==================================================== //
 
 static constexpr uint8_t AnimationSetCount = 9;
@@ -61,28 +63,26 @@ static const Image1x image_idle = {0x3a, 0x44, 0x5a, 0x22, 0x5c};
 
 Renderer::Renderer(Noritake_VFD_GU7000& s) : screen_(s) {}
 
-void Renderer::InitializeImages(int8_t temperature, uint8_t humidity) {
-  const uint8_t posTemp = abs(temperature);
-
+void Renderer::InitializeDigitImages(int8_t temperature, uint8_t humidity) {
   const Image2x* hundreds_image = &blank_2x;
 
   if (temperature < 0) {
     hundreds_image = &minus_2x;
   } else if (temperature >= 100) {
-    hundreds_image = number_2x_images[posTemp / 100];
+    hundreds_image = number_2x_images[Hundreds(temperature)];
   } else {
     hundreds_image = &blank_2x;
   }
 
   memcpy(&images_.temperature_hundreds_or_minus_, hundreds_image,
          sizeof(Image2x));
-  memcpy(&images_.temperature_tens_, number_2x_images[(posTemp % 100) / 10],
+  memcpy(&images_.temperature_tens_, number_2x_images[Tens(temperature)],
          sizeof(Image2x));
-  memcpy(&images_.temperature_ones_, number_2x_images[posTemp % 10],
+  memcpy(&images_.temperature_ones_, number_2x_images[Ones(temperature)],
          sizeof(Image2x));
-  memcpy(&images_.humidity_tens_, number_2x_images[humidity / 10],
+  memcpy(&images_.humidity_tens_, number_2x_images[Tens(humidity)],
          sizeof(Image2x));
-  memcpy(&images_.humidity_ones_, number_2x_images[humidity % 10],
+  memcpy(&images_.humidity_ones_, number_2x_images[Ones(humidity)],
          sizeof(Image2x));
 }
 

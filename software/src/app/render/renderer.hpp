@@ -32,7 +32,7 @@ class Renderer {
 
   Renderer(Noritake_VFD_GU7000& s);
 
-  void InitializeImages(int8_t temperature, uint8_t humidity);
+  void InitializeDigitImages(int8_t temperature, uint8_t humidity);
   void DrawTemperature(char suffix);
   void DrawHumidity();
   void DrawSetPoint(int8_t setPoint);

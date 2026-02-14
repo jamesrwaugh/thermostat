@@ -1,4 +1,5 @@
 src = files(
+  'render/digit_ops.cpp',
   'render/renderer.cpp',
   'render/scroll_manager.cpp',
   'render/scroller.cpp',

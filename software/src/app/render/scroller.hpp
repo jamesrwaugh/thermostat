@@ -34,17 +34,20 @@ enum class ScrollDirection : uint8_t {
   Down,
 };
 
-class ScrollerT {
+class Scroller {
  public:
-  static_assert(ImageWidth2xFullSize % 2 == 0,
-                "Image width must be multiple of 2");
+  static_assert(
+    ImageWidth2xFullSize % 2 == 0,
+    "Image width must be multiple of 2 in order to iterate columns");
 
-  ScrollerT(Image2x& image, const Image2x& nextImage);
+  Scroller(Image2x& image,
+           const Image2x& originalImage,
+           const Image2x& nextImage);
 
   bool ScrollInDirection(ScrollDirection dir);
   bool ScollUpOneLine();
   bool ScrollDownOneLine();
-  void SetNextImage(const Image2x& image);
+  void SetImages(const Image2x* originalImage, const Image2x* nextImage);
   int8_t ScrolledCount() const;
 
  private:
@@ -54,7 +57,7 @@ class ScrollerT {
   bool HaveScrolledDown() const;
 
   Image2x& image_;
-  Image2x original_image_;
+  const Image2x* original_image_;
   const Image2x* next_image_;
   int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };

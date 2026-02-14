@@ -15,9 +15,7 @@
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
     : State::Base(stateId),
       machine_(machine),
-      rctx_{machine.GetRenderContext()} {
-  DriverDisplayClearScreen();
-}
+      rctx_{machine.GetRenderContext()} {}
 
 CoolableParent::~CoolableParent() {}
 
@@ -33,7 +31,10 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::TenMillisecondsPassed: {
-      Render();
+      if (render_count_++ >= 5) {
+        render_count_ = 0;
+        Render();
+      }
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {
@@ -73,26 +74,25 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
 }
 
 void CoolableParent::Render() {
-  // const auto& saveData = machine_.SaveState();
+  const auto& saveData = machine_.SaveState();
 
-  // if (!rctx_.temperature_manager_.IsFinished()) {
-  //   rctx_.temperature_manager_.ScrollOnce();
-  //   rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
-  // }
+  if (!rctx_.temperature_manager_.IsFinished()) {
+    rctx_.temperature_manager_.ScrollOnce();
+    rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
+  }
 
-  // if (!rctx_.humidity_manager_.IsFinished()) {
-  //   rctx_.humidity_manager_.ScrollOnce();
-  //   rctx_.renderer_.DrawHumidity();
-  // }
+  if (!rctx_.humidity_manager_.IsFinished()) {
+    rctx_.humidity_manager_.ScrollOnce();
+    rctx_.renderer_.DrawHumidity();
+  }
 
-  // rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(),
-  // IsHeatingOrCooling());
+  rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(), IsHeatingOrCooling());
 
-  // if (last_set_point_ != saveData.SetPoint()) {
-  //   last_set_point_ = saveData.SetPoint();
-  //   rctx_.renderer_.DrawSetPoint(
-  //       saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
-  // }
+  if (last_set_point_ != saveData.SetPoint()) {
+    last_set_point_ = saveData.SetPoint();
+    rctx_.renderer_.DrawSetPoint(
+        saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
+  }
 }
 
 void CoolableParent::ActivateCoolingRelays(Relay onRelay,

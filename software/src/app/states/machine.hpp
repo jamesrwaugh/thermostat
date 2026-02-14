@@ -45,8 +45,8 @@ class RenderContext {
                           images_.humidity_ones_) {}
 
   Renderer renderer_;
-  ScollManager temperature_manager_;
-  ScollManager humidity_manager_;
+  ScrollManager temperature_manager_;
+  ScrollManager humidity_manager_;
 
  private:
   Image2x dummy_humidity_hundreds_;

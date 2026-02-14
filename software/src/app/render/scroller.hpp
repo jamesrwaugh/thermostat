@@ -13,7 +13,7 @@ enum class ScrollDirection : uint8_t {
 class Scroller {
  public:
   static_assert(
-      ImageWidth2xFullSize % 2 == 0,
+      Image2xWidthFullSize % 2 == 0,
       "Image width must be multiple of 2 in order to iterate columns");
 
   Scroller(Image2x& image, Image2xId originalImage, Image2xId nextImage);

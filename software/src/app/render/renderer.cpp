@@ -36,10 +36,10 @@ void Renderer::InitializeDigitImages(int8_t temperature, uint8_t humidity) {
 void Renderer::DrawTemperature(TemperatureUnitT unit) {
   AutoTwi t;
 
-  screen_.GU7000_drawImage(TemperatureXPos, 0, ImageWidth2x, ImageHeight2x,
+  screen_.GU7000_drawImage(TemperatureXPos, 0, Image2xWidth, Image2xHeight,
                            images_.temperature_hundreds_or_minus_);
 
-  DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x,
+  DrawPositive2DigitNumber(TemperatureXPos + Image2xWidth,
                            images_.temperature_tens_, images_.temperature_ones_,
                            unit == TemperatureUnitT::Celsius ? 'C' : 'F');
 }
@@ -84,7 +84,7 @@ void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
       const Image1xId startIndex =
           heatMode == HeatModeT::Heating ? Image1xId::Fire0 : Image1xId::Cold0;
       screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
-      status_image_idx_ = (status_image_idx_ + 1) % 10;
+      status_image_idx_ = (status_image_idx_ + 1) % 9;
       Draw1xImage(imagePosition, true,
                   static_cast<Image1xId>(startIndex + status_image_idx_));
     } else {
@@ -100,12 +100,12 @@ void Renderer::DrawPositive2DigitNumber(uint8_t xPos,
                                         const Image2x& ones,
                                         char suffix) {
   const uint8_t tensSpot = xPos;
-  const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
-  const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
+  const uint8_t onesSpot = tensSpot + Image2xWidth + 1;
+  const uint8_t suffixSpot = onesSpot + Image2xWidth + 1;
 
-  screen_.GU7000_drawImage(tensSpot, 1, ImageWidth2x, ImageHeight2x, tens);
+  screen_.GU7000_drawImage(tensSpot, 1, Image2xWidth, Image2xHeight, tens);
 
-  screen_.GU7000_drawImage(onesSpot, 1, ImageWidth2x, ImageHeight2x, ones);
+  screen_.GU7000_drawImage(onesSpot, 1, Image2xWidth, Image2xHeight, ones);
 
   screen_.print(suffixSpot, 1, suffix);
 }

@@ -22,8 +22,8 @@ static const Image1x image_fire7 = {0x06, 0x1f, 0xbf, 0x1f, 0x0e};
 static const Image1x image_fire8 = {0x2e, 0x1f, 0x7f, 0x3f, 0x0e};
 
 static const Animation1xSet fire_images = {
-  &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
-  &image_fire5, &image_fire6, &image_fire7, &image_fire8,
+    &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
+    &image_fire5, &image_fire6, &image_fire7, &image_fire8,
 };
 
 static constexpr uint8_t DefaultHeatImageIdx = 3;
@@ -44,8 +44,8 @@ static const Image1x image_cold7 = {0x00, 0x88, 0x50, 0xac, 0x50};
 static const Image1x image_cold8 = {0x44, 0x28, 0xd6, 0x28, 0x44};
 
 static const Animation1xSet snowflake_images = {
-  &image_cold0, &image_cold1, &image_cold2, &image_cold3, &image_cold4,
-  &image_cold5, &image_cold6, &image_cold7, &image_cold8,
+    &image_cold0, &image_cold1, &image_cold2, &image_cold3, &image_cold4,
+    &image_cold5, &image_cold6, &image_cold7, &image_cold8,
 };
 
 static constexpr uint8_t DefaultSnowImageIdx = 0;
@@ -89,10 +89,10 @@ void Renderer::InitializeImages(int8_t temperature, uint8_t humidity) {
 void Renderer::DrawTemperature(char suffix) {
   AutoTwi t;
 
-  screen_.GU7000_drawImage(TemperatureXPos, 0, ImageWidth2x, ImageHeight2x,
+  screen_.GU7000_drawImage(TemperatureXPos, 0, Image2xWidth, Image2xHeight,
                            images_.temperature_hundreds_or_minus_);
 
-  DrawPositive2DigitNumber(TemperatureXPos + ImageWidth2x,
+  DrawPositive2DigitNumber(TemperatureXPos + Image2xWidth,
                            images_.temperature_tens_, images_.temperature_ones_,
                            suffix);
 }
@@ -134,10 +134,10 @@ void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
     Draw1xImage(imagePosition, true, image_idle);
   } else {
     const uint8_t defaultIndex = heatMode == HeatModeT::Heating
-                                   ? DefaultHeatImageIdx
-                                   : DefaultSnowImageIdx;
+                                     ? DefaultHeatImageIdx
+                                     : DefaultSnowImageIdx;
     const auto& imageSet =
-      heatMode == HeatModeT::Heating ? fire_images : snowflake_images;
+        heatMode == HeatModeT::Heating ? fire_images : snowflake_images;
 
     if (active) {
       screen_.print(imagePosition - (CharacterWidth1x * 2) - 2, 9, "ON");
@@ -158,12 +158,12 @@ void Renderer::DrawPositive2DigitNumber(uint8_t xPos,
                                         const Image2x& ones,
                                         char suffix) {
   const uint8_t tensSpot = xPos;
-  const uint8_t onesSpot = tensSpot + ImageWidth2x + 1;
-  const uint8_t suffixSpot = onesSpot + ImageWidth2x + 1;
+  const uint8_t onesSpot = tensSpot + Image2xWidth + 1;
+  const uint8_t suffixSpot = onesSpot + Image2xWidth + 1;
 
-  screen_.GU7000_drawImage(tensSpot, 1, ImageWidth2x, ImageHeight2x, tens);
+  screen_.GU7000_drawImage(tensSpot, 1, Image2xWidth, Image2xHeight, tens);
 
-  screen_.GU7000_drawImage(onesSpot, 1, ImageWidth2x, ImageHeight2x, ones);
+  screen_.GU7000_drawImage(onesSpot, 1, Image2xWidth, Image2xHeight, ones);
 
   screen_.print(suffixSpot, 1, suffix);
 }

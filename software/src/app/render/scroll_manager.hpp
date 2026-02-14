@@ -4,9 +4,9 @@
 
 #include "scroller.hpp"
 
-class ScollManager {
+class ScrollManager {
  public:
-  ScollManager(Image2x& hundreds, Image2x& tens, Image2x& ones);
+  ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones);
 
   void Calculate(int8_t old, int8_t theNew);
   bool IsFinished() const;

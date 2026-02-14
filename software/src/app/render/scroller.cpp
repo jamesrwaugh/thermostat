@@ -11,13 +11,13 @@ bool Scroller::ScrollInDirection(ScrollDirection dir) {
 }
 
 bool Scroller::ScollUpOneLine() {
-  for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+  for (uint8_t col = 0; col < Image2xWidthFullSize; col += 2) {
     ScollUpColumn(col);
   }
 
   scrolled_lines_ += 1;
 
-  if (scrolled_lines_ == ImageHeight2x) {
+  if (scrolled_lines_ == Image2xHeight) {
     scrolled_lines_ = 0;
     return true;
   }
@@ -26,13 +26,13 @@ bool Scroller::ScollUpOneLine() {
 }
 
 bool Scroller::ScrollDownOneLine() {
-  for (uint8_t col = 0; col < ImageWidth2xFullSize; col += 2) {
+  for (uint8_t col = 0; col < Image2xWidthFullSize; col += 2) {
     ScrollDownColumn(col);
   }
 
   scrolled_lines_ -= 1;
 
-  if (scrolled_lines_ == -static_cast<int8_t>(ImageHeight2x)) {
+  if (scrolled_lines_ == -static_cast<int8_t>(Image2xHeight)) {
     scrolled_lines_ = 0;
     return true;
   }
@@ -55,7 +55,7 @@ void Scroller::ScrollDownColumn(uint8_t col) {
 
   const auto& nextImageId = HaveScrolledUp() ? original_image_ : next_image_;
 
-  uint8_t row = HaveScrolledUp() ? (ImageHeight2x - scrolled_lines_)
+  uint8_t row = HaveScrolledUp() ? (Image2xHeight - scrolled_lines_)
                                  : abs(scrolled_lines_);
 
   uint8_t nextCol = LoadImage2xByte(nextImageId, col + (row < 8 ? 1 : 0));
@@ -72,7 +72,7 @@ void Scroller::ScollUpColumn(uint8_t col) {
 
   const auto& prevImageId = HaveScrolledDown() ? original_image_ : next_image_;
 
-  uint8_t row = HaveScrolledDown() ? ImageHeight2x - abs(scrolled_lines_)
+  uint8_t row = HaveScrolledDown() ? Image2xHeight - abs(scrolled_lines_)
                                    : scrolled_lines_;
 
   uint8_t prevCol = LoadImage2xByte(prevImageId, col + (row < 8 ? 0 : 1));

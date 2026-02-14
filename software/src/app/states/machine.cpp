@@ -40,13 +40,11 @@ void Machine::start() {
   rctx_.renderer_.InitializeDigitImages(
       CurrentTemp.GetUnitWhole(SaveData.TemperatureUnit()),
       CurrentHumid.ToWholePercent());
-
   rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
   rctx_.renderer_.DrawHumidity();
   rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(), false);
-
-  // rctx_.renderer_.DrawSetPoint(
-  //     saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
+  rctx_.renderer_.DrawSetPoint(
+      saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
 }
 
 void Machine::SetThermoButtonState(const ThermoButtonState& raw) {

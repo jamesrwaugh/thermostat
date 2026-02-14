@@ -11,12 +11,11 @@ extern "C" {
 
 typedef uint8_t Image1x[Image1xWidth];
 
-#define ImageWidth2x 12
-#define ImageWidth2xHalfSize ImageWidth2x;
-#define ImageWidth2xFullSize (ImageWidth2x * 2)
-#define ImageHeight2x 16
+#define Image2xWidth 12
+#define Image2xWidthFullSize (Image2xWidth * 2)
+#define Image2xHeight 16
 
-typedef uint8_t Image2x[ImageWidth2xFullSize];
+typedef uint8_t Image2x[Image2xWidthFullSize];
 
 enum Image2xId {
   Zero = 0,

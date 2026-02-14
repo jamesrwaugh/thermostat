@@ -14,8 +14,8 @@ class Renderer {
   static constexpr uint8_t CharacterWidth1x = 7;
   static constexpr uint8_t ScreenWidth = 112;
   static constexpr uint8_t TemperatureXPos = 0;
-  static constexpr uint8_t HumidityXPos =
-    TemperatureXPos + (3 * ImageWidth2x) + CharacterWidth1x + CharacterWidth1x;
+  static constexpr uint8_t HumidityXPos = TemperatureXPos + (3 * Image2xWidth) +
+                                          CharacterWidth1x + CharacterWidth1x;
 
   struct Images {
     Image2x temperature_hundreds_or_minus_;

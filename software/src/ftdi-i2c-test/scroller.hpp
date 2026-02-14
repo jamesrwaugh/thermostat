@@ -2,12 +2,12 @@
 
 #include <stdint.h>
 
-constexpr uint8_t ImageWidth2x = 12;
-constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
-constexpr uint8_t ImageWidth2xFullSize = ImageWidth2x * 2;
-constexpr uint8_t ImageHeight2x = 16;
+constexpr uint8_t Image2xWidth = 12;
+constexpr uint8_t Image2xWidthHalfSize = Image2xWidth;
+constexpr uint8_t Image2xWidthFullSize = Image2xWidth * 2;
+constexpr uint8_t Image2xHeight = 16;
 
-typedef uint8_t Image2x[ImageWidth2xFullSize];
+typedef uint8_t Image2x[Image2xWidthFullSize];
 
 typedef const Image2x* const Image2x_0Thru9[10];
 
@@ -33,7 +33,7 @@ enum class ScrollDirection : uint8_t {
 
 class ScrollerT {
  public:
-  static_assert(ImageWidth2xFullSize % 2 == 0,
+  static_assert(Image2xWidthFullSize % 2 == 0,
                 "Image width must be multiple of 2");
 
   ScrollerT(Image2x& image, const Image2x& nextImage);

@@ -25,6 +25,7 @@ class CoolableParent : public State::Base {
   Machine& machine_;
   RenderContext& rctx_;
   Temperature last_set_point_;
+  uint8_t render_count_{0};
 
  private:
   [[nodiscard]] State::Type ChangeSetPoint(bool increment);

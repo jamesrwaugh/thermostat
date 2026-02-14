@@ -5,8 +5,7 @@
 
 // ================================================================= //
 
-typedef uint8_t __flash Image2xF[ImageWidth2xFullSize];
-typedef const __flash Image2xF* const Image2x_0Thru9[10];
+typedef uint8_t __flash Image2xF[Image2xWidthFullSize];
 typedef uint8_t __flash Image1xF[Image1xWidth];
 
 // ================================================================= //
@@ -71,7 +70,7 @@ const Image2xF image_9_2x = {
     0xc3, 0x0c, 0xc3, 0x0c, 0xc3, 0x30, 0xc3, 0x30, 0x3f, 0xc0, 0x3f, 0xc0,
 };
 
-const __flash Image2xF* image_2x_index[] = {
+const Image2xF* __flash const image_2x_index[] = {
     &image_0_2x, &image_1_2x, &image_2_2x, &image_3_2x,
     &image_4_2x, &image_5_2x, &image_6_2x, &image_7_2x,
     &image_8_2x, &image_9_2x, &blank_2x,   &minus_2x,
@@ -101,7 +100,7 @@ static const Image1xF image_cold8 = {0x44, 0x28, 0xd6, 0x28, 0x44};
 
 static const Image1xF image_idle = {0x3a, 0x44, 0x5a, 0x22, 0x5c};
 
-const __flash Image1xF* image_1x_index[] = {
+const Image1xF* __flash const image_1x_index[] = {
     &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
     &image_fire5, &image_fire6, &image_fire7, &image_fire8, &image_cold0,
     &image_cold1, &image_cold2, &image_cold3, &image_cold4, &image_cold5,
@@ -111,17 +110,19 @@ const __flash Image1xF* image_1x_index[] = {
 // ================================================================= //
 
 void LoadImage2x(Image2x* dest, enum Image2xId id) {
-  memcpy_F(&dest, image_2x_index[id], sizeof(Image2xF));
+  memcpy_F(dest, image_2x_index[id], sizeof(Image2xF));
 }
 
 uint8_t LoadImage2xByte(enum Image2xId id, uint8_t offset) {
-  return *(image_2x_index[id][offset]);
+  const Image2xF* img = image_2x_index[id];
+  return (*img)[offset];
 }
 
 void LoadImage1x(Image1x* dest, enum Image1xId id) {
-  memcpy_F(&dest, image_1x_index[id], sizeof(Image1x));
+  memcpy_F(dest, image_1x_index[id], sizeof(Image1x));
 }
 
 uint8_t LoadImage1xByte(enum Image1xId id, uint8_t offset) {
-  return *(image_1x_index[id][offset]);
+  const Image1xF* img = image_1x_index[id];
+  return (*img)[offset];
 }

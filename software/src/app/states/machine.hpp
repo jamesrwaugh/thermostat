@@ -11,6 +11,7 @@
 #include "event.hpp"
 #include "heating.hpp"
 #include "idle.hpp"
+#include "mqtt/mqtt_state.hpp"
 #include "program_screen.hpp"
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
@@ -28,33 +29,6 @@ struct ProgramData {
 
   static_assert(sizeof(StartTime_) == sizeof(ChangedTime_),
                 "Time sizes are messed up for memcmp");
-};
-
-struct MqttState {
-  static constexpr uint8_t gMqttTimeoutMaxSeconds = 60;
-
-  void IncreaseTimeout() {
-    if (MqttDisconnectedSeconds < gMqttTimeoutMaxSeconds) {
-      MqttDisconnectedSeconds += 1;
-    }
-  }
-
-  void ResetTimeout() {
-    MqttDisconnectedSeconds = 0;
-  }
-
-  bool IsMqttConnected() const {
-    return MqttDisconnectedSeconds < gMqttTimeoutMaxSeconds;
-  }
-
- private:
-  enum class SmartMode : uint8_t {
-    Controller,
-    HomeAssistant,
-  };
-
-  SmartMode Mode{SmartMode::Controller};
-  uint8_t MqttDisconnectedSeconds{0};
 };
 
 class Machine {

@@ -3,18 +3,13 @@
 #include <temperature_change.hpp>
 
 #include "event.hpp"
-#include "images.hpp"
-#include "scoller.hpp"
 #include "state.hpp"
 
 class Machine;
 
 class CoolableParent : public State::Base {
  public:
-  CoolableParent(Machine& machine,
-                 State::Type stateId,
-                 const Image* const a,
-                 const Image* const b);
+  CoolableParent(Machine& machine, State::Type stateId);
   virtual ~CoolableParent();
   State::Type handle_event(const Event::Base& event) override;
 
@@ -31,23 +26,4 @@ class CoolableParent : public State::Base {
   [[nodiscard]] State::Type DetermineNextState();
   [[nodiscard]] bool IsHeatingOrCooling() const;
   [[nodiscard]] bool IsIdle() const;
-
-  bool image_state_{false};
-  const Image* const status_image_a_;
-  const Image* const status_image_b_;
-
-  struct ScrollState {
-    uint8_t tick_ten_ms_count{0};
-    int8_t t10s_lines_{0};
-    int8_t t1s_lines_{0};
-    int8_t h10s_lines_{0};
-    int8_t h1s_lines_{0};
-  };
-
-  ScrollState scroll_state_;
-
-  Scroller t10s_;
-  Scroller t1s_;
-  Scroller h10s_;
-  Scroller h1s_;
 };

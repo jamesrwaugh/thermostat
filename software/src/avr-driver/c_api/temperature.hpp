@@ -1,9 +1,10 @@
 #pragma once
 
-#include <etl/alignment.h>
 #include <stdint.h>
 
-#include "../data_types.hpp"
+#include "thermo_data_types.hpp"
+
+// ==================================================== //
 
 class Humidity {
  public:
@@ -38,6 +39,8 @@ class Humidity {
 
 static_assert(sizeof(Humidity) <= 2,
               "Humidity should be small enough to pass by value");
+
+// ==================================================== //
 
 class Temperature {
  public:
@@ -150,3 +153,5 @@ class Temperature {
 
 static_assert(sizeof(Temperature) <= 2,
               "Temperature should be small enough to pass by value");
+
+// ==================================================== //

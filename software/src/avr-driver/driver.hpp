@@ -7,7 +7,7 @@
 
 #include <SHT4x.hpp>
 
-#include "data_types.hpp"
+#include "c_api/thermo_data_types.hpp"
 
 struct AvrDriverCallbacks;
 struct ThermoButtonState;

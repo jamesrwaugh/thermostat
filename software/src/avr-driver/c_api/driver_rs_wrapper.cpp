@@ -7,7 +7,6 @@
 #include <twi_master.h>
 
 #include "Noritake_VFD_GU7000.h"
-#include "c_api/temperature.hpp"
 #include "driver.hpp"
 
 extern "C" {
@@ -63,32 +62,6 @@ bool DriverSaveData(const ThermoSaveData& data) {
 
 bool DriverLoadData(ThermoSaveData& data) {
   return gDriver->LoadData(data);
-}
-
-void DriverDisplaySetPoint(const Temperature& temp, TemperatureUnitT unit) {
-  AutoTwi t;
-  auto& screen = gDriver->Screen;
-  screen.GU7000_setCursor(80, 0);
-  screen.print("S@ ");
-  screen.print(temp.GetUnitWhole(unit), 10);
-}
-
-void DriverDisplayIsHeating() {
-  AutoTwi t;
-  auto& screen = gDriver->Screen;
-  screen.print(76, 8, "Heating");
-}
-
-void DriverDisplayIsCooling() {
-  AutoTwi t;
-  auto& screen = gDriver->Screen;
-  screen.print(76, 8, "Cooling");
-}
-
-void DriverDisplayIsIdle() {
-  AutoTwi t;
-  auto& screen = gDriver->Screen;
-  screen.print(91, 8, "Idle");
 }
 
 void DriverDisplayClearScreen() {

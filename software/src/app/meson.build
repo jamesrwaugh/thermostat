@@ -1,4 +1,7 @@
 src = files(
+  'render/renderer.cpp',
+  'render/scroll_manager.cpp',
+  'render/scroller.cpp',
   'states/coolable_parent.cpp',
   'states/cooling.cpp',
   'states/heating.cpp',
@@ -10,7 +13,6 @@ src = files(
   'states/started.cpp',
   'main.cpp',
   'safe_thermo_safe.cpp',
-  'scoller.cpp',
   'sim.c',
 )
 

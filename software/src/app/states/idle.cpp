@@ -4,8 +4,6 @@
 
 #include "machine.hpp"
 
-Idle::Idle(Machine& machine)
-    : CoolableParent(machine, State::Type::Idle, nullptr, nullptr) {
-  DriverDisplayIsIdle();
+Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
   machine.WriteHaActionStateTopicResponse(HaActionKey::Idle);
 }

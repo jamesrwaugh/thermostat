@@ -4,8 +4,7 @@
 #include <ThermoSaveData_bp.h>
 #include <stdint.h>
 
-#include "../data_types.hpp"
-#include "temperature.hpp"
+#include "thermo_data_types.hpp"
 
 struct ds1307_time_s;
 class Noritake_VFD_GU7000;
@@ -18,10 +17,6 @@ struct ThermoButtonState {
 
 void DriverInit();
 void DriverGetButtonStateNow(ThermoButtonState* data);
-void DriverDisplaySetPoint(const Temperature& temp, TemperatureUnitT);
-void DriverDisplayIsHeating();
-void DriverDisplayIsCooling();
-void DriverDisplayIsIdle();
 void DriverDisplayClearScreen();
 void DriverReadRawTemp(uint16_t& outTempTicks, uint16_t& outHumidityTicks);
 void DriverRelayOn(Relay r);

@@ -2,12 +2,10 @@
 
 #include <driver_rs_wrapper.hpp>
 
-#include "images.hpp"
 #include "machine.hpp"
 
 Cooling::Cooling(Machine& machine)
-    : CoolableParent(machine, State::Type::Cooling, &gSnowflakeOneImageData,
-                     &gSnowflakeTwoImageData) {
+    : CoolableParent(machine, State::Type::Cooling) {
   EnterHeatingOrCooling(HeatModeT::Cooling);
 }
 

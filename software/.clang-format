@@ -3,5 +3,5 @@ IndentWidth: 2
 ColumnLimit: 80
 AllowShortFunctionsOnASingleLine: Empty
 PointerAlignment: Left
-ContinuationIndentWidth: 2
+ContinuationIndentWidth: 4
 BinPackParameters: OnePerLine

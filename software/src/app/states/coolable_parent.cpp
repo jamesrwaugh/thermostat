@@ -211,7 +211,7 @@ bool FrictionScrollManager::AttemptScroll() {
       scroll_attempts_ = 0;
       s_.ScrollOnce();
       bool addAggressive = s_.RemainingLines() < (Image2xHeight / 2);
-      current_friction_ = max(20, current_friction_ + (addAggressive ? 24 : 1));
+      current_friction_ = max(20, current_friction_ + (addAggressive ? 20 : 1));
       return true;
     }
   } else {

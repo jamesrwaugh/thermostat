@@ -13,13 +13,10 @@
 // ===================================================================== //
 
 CoolableParent::CoolableParent(Machine& machine, State::Type stateId)
-    : State::Base(stateId), machine_(machine) {
+    : State::Base(stateId),
+      machine_(machine),
+      rctx_{machine.GetRenderContext()} {
   DriverDisplayClearScreen();
-  machine_.DisplaySetPoint();
-  {
-    AutoTwi t;
-    DriverGetScreenHandle().GU7000_setScreenBrightness(1);
-  }
 }
 
 CoolableParent::~CoolableParent() {}
@@ -36,6 +33,7 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       return State::Type::ProgramTemp;
     }
     case Event::Type::TenMillisecondsPassed: {
+      Render();
       return State::Type::NO_CHANGE;
     }
     case Event::Type::SecondPassed: {
@@ -65,13 +63,36 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
     }
     case Event::Type::ReverseValveModeChanged: {
       const auto& valveEvent =
-        static_cast<const Event::ReverseValveModeChanged&>(event);
+          static_cast<const Event::ReverseValveModeChanged&>(event);
       machine_.ButtonState().ReverseValveState = valveEvent.Mode;
       return State::Type::Idle;
     }
     default:
       return State::Type::NO_CHANGE;
   }
+}
+
+void CoolableParent::Render() {
+  // const auto& saveData = machine_.SaveState();
+
+  // if (!rctx_.temperature_manager_.IsFinished()) {
+  //   rctx_.temperature_manager_.ScrollOnce();
+  //   rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
+  // }
+
+  // if (!rctx_.humidity_manager_.IsFinished()) {
+  //   rctx_.humidity_manager_.ScrollOnce();
+  //   rctx_.renderer_.DrawHumidity();
+  // }
+
+  // rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(),
+  // IsHeatingOrCooling());
+
+  // if (last_set_point_ != saveData.SetPoint()) {
+  //   last_set_point_ = saveData.SetPoint();
+  //   rctx_.renderer_.DrawSetPoint(
+  //       saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
+  // }
 }
 
 void CoolableParent::ActivateCoolingRelays(Relay onRelay,
@@ -93,12 +114,10 @@ void CoolableParent::EnterHeatingOrCooling(HeatModeT mode) {
   }
 
   if (mode == HeatModeT::Cooling) {
-    DriverDisplayIsCooling();
     ActivateCoolingRelays(Relay::Compressor, Relay::Heat,
                           ReverseValveModeT::OnForCooling);
     machine_.WriteHaActionStateTopicResponse(HaActionKey::Cooling);
   } else {
-    DriverDisplayIsHeating();
     ActivateCoolingRelays(Relay::Heat, Relay::Compressor,
                           ReverseValveModeT::OnForHeating);
     machine_.WriteHaActionStateTopicResponse(HaActionKey::Heating);
@@ -125,8 +144,6 @@ void CoolableParent::ExitHeatingOrCooling() {
   setPoint.ChangeBy1Unit(saveData.TemperatureUnit(), increment);
   saveData.SetSetPoint(setPoint);
 
-  DriverDisplaySetPoint(setPoint, saveData.TemperatureUnit());
-
   return DetermineNextState();
 }
 
@@ -144,12 +161,12 @@ void CoolableParent::ExitHeatingOrCooling() {
   Temperature lowerLimit;
 
   upperLimit  //
-    .SetFromTemperature(setPoint)
-    .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, true);
+      .SetFromTemperature(setPoint)
+      .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, true);
 
   lowerLimit  //
-    .SetFromTemperature(setPoint)
-    .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, false);
+      .SetFromTemperature(setPoint)
+      .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, false);
 
   if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
     return State::Type::Idle;

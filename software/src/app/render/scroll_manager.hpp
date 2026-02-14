@@ -8,7 +8,7 @@ class ScollManager {
 
   void Calculate(int8_t old, int8_t theNew);
   bool IsFinished() const;
-  void ApplyOnce();
+  void ScrollOnce();
 
  private:
   void RecalculateDigits();

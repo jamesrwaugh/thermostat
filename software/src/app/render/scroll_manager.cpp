@@ -19,7 +19,7 @@ bool ScollManager::IsFinished() const {
   return current_number_ == goal_number_;
 }
 
-void ScollManager::ApplyOnce() {
+void ScollManager::ScrollOnce() {
   bool ones_done = ones_scroller_.ScrollInDirection(diff_direction_);
 
   if (hundreds_lines_left_ > 0) {

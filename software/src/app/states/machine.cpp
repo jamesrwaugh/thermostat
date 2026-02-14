@@ -1,5 +1,6 @@
 #include "machine.hpp"
 
+#include <Noritake_VFD_GU7000.h>
 #include <ThermoSaveData_bp.h>
 #include <driver_ds1307.h>
 #include <etl/algorithm.h>
@@ -28,6 +29,24 @@ void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Started();
   ReadTemperature();
   ReadAndApplySettings();
+
+  {
+    AutoTwi t;
+    DriverGetScreenHandle().GU7000_setScreenBrightness(1);
+  }
+
+  const auto& saveData = SaveState();
+
+  rctx_.renderer_.InitializeDigitImages(
+      CurrentTemp.GetUnitWhole(SaveData.TemperatureUnit()),
+      CurrentHumid.ToWholePercent());
+
+  rctx_.renderer_.DrawTemperature(saveData.TemperatureUnit());
+  rctx_.renderer_.DrawHumidity();
+  rctx_.renderer_.DrawHeatingStatus(saveData.HeatMode(), false);
+
+  // rctx_.renderer_.DrawSetPoint(
+  //     saveData.SetPoint().GetUnitWhole(saveData.TemperatureUnit()));
 }
 
 void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
@@ -68,13 +87,18 @@ void Machine::ReadTemperatureAndReportIfChanged(TemperatureChangeInfo& info) {
                                       PreviousHumidity, CurrentHumid);
 
   if (info.TemperatureChanged()) {
-    PreviousTemp = CurrentTemp;
+    auto unit = SaveData.TemperatureUnit();
+    rctx_.temperature_manager_.Calculate(PreviousTemp.GetUnitWhole(unit),
+                                         CurrentTemp.GetUnitWhole(unit));
     WriteHaTempStateTopicResponse();
+    PreviousTemp = CurrentTemp;
   }
 
   if (info.HumidityChanged()) {
-    PreviousHumidity = CurrentHumid;
     WriteHaHumidityStateTopicResponse();
+    rctx_.humidity_manager_.Calculate(PreviousHumidity.ToWholePercent(),
+                                      CurrentHumid.ToWholePercent());
+    PreviousHumidity = CurrentHumid;
   }
 }
 
@@ -99,11 +123,6 @@ void Machine::ReadAndApplySettings() {
   SetThermoButtonState(buttons);
 
   ApplySaveState();
-}
-
-void Machine::DisplaySetPoint() {
-  const auto& save = SaveState();
-  DriverDisplaySetPoint(save.SetPoint(), (save.TemperatureUnit()));
 }
 
 // Setting: MQTT Config
@@ -166,10 +185,10 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
   const auto prevState = address->StateId;
 
   const bool enteringProgramming =
-    !IsProgrammingState(prevState) && IsProgrammingState(new_state);
+      !IsProgrammingState(prevState) && IsProgrammingState(new_state);
 
   const bool exitingProgramming =
-    IsProgrammingState(prevState) && !IsProgrammingState(new_state);
+      IsProgrammingState(prevState) && !IsProgrammingState(new_state);
 
   if (enteringProgramming) {
     SetupProgramming();

@@ -6,6 +6,7 @@
 #include "state.hpp"
 
 class Machine;
+class RenderContext;
 
 class CoolableParent : public State::Base {
  public:
@@ -14,12 +15,16 @@ class CoolableParent : public State::Base {
   State::Type handle_event(const Event::Base& event) override;
 
  protected:
+  void Render();
   void ActivateCoolingRelays(Relay onRelay,
                              Relay offRelay,
                              ReverseValveModeT onIfType);
   void EnterHeatingOrCooling(HeatModeT mode);
   void ExitHeatingOrCooling();
+
   Machine& machine_;
+  RenderContext& rctx_;
+  Temperature last_set_point_;
 
  private:
   [[nodiscard]] State::Type ChangeSetPoint(bool increment);

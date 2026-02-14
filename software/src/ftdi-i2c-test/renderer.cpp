@@ -33,9 +33,19 @@ static_assert(DefaultHeatImageIdx < AnimationSetCount,
 
 // ==================================================== //
 
+static const Image1x image_cold0 = {0x22, 0x14, 0x6b, 0x14, 0x22};
+static const Image1x image_cold1 = {0x14, 0x6b, 0x14, 0x22, 0x00};
+static const Image1x image_cold2 = {0x0a, 0x35, 0x0a, 0x11, 0x00};
+static const Image1x image_cold3 = {0x08, 0x05, 0x1a, 0x05, 0x08};
+static const Image1x image_cold4 = {0x00, 0xc4, 0x02, 0x8d, 0x02};
+static const Image1x image_cold5 = {0x40, 0x80, 0x62, 0x81, 0x46};
+static const Image1x image_cold6 = {0x00, 0x20, 0x40, 0xb1, 0x40};
+static const Image1x image_cold7 = {0x00, 0x88, 0x50, 0xac, 0x50};
+static const Image1x image_cold8 = {0x44, 0x28, 0xd6, 0x28, 0x44};
+
 static const Animation1xSet snowflake_images = {
-  &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
-  &image_fire5, &image_fire6, &image_fire7, &image_fire8,
+  &image_cold0, &image_cold1, &image_cold2, &image_cold3, &image_cold4,
+  &image_cold5, &image_cold6, &image_cold7, &image_cold8,
 };
 
 static constexpr uint8_t DefaultSnowImageIdx = 0;
@@ -45,7 +55,7 @@ static_assert(DefaultSnowImageIdx < AnimationSetCount,
 
 // ==================================================== //
 
-static const Image1x image_idle = {0x4e, 0x3f, 0x7f, 0x1f, 0x0e};
+static const Image1x image_idle = {0x3a, 0x44, 0x5a, 0x22, 0x5c};
 
 // ==================================================== //
 

@@ -86,7 +86,7 @@ int main(void) {
   r.DrawTemperature('F');
   r.DrawHumidity();
   r.DrawSetPoint(-32);
-  r.DrawHeatingStatus(true);
+  // r.DrawHeatingStatus(HeatModeT::Cooling, true);
 
   auto& images = r.GetImages();
 
@@ -94,14 +94,6 @@ int main(void) {
                  images.temperature_tens_, images.temperature_ones_);
 
   m.Calculate(oldTemp, newTemp);
-
-  // unsigned count = 0;
-  // while (!m.Finished()) {
-  //   m.ApplyOnce();
-  //   r.DrawTemperature('F');
-  //   usleep(std::clamp(50000u - (count * 500), 25000u, 50000u));
-  //   count += 1;
-  // }
 
   while (1) {
     r.DrawHeatingStatus(HeatModeT::Heating, true);

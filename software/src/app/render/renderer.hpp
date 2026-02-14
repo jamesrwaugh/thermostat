@@ -1,18 +1,10 @@
 #pragma once
 
+#include <images.h>
+
 #include <thermo_data_types.hpp>
 
-#include "scroller.hpp"
-
 class Noritake_VFD_GU7000;
-
-// ==================================================== //
-
-constexpr uint8_t Image1xWidth = 5;
-constexpr uint8_t Image1xHeight = 7;
-typedef const uint8_t __flash Image1xF[Image1xWidth];
-
-// ==================================================== //
 
 struct DigitImages {
   Image2x temperature_hundreds_or_minus_;
@@ -46,7 +38,7 @@ class Renderer {
                                 const Image2x& ones,
                                 char suffix);
 
-  void Draw1xImage(uint8_t xPositionDots, bool bottom, const Image1xF& image);
+  void Draw1xImage(uint8_t xPositionDots, bool bottom, Image1xId imageId);
 
   uint8_t status_image_idx_{0};
   Noritake_VFD_GU7000& screen_;

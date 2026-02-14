@@ -3,13 +3,13 @@
 #include "digit_ops.hpp"
 
 ScollManager::ScollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
-    : hundreds_scroller_(hundreds, blank_2x, blank_2x),
-      tens_scroller_(tens, blank_2x, blank_2x),
-      ones_scroller_(ones, blank_2x, blank_2x) {}
+    : hundreds_scroller_(hundreds, Image2xId::Blank, Image2xId::Blank),
+      tens_scroller_(tens, Image2xId::Blank, Image2xId::Blank),
+      ones_scroller_(ones, Image2xId::Blank, Image2xId::Blank) {}
 
 void ScollManager::Calculate(int8_t old, int8_t theNew) {
   diff_direction_ =
-    (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
+      (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
   current_number_ = old;
   goal_number_ = theNew;
   RecalculateDigits();
@@ -49,18 +49,18 @@ void ScollManager::RecalculateHundreds() {
   const uint8_t nowHundreds = Hundreds(current_number_);
   const uint8_t nextHundreds = Hundreds(nextNumber);
 
-  const auto& curentHundredsImage = number_2x_images[nowHundreds];
+  const auto& curentHundredsImage = static_cast<Image2xId>(nowHundreds);
 
   if (nowHundreds != nextHundreds) {
     hundreds_lines_left_ += ImageHeight2x;
     hundreds_scroller_.SetImages(curentHundredsImage,
-                                 number_2x_images[nextHundreds]);
+                                 static_cast<Image2xId>(nextHundreds));
   } else if (current_number_ < 0 && nextNumber >= 0) {
     hundreds_lines_left_ += ImageHeight2x;
-    hundreds_scroller_.SetImages(curentHundredsImage, &blank_2x);
+    hundreds_scroller_.SetImages(curentHundredsImage, Image2xId::Blank);
   } else if (current_number_ >= 0 && nextNumber < 0) {
     hundreds_lines_left_ += ImageHeight2x;
-    hundreds_scroller_.SetImages(curentHundredsImage, &minus_2x);
+    hundreds_scroller_.SetImages(curentHundredsImage, Image2xId::Minus);
   } else {
     hundreds_lines_left_ = 0;
   }
@@ -72,8 +72,8 @@ void ScollManager::RecalculateTens() {
 
   if (nowTens != nextTens) {
     tens_lines_left_ += ImageHeight2x;
-    tens_scroller_.SetImages(number_2x_images[nowTens],
-                             number_2x_images[nextTens]);
+    tens_scroller_.SetImages(static_cast<Image2xId>(nowTens),
+                             static_cast<Image2xId>(nextTens));
   } else {
     tens_lines_left_ = 0;
   }
@@ -83,8 +83,8 @@ void ScollManager::RecalculateOnes() {
   const uint8_t nowOnes = Ones(current_number_);
   const uint8_t nextOnes = Ones(current_number_ + Delta());
 
-  ones_scroller_.SetImages(number_2x_images[nowOnes],
-                           number_2x_images[nextOnes]);
+  ones_scroller_.SetImages(static_cast<Image2xId>(nowOnes),
+                           static_cast<Image2xId>(nextOnes));
 }
 
 int8_t ScollManager::Delta() const {

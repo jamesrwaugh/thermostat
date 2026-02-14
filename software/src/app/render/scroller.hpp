@@ -1,32 +1,7 @@
 #pragma once
 
+#include <images.h>
 #include <stdint.h>
-
-// ==================================================== //
-
-constexpr uint8_t ImageWidth2x = 12;
-constexpr uint8_t ImageWidth2xHalfSize = ImageWidth2x;
-constexpr uint8_t ImageWidth2xFullSize = ImageWidth2x * 2;
-constexpr uint8_t ImageHeight2x = 16;
-
-typedef uint8_t Image2x[ImageWidth2xFullSize];
-typedef uint8_t __flash Image2xF[ImageWidth2xFullSize];
-typedef const Image2xF* const Image2x_0Thru9[10];
-
-extern const Image2xF minus_2x;
-extern const Image2xF blank_2x;
-extern const Image2xF image_0_2x;
-extern const Image2xF image_1_2x;
-extern const Image2xF image_2_2x;
-extern const Image2xF image_3_2x;
-extern const Image2xF image_4_2x;
-extern const Image2xF image_5_2x;
-extern const Image2xF image_6_2x;
-extern const Image2xF image_7_2x;
-extern const Image2xF image_8_2x;
-extern const Image2xF image_9_2x;
-
-extern const Image2x_0Thru9 number_2x_images;
 
 // ==================================================== //
 
@@ -41,14 +16,12 @@ class Scroller {
       ImageWidth2xFullSize % 2 == 0,
       "Image width must be multiple of 2 in order to iterate columns");
 
-  Scroller(Image2x& image,
-           const Image2xF& originalImage,
-           const Image2xF& nextImage);
+  Scroller(Image2x& image, Image2xId originalImage, Image2xId nextImage);
 
   bool ScrollInDirection(ScrollDirection dir);
   bool ScollUpOneLine();
   bool ScrollDownOneLine();
-  void SetImages(const Image2xF* originalImage, const Image2xF* nextImage);
+  void SetImages(Image2xId originalImage, Image2xId nextImage);
   int8_t ScrolledCount() const;
 
  private:
@@ -58,7 +31,7 @@ class Scroller {
   bool HaveScrolledDown() const;
 
   Image2x& image_;
-  const Image2xF* original_image_;
-  const Image2xF* next_image_;
+  Image2xId original_image_;
+  Image2xId next_image_;
   int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };

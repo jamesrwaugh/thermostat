@@ -1,5 +1,7 @@
 #pragma once
 
+#include <images.h>
+
 #include "scroller.hpp"
 
 class ScollManager {

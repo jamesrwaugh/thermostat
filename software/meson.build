@@ -45,6 +45,7 @@ ft4222_dep = dependency(
 
 ## subdir('src/ftdi-i2c-test')
 
+subdir('src/images')
 subdir('src/protos')
 subdir('src/avr-driver')
 subdir('src/simulation')

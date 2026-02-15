@@ -102,21 +102,21 @@ static const Image1xF image_idle = {0x3a, 0x44, 0x5a, 0x22, 0x5c};
 
 static const Image1xF image_blank = {
     // clang-format off
-    0b0000'0000,
-    0b0000'0000,
-    0b0000'0000,
-    0b0000'0000,
-    0b0000'0000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
     // clang-format on
 };
 
 static const Image1xF up_arrow = {
     // clang-format off
-    0b0000'1000,
-    0b0001'1000,
-    0b0011'1110,
-    0b0001'1000,
-    0b0000'1000,
+    0b00001000,
+    0b00011000,
+    0b00111110,
+    0b00011000,
+    0b00001000,
     // clang-format on
 };
 

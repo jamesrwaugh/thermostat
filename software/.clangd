@@ -8,5 +8,8 @@ CompileFlags:
       -D__WCHAR_MAX__=65535,
       -D__STDC_LIMIT_MACROS,
       -DETL_NO_STL,
+      -DINT8_MAXU=255,
+      -Wno-unknown-warning-option
     ]
+  Remove: [-mcall-prologues]
   BuiltinHeaders: QueryDriver

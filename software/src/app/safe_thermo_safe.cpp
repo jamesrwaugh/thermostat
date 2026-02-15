@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-#include "casts.hpp"
+#include <casts.hpp>
+
 #include "temperature.hpp"
 
 // ===================================================================== //

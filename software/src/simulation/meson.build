@@ -45,7 +45,6 @@ executable(
 )
 
 simulation__test_src = files(
-  'GU7000/Noritake_VFD_GU7000.cpp',
   'main_test.cpp',
 )
 
@@ -60,6 +59,7 @@ executable(
     simavr_parts_dep,
     ftxui_toolbox_dep,
     lodepng_dep,
+    protos_dep_native,
   ],
   cpp_args: [
     '-std=c++20',

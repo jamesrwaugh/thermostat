@@ -2,7 +2,9 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdlib.h>
 
+#include "casts.hpp"
 #include "thermo_data_types.hpp"
 
 // ==================================================== //

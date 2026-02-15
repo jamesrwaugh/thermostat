@@ -7,11 +7,11 @@
 #include <etl/placement_new.h>
 
 #include <HomeAssistantSerial.hpp>
+#include <casts.hpp>
 #include <checksum.hpp>
 #include <driver_rs_wrapper.hpp>
 #include <temperature.hpp>
 
-#include "casts.hpp"
 #include "coolable_parent.hpp"
 #include "cooling.hpp"
 #include "event.hpp"

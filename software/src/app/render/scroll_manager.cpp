@@ -12,7 +12,7 @@ ScrollManager::ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
 void ScrollManager::Calculate(int8_t old, int8_t theNew) {
   current_number_ = old;
   goal_number_ = theNew;
-  remaining_lines_ = abs(goal_number_ - current_number_) * Image2xHeight;
+  total_lines_left_ = abs(goal_number_ - current_number_) * Image2xHeight;
   if (current_number_ != goal_number_) {
     scroll_direction_ =
         (theNew < old) ? ScrollDirection::Up : ScrollDirection::Down;
@@ -24,15 +24,15 @@ bool ScrollManager::IsFinished() const {
   return current_number_ == goal_number_;
 }
 
-uint16_t ScrollManager::RemainingLines() const {
-  return remaining_lines_;
+uint16_t ScrollManager::ScrollLinesLeft() const {
+  return total_lines_left_;
 }
 
 void ScrollManager::ScrollOnce() {
   bool ones_done = ones_scroller_.ScrollInDirection(scroll_direction_);
 
-  if (remaining_lines_ >= 0) {
-    remaining_lines_ -= 1;
+  if (total_lines_left_ > 0) {
+    total_lines_left_ -= 1;
   }
 
   if (hundreds_lines_left_ > 0) {

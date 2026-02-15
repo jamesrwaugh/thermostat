@@ -30,7 +30,6 @@ enum Image2xId {
   Nine,
   Blank,
   Minus,
-  IMG_2X_COUNT,
 };
 
 enum Image1xId {
@@ -53,7 +52,9 @@ enum Image1xId {
   Cold7,
   Cold8,
   Idle0,
-  IMG_1X_COUNT,
+  Blank1x,
+  UpArrow,
+  DownArrow,
 };
 
 void LoadImage2x(Image2x* dest, enum Image2xId id);

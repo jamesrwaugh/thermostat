@@ -4,17 +4,18 @@
 #include <ThermoSaveData_bp.h>
 #include <etl/algorithm.h>
 #include <etl/placement_new.h>
+#include <images.h>
 #include <stdint.h>
 
 #include <driver_rs_wrapper.hpp>
-
-#include "images.hpp"
 
 // ================================================================ //
 
 Noritake_VFD_GU7000* ScreenBox::Screen_ = nullptr;
 
-ScreenBox::ScreenBox(uint8_t xPosChars, uint8_t* targetData, uint8_t min,
+ScreenBox::ScreenBox(uint8_t xPosChars,
+                     uint8_t* targetData,
+                     uint8_t min,
                      uint8_t max)
     : TargetData_{targetData}, xPosChars{xPosChars}, Min{min}, Max{max} {}
 
@@ -44,8 +45,10 @@ void ScreenBox::DrawIndicator() const {
 
 void ScreenBox::DrawIndicator(bool on) const {
   AutoTwi t;
-  Screen_->GU7000_drawImage(xPositionDots() + 1, CharDotHeight, ImageWidth, 8,
-                            on ? gUpArrowImageData : gBlankImageData);
+  Image1x image;
+  LoadImage1x(&image, on ? Image1xId::UpArrow : Image1xId::Blank1x);
+  Screen_->GU7000_drawImage(xPositionDots() + 1, CharDotHeight, Image1xWidth, 8,
+                            image);
 }
 
 void ScreenBox::Draw() const {
@@ -76,11 +79,15 @@ void TwoDigitScreenBox::Draw(bool on) const {
 constexpr const char* FullScreenSpaceBuffer = "               ";
 constexpr int FullScreenSpaceBufferLen = 15;
 
-CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars, uint8_t* targetData,
-                                   const char* charSet, uint8_t charSetLength,
+CharSetScreenBox::CharSetScreenBox(uint8_t xPosChars,
+                                   uint8_t* targetData,
+                                   const char* charSet,
+                                   uint8_t charSetLength,
                                    uint8_t stride)
     : ScreenBox(
-          xPosChars, targetData, 0,
+          xPosChars,
+          targetData,
+          0,
           etl::min(FullScreenSpaceBufferLen, (charSetLength / stride) - 1)),
       CharSet{charSet},
       CharSetLength{charSetLength},

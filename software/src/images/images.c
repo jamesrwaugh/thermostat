@@ -100,11 +100,42 @@ static const Image1xF image_cold8 = {0x44, 0x28, 0xd6, 0x28, 0x44};
 
 static const Image1xF image_idle = {0x3a, 0x44, 0x5a, 0x22, 0x5c};
 
+static const Image1xF image_blank = {
+    // clang-format off
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
+    0b0000'0000,
+    // clang-format on
+};
+
+static const Image1xF up_arrow = {
+    // clang-format off
+    0b0000'1000,
+    0b0001'1000,
+    0b0011'1110,
+    0b0001'1000,
+    0b0000'1000,
+    // clang-format on
+};
+
+static const Image1xF down_arrow = {
+    // clang-format off
+    0b00010000,
+    0b00011000,
+    0b01111100,
+    0b00011000,
+    0b00010000,
+    // clang-format on
+};
+
 const Image1xF* __flash const image_1x_index[] = {
     &image_fire0, &image_fire1, &image_fire2, &image_fire3, &image_fire4,
     &image_fire5, &image_fire6, &image_fire7, &image_fire8, &image_cold0,
     &image_cold1, &image_cold2, &image_cold3, &image_cold4, &image_cold5,
-    &image_cold6, &image_cold7, &image_cold8, &image_idle,
+    &image_cold6, &image_cold7, &image_cold8, &image_idle,  &image_blank,
+    &up_arrow,    &down_arrow,
 };
 
 // ================================================================= //

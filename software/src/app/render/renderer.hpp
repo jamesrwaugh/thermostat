@@ -44,6 +44,7 @@ class Renderer {
   void Draw1xImage(uint8_t xPositionDots, bool bottom, Image1xId imageId);
 
   uint8_t status_image_idx_{0};
+  uint8_t last_setpoint_pos_{0};
   Noritake_VFD_GU7000& screen_;
   DigitImages& images_;
 };

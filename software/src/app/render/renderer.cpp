@@ -71,7 +71,14 @@ void Renderer::DrawSetPoint(Temperature::WholeType setPoint) {
     setPointPos -= 1 * CharacterWidth1x;
   }
 
+  if (setPointPos > last_setpoint_pos_) {
+    constexpr uint8_t minSetPointPos = ScreenWidth - (4 * CharacterWidth1x);
+    screen_.print(minSetPointPos, 0, "    ");
+  }
+
   screen_.print(setPointPos, 0, setPoint, 10);
+
+  last_setpoint_pos_ = setPointPos;
 }
 
 void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {

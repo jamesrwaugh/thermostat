@@ -118,8 +118,9 @@ class Temperature {
   }
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
-    mibi_celcius_ = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
-    Clamp();
+    int32_t value = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
+    Clamp(value, MinCelciusValue, MaxMibiValue);
+    mibi_celcius_ = value;
     return *this;
   }
 
@@ -186,7 +187,7 @@ class Temperature {
     Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
   }
 
-  void Clamp(int16_t& value, int16_t min, int16_t max) const {
+  void Clamp(auto& value, int16_t min, int16_t max) const {
     if (value > max) {
       value = max;
     } else if (value < min) {

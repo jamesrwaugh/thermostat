@@ -19,13 +19,6 @@ struct DigitImages {
 
 class Renderer {
  public:
-  static constexpr uint8_t BigDigitYPos = 1;
-  static constexpr uint8_t CharacterWidth1x = 7;
-  static constexpr uint8_t ScreenWidth = 112;
-  static constexpr uint8_t TemperatureXPos = 0;
-  static constexpr uint8_t HumidityXPos = TemperatureXPos + (3 * Image2xWidth) +
-                                          CharacterWidth1x + CharacterWidth1x;
-
   Renderer(Noritake_VFD_GU7000& s, DigitImages& images);
 
   void InitializeDigitImages(Temperature::WholeType temperature,
@@ -36,6 +29,13 @@ class Renderer {
   void DrawHeatingStatus(HeatModeT heatMode, bool active);
 
  private:
+  static constexpr uint8_t BigDigitYPos = 1;
+  static constexpr uint8_t CharacterWidth1x = 7;
+  static constexpr uint8_t ScreenWidth = 112;
+  static constexpr uint8_t TemperatureXPos = 0;
+  static constexpr uint8_t HumidityXPos = TemperatureXPos + (3 * Image2xWidth) +
+                                          CharacterWidth1x + CharacterWidth1x;
+
   void DrawPositive2DigitNumber(uint8_t xPos,
                                 const Image2x& tens,
                                 const Image2x& ones,

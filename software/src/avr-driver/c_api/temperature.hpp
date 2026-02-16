@@ -7,6 +7,16 @@
 
 // ==================================================== //
 
+void Clamp(auto& value, auto min, auto max) {
+  if (value > max) {
+    value = max;
+  } else if (value < min) {
+    value = min;
+  }
+}
+
+// ==================================================== //
+
 class Humidity {
  public:
   static constexpr uint16_t MibiFactor = 512;
@@ -16,8 +26,9 @@ class Humidity {
   typedef uint8_t WholeType;
 
   Humidity& SetFromSht4xSensor(uint16_t device_ticks) {
-    mibi_percent_ = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
-    Clamp();
+    uint32_t value = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
+    ::Clamp(value, MinValue, MaxValue);
+    mibi_percent_ = value;
     return *this;
   }
 
@@ -112,14 +123,14 @@ class Temperature {
   }
 
   Temperature& SetFromCelcius(int16_t celcius) {
-    Clamp(celcius, MinCelciusValue, MaxCelciusValue);
+    ::Clamp(celcius, MinCelciusValue, MaxCelciusValue);
     mibi_celcius_ = celcius * MibiFactor;
     return *this;
   }
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
     int32_t value = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
-    Clamp(value, MinCelciusValue, MaxMibiValue);
+    ::Clamp(value, MinCelciusValue, MaxMibiValue);
     mibi_celcius_ = value;
     return *this;
   }
@@ -184,15 +195,7 @@ class Temperature {
 
  private:
   void Clamp() {
-    Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
-  }
-
-  void Clamp(auto& value, int16_t min, int16_t max) const {
-    if (value > max) {
-      value = max;
-    } else if (value < min) {
-      value = min;
-    }
+    ::Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
   }
 
   void ChangeBy1C(bool increment) {

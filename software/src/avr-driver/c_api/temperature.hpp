@@ -165,7 +165,7 @@ class Temperature {
   }
 
   WholeType GetFahrenheitWhole() const {
-    volatile int32_t mibi_fahrenheit = mibi_celcius_;
+    int32_t mibi_fahrenheit = mibi_celcius_;
     mibi_fahrenheit <<= 3;
     mibi_fahrenheit += mibi_celcius_;
     mibi_fahrenheit /= 5;

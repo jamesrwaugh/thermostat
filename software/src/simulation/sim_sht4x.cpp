@@ -28,7 +28,7 @@ void SimSHT4x::SimulateTempChange(const RelayState& relays) {
   auto now = std::chrono::steady_clock::now();
 
   auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
-    now - last_temp_update_);
+      now - last_temp_update_);
 
   if (delta > std::chrono::seconds(1)) {
     last_temp_update_ = now;

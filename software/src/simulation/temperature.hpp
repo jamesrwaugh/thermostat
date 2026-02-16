@@ -2,10 +2,18 @@
 
 #include <limits.h>
 #include <stdint.h>
-#include <stdlib.h>
 
-#include "casts.hpp"
 #include "thermo_data_types.hpp"
+
+// ==================================================== //
+
+void Clamp(auto& value, auto min, auto max) {
+  if (value > max) {
+    value = max;
+  } else if (value < min) {
+    value = min;
+  }
+}
 
 // ==================================================== //
 
@@ -15,13 +23,16 @@ class Humidity {
   static constexpr uint16_t MinValue = 0;
   static constexpr uint16_t MaxValue = (99u * MibiFactor);
 
+  typedef uint8_t WholeType;
+
   Humidity& SetFromSht4xSensor(uint16_t device_ticks) {
-    mibi_percent_ = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
-    Clamp();
+    uint32_t value = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
+    ::Clamp(value, MinValue, MaxValue);
+    mibi_percent_ = value;
     return *this;
   }
 
-  uint8_t ToWholePercent() const {
+  WholeType ToWholePercent() const {
     return mibi_percent_ / MibiFactor;
   }
 
@@ -85,7 +96,9 @@ class Temperature {
   static_assert(MinMibiValue < 0, "Error setting min value");
   static_assert(MaxMibiValue > MinMibiValue, "Error setting values");
 
-  [[nodiscard]] static Temperature FromCelcius(int16_t celcius) {
+  typedef int16_t WholeType;
+
+  [[nodiscard]] static Temperature FromCelcius(WholeType celcius) {
     Temperature t;
     t.SetFromCelcius(celcius);
     return t;
@@ -110,14 +123,15 @@ class Temperature {
   }
 
   Temperature& SetFromCelcius(int16_t celcius) {
-    Clamp(celcius, MinCelciusValue, MaxCelciusValue);
+    ::Clamp(celcius, MinCelciusValue, MaxCelciusValue);
     mibi_celcius_ = celcius * MibiFactor;
     return *this;
   }
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
-    mibi_celcius_ = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
-    Clamp();
+    int32_t value = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
+    ::Clamp(value, MinCelciusValue, MaxMibiValue);
+    mibi_celcius_ = value;
     return *this;
   }
 
@@ -141,16 +155,16 @@ class Temperature {
     return *this;
   }
 
-  int16_t GetUnitWhole(TemperatureUnitT unit) const {
+  WholeType GetUnitWhole(TemperatureUnitT unit) const {
     return unit == TemperatureUnitT::Celsius ? GetCelciusWhole()
                                              : GetFahrenheitWhole();
   }
 
-  int16_t GetCelciusWhole() const {
+  WholeType GetCelciusWhole() const {
     return mibi_celcius_ / MibiFactor;
   }
 
-  int16_t GetFahrenheitWhole() const {
+  WholeType GetFahrenheitWhole() const {
     volatile int32_t mibi_fahrenheit = mibi_celcius_;
     mibi_fahrenheit <<= 3;
     mibi_fahrenheit += mibi_celcius_;
@@ -159,7 +173,7 @@ class Temperature {
     return mibi_fahrenheit / MibiFactor;
   }
 
-  int16_t GetMibiCelcius() const {
+  WholeType GetMibiCelcius() const {
     return mibi_celcius_;
   }
 
@@ -181,15 +195,7 @@ class Temperature {
 
  private:
   void Clamp() {
-    Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
-  }
-
-  void Clamp(int16_t& value, int16_t min, int16_t max) const {
-    if (value > max) {
-      value = max;
-    } else if (value < min) {
-      value = min;
-    }
+    ::Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
   }
 
   void ChangeBy1C(bool increment) {

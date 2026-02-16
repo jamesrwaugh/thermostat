@@ -6,12 +6,10 @@
 #include "temperature.hpp"
 
 int main() {
-  auto temp = Temperature::FromCelcius(Temperature::MinCelciusValue);
+  auto temp = Temperature::FromCelcius(Temperature::MaxCelciusValue);
 
-  temp.ChangeByMibiCelcius(1, false);
-  std::cout << temp.GetCelciusWhole() << std::endl;
+  std::cout << temp.GetFahrenheitWhole() << std::endl;
 
-  temp.ChangeByMibiCelcius(10 * Temperature::MibiFactor, true);
   std::cout << temp.GetCelciusWhole() << std::endl;
 
   return 0;

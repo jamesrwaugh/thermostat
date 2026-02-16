@@ -9,7 +9,7 @@ ScrollManager::ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones)
       tens_scroller_(tens, Image2xId::Blank, Image2xId::Blank),
       ones_scroller_(ones, Image2xId::Blank, Image2xId::Blank) {}
 
-void ScrollManager::Calculate(int8_t old, int8_t theNew) {
+void ScrollManager::Calculate(int16_t old, int16_t theNew) {
   current_number_ = old;
   goal_number_ = theNew;
   total_lines_left_ = abs(goal_number_ - current_number_) * Image2xHeight;
@@ -58,7 +58,7 @@ void ScrollManager::RecalculateDigits() {
 }
 
 void ScrollManager::RecalculateHundreds() {
-  const int8_t nextNumber = current_number_ + Delta();
+  const auto nextNumber = current_number_ + Delta();
   const uint8_t nowHundreds = Hundreds(current_number_);
   const uint8_t nextHundreds = Hundreds(nextNumber);
 

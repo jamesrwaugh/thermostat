@@ -35,3 +35,5 @@ class Scroller {
   Image2xId next_image_;
   int8_t scrolled_lines_{0};  // >0 scrolled up, <0 scrolled down
 };
+
+// ==================================================== //

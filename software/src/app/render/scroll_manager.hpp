@@ -8,7 +8,7 @@ class ScrollManager {
  public:
   ScrollManager(Image2x& hundreds, Image2x& tens, Image2x& ones);
 
-  void Calculate(int8_t old, int8_t theNew);
+  void Calculate(int16_t old, int16_t theNew);
   bool IsFinished() const;
   void ScrollOnce();
   uint16_t ScrollLinesLeft() const;
@@ -20,8 +20,8 @@ class ScrollManager {
   void RecalculateOnes();
   int8_t Delta() const;
 
-  int8_t goal_number_{0};
-  int8_t current_number_{0};
+  int16_t goal_number_{0};
+  int16_t current_number_{0};
   uint16_t total_lines_left_{0};
   uint8_t tens_lines_left_{0};
   uint8_t hundreds_lines_left_{0};

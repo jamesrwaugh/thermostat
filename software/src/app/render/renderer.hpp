@@ -2,6 +2,7 @@
 
 #include <images.h>
 
+#include <temperature.hpp>
 #include <thermo_data_types.hpp>
 
 class Noritake_VFD_GU7000;
@@ -27,10 +28,11 @@ class Renderer {
 
   Renderer(Noritake_VFD_GU7000& s, DigitImages& images);
 
-  void InitializeDigitImages(int8_t temperature, uint8_t humidity);
+  void InitializeDigitImages(Temperature::WholeType temperature,
+                             Humidity::WholeType humidity);
   void DrawTemperature(TemperatureUnitT unit);
   void DrawHumidity();
-  void DrawSetPoint(int8_t setPoint);
+  void DrawSetPoint(Temperature::WholeType setPoint);
   void DrawHeatingStatus(HeatModeT heatMode, bool active);
 
  private:

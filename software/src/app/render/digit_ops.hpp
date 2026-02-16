@@ -1,7 +1,13 @@
 #pragma once
 
-#include <stdint.h>
+auto Hundreds(auto number) {
+  return abs(number) / 100;
+}
 
-uint8_t Hundreds(int8_t number);
-uint8_t Tens(int8_t number);
-uint8_t Ones(int8_t number);
+auto Tens(auto number) {
+  return (abs(number) % 100) / 10;
+}
+
+auto Ones(auto number) {
+  return abs(number) % 10;
+}

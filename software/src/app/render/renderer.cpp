@@ -15,7 +15,8 @@ inline constexpr Image2xId I2xId(uint8_t number) {
 Renderer::Renderer(Noritake_VFD_GU7000& s, DigitImages& images)
     : screen_(s), images_{images} {}
 
-void Renderer::InitializeDigitImages(int8_t temperature, uint8_t humidity) {
+void Renderer::InitializeDigitImages(Temperature::WholeType temperature,
+                                     Humidity::WholeType humidity) {
   auto hundreds_image = Image2xId::Blank;
 
   if (temperature < 0) {
@@ -51,7 +52,7 @@ void Renderer::DrawHumidity() {
                            images_.humidity_ones_, '%');
 }
 
-void Renderer::DrawSetPoint(int8_t setPoint) {
+void Renderer::DrawSetPoint(Temperature::WholeType setPoint) {
   AutoTwi t;
 
   uint8_t setPointPos = ScreenWidth;
@@ -60,7 +61,7 @@ void Renderer::DrawSetPoint(int8_t setPoint) {
     setPointPos -= CharacterWidth1x;
   }
 
-  static const uint8_t posSetPoint = abs(setPoint);
+  const Temperature::WholeType posSetPoint = abs(setPoint);
 
   if (posSetPoint >= 100) {
     setPointPos -= 3 * CharacterWidth1x;

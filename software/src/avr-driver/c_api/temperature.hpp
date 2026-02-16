@@ -13,13 +13,15 @@ class Humidity {
   static constexpr uint16_t MinValue = 0;
   static constexpr uint16_t MaxValue = (99u * MibiFactor);
 
+  typedef uint8_t WholeType;
+
   Humidity& SetFromSht4xSensor(uint16_t device_ticks) {
     mibi_percent_ = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
     Clamp();
     return *this;
   }
 
-  uint8_t ToWholePercent() const {
+  WholeType ToWholePercent() const {
     return mibi_percent_ / MibiFactor;
   }
 
@@ -83,7 +85,9 @@ class Temperature {
   static_assert(MinMibiValue < 0, "Error setting min value");
   static_assert(MaxMibiValue > MinMibiValue, "Error setting values");
 
-  [[nodiscard]] static Temperature FromCelcius(int16_t celcius) {
+  typedef int16_t WholeType;
+
+  [[nodiscard]] static Temperature FromCelcius(WholeType celcius) {
     Temperature t;
     t.SetFromCelcius(celcius);
     return t;
@@ -139,16 +143,16 @@ class Temperature {
     return *this;
   }
 
-  int16_t GetUnitWhole(TemperatureUnitT unit) const {
+  WholeType GetUnitWhole(TemperatureUnitT unit) const {
     return unit == TemperatureUnitT::Celsius ? GetCelciusWhole()
                                              : GetFahrenheitWhole();
   }
 
-  int16_t GetCelciusWhole() const {
+  WholeType GetCelciusWhole() const {
     return mibi_celcius_ / MibiFactor;
   }
 
-  int16_t GetFahrenheitWhole() const {
+  WholeType GetFahrenheitWhole() const {
     volatile int32_t mibi_fahrenheit = mibi_celcius_;
     mibi_fahrenheit <<= 3;
     mibi_fahrenheit += mibi_celcius_;
@@ -157,7 +161,7 @@ class Temperature {
     return mibi_fahrenheit / MibiFactor;
   }
 
-  int16_t GetMibiCelcius() const {
+  WholeType GetMibiCelcius() const {
     return mibi_celcius_;
   }
 

@@ -44,7 +44,7 @@ void SimSHT4x::SimulateTempChange(const RelayState& relays) {
     }
 
     percent_humidity_ = std::min(percent_humidity_, MaxHumidity);
-    celcius_ = std::min(celcius_, MaxTempC);
+    celcius_ = std::min(celcius_, MaxTempC - 1);
   }
 }
 

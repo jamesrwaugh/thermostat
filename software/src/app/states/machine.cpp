@@ -3,7 +3,6 @@
 #include <Noritake_VFD_GU7000.h>
 #include <ThermoSaveData_bp.h>
 #include <driver_ds1307.h>
-#include <etl/algorithm.h>
 #include <etl/placement_new.h>
 
 #include <HomeAssistantSerial.hpp>
@@ -12,18 +11,12 @@
 #include <driver_rs_wrapper.hpp>
 #include <temperature.hpp>
 
-#include "coolable_parent.hpp"
-#include "cooling.hpp"
 #include "event.hpp"
-#include "heating.hpp"
-#include "idle.hpp"
-#include "program_screen.hpp"
 #include "safe_thermo_safe.hpp"
 #include "state.hpp"
 #include "states/started.hpp"
 
 // ===================================================================== //
-//
 
 void Machine::start() {
   ::new (CurrentState.get_address<void*>()) Started();
@@ -84,7 +77,8 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   const auto nowHumid = CurrentHumid.ToWholePercent();
 
   if (nowTemp != prevTemp) {
-    rctx_.temperature_manager_.Calculate(prevTemp, nowTemp);
+    rctx_.temperature_manager_.Calculate(PreviousTemp.GetRoundedUnitWhole(unit),
+                                         CurrentTemp.GetRoundedUnitWhole(unit));
     WriteHaTempStateTopicResponse();
     PreviousTemp = CurrentTemp;
   }
@@ -230,7 +224,7 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
 
 void Machine::InitialRender() {
   const auto unit = SaveData.TemperatureUnit();
-  const auto currentTemp = CurrentTemp.GetUnitWhole(unit);
+  const auto currentTemp = CurrentTemp.GetRoundedUnitWhole(unit);
   const auto currentHumid = CurrentHumid.ToWholePercent();
   const auto setPoint = SaveData.SetPoint().GetUnitWhole(unit);
 

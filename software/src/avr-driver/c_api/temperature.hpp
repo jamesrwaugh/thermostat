@@ -24,6 +24,7 @@ class Humidity {
   static constexpr uint16_t MaxValue = (99u * MibiFactor);
 
   typedef uint8_t WholeType;
+  typedef uint16_t MibiType;
 
   Humidity& SetFromSht4xSensor(uint16_t device_ticks) {
     uint32_t value = ((8000 * (uint32_t)device_ticks) >> 13) - 2560;
@@ -59,7 +60,7 @@ class Humidity {
   // This allows us to store fractional humidity as well
   // as only require bitshifts to encode and decode whole values,
   // to save on flash size, instead of divide by 1000 for example.
-  uint16_t mibi_percent_{0};
+  MibiType mibi_percent_{0};
 };
 
 static_assert(sizeof(Humidity) <= 2,
@@ -97,6 +98,7 @@ class Temperature {
   static_assert(MaxMibiValue > MinMibiValue, "Error setting values");
 
   typedef int16_t WholeType;
+  typedef int16_t MibiType;
 
   [[nodiscard]] static Temperature FromCelcius(WholeType celcius) {
     Temperature t;
@@ -104,7 +106,7 @@ class Temperature {
     return t;
   }
 
-  [[nodiscard]] static Temperature FromMibiCelcius(int16_t mibicelcius) {
+  [[nodiscard]] static Temperature FromMibiCelcius(MibiType mibicelcius) {
     Temperature t;
     t.SetFromMibiCelcius(mibicelcius);
     return t;
@@ -116,13 +118,13 @@ class Temperature {
     return *this;
   }
 
-  Temperature& SetFromMibiCelcius(int16_t mibi_celcius) {
+  Temperature& SetFromMibiCelcius(MibiType mibi_celcius) {
     mibi_celcius_ = mibi_celcius;
     Clamp();
     return *this;
   }
 
-  Temperature& SetFromCelcius(int16_t celcius) {
+  Temperature& SetFromCelcius(WholeType celcius) {
     ::Clamp(celcius, MinCelciusValue, MaxCelciusValue);
     mibi_celcius_ = celcius * MibiFactor;
     return *this;
@@ -135,16 +137,16 @@ class Temperature {
     return *this;
   }
 
-  Temperature& ChangeByMibiCelcius(uint16_t amount, bool increment) {
+  Temperature& ChangeByMibiCelcius(MibiType amount, bool increment) {
     if (increment) {
-      int16_t sum = 0;
+      MibiType sum = 0;
       if (__builtin_add_overflow(mibi_celcius_, amount, &sum)) {
         mibi_celcius_ = MaxMibiValue;
       } else {
         mibi_celcius_ = sum;
       }
     } else {
-      int16_t sum = 0;
+      MibiType sum = 0;
       if (__builtin_sub_overflow(mibi_celcius_, amount, &sum)) {
         mibi_celcius_ = MinMibiValue;
       } else {
@@ -160,17 +162,48 @@ class Temperature {
                                              : GetFahrenheitWhole();
   }
 
+  Temperature& Floored() {
+    mibi_celcius_ = (mibi_celcius_ & 0xFE00);
+    return *this;
+  }
+
+  WholeType GetRoundedUnitWhole(TemperatureUnitT unit) const {
+    if (unit == TemperatureUnitT::Celsius) {
+      return GetRoundedMibi(mibi_celcius_) / MibiFactor;
+    } else {
+      auto mif = GetMibiFahrenheit(mibi_celcius_);
+      return GetRoundedMibi(mif) / MibiFactor;
+    }
+  }
+
+  static MibiType GetRoundedMibi(const MibiType& mibi) {
+    if (mibi & MibiOneHalfDegree) {
+      MibiType sum = 0;
+      if (__builtin_add_overflow(mibi, MibiFactor, &sum)) {
+        return MaxMibiValue;
+      } else {
+        return sum;
+      }
+    } else {
+      return mibi;
+    }
+  }
+
   WholeType GetCelciusWhole() const {
     return mibi_celcius_ / MibiFactor;
   }
 
   WholeType GetFahrenheitWhole() const {
-    int32_t mibi_fahrenheit = mibi_celcius_;
+    return GetMibiFahrenheit(mibi_celcius_) / MibiFactor;
+  }
+
+  static MibiType GetMibiFahrenheit(const MibiType& value) {
+    int32_t mibi_fahrenheit = value;
     mibi_fahrenheit <<= 3;
-    mibi_fahrenheit += mibi_celcius_;
+    mibi_fahrenheit += value;
     mibi_fahrenheit /= 5;
     mibi_fahrenheit += (32u * MibiFactor);
-    return mibi_fahrenheit / MibiFactor;
+    return mibi_fahrenheit;
   }
 
   WholeType GetMibiCelcius() const {
@@ -212,7 +245,7 @@ class Temperature {
   // This allows us to store fractional temperatures as well
   // as only require bitshifts to encode and decode whole values,
   // to save on flash size, instead of divide by 1000 for example.
-  int16_t mibi_celcius_{0};
+  MibiType mibi_celcius_{0};
 };
 
 static_assert(sizeof(Temperature) <= 2,

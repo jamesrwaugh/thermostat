@@ -14,7 +14,7 @@ SafeThermoSaveData::SafeThermoSaveData() {
 
   // Good defaults
   Data.set_point_mibicelcius = Temperature::FromCelcius(23).GetMibiCelcius();
-  Data.temp_display_unit = TEMP_UNIT_FREEDOM;
+  Data.temp_display_unit = TEMP_UNIT_CELSIUS;
   Data.fan_mode = FANMODE_AUTO;
   Data.heat_mode = HEATMODE_NONE;
 

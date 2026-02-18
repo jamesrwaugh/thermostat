@@ -64,16 +64,22 @@ void ScrollManager::RecalculateHundreds() {
 
   const auto& curentHundredsImage = static_cast<Image2xId>(nowHundreds);
 
-  if (nowHundreds != nextHundreds) {
+  int8_t nextImage = -1;
+
+  if (nextHundreds == 1 && nowHundreds == 0) {
+    nextImage = Image2xId::One;
+  } else if (nextHundreds == 0 && nowHundreds == 1) {
+    nextImage = Image2xId::Blank;
+  } else if (current_number_ < 0 && nextNumber >= 0) {
+    nextImage = Image2xId::Blank;
+  } else if (current_number_ >= 0 && nextNumber < 0) {
+    nextImage = Image2xId::Minus;
+  }
+
+  if (nextImage != -1) {
     hundreds_lines_left_ += Image2xHeight;
     hundreds_scroller_.SetImages(curentHundredsImage,
-                                 static_cast<Image2xId>(nextHundreds));
-  } else if (current_number_ < 0 && nextNumber >= 0) {
-    hundreds_lines_left_ += Image2xHeight;
-    hundreds_scroller_.SetImages(curentHundredsImage, Image2xId::Blank);
-  } else if (current_number_ >= 0 && nextNumber < 0) {
-    hundreds_lines_left_ += Image2xHeight;
-    hundreds_scroller_.SetImages(curentHundredsImage, Image2xId::Minus);
+                                 static_cast<Image2xId>(nextImage));
   } else {
     hundreds_lines_left_ = 0;
   }

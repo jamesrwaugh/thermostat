@@ -5,6 +5,8 @@
 #include <temperature.hpp>
 #include <thermo_data_types.hpp>
 
+// ==================================================== //
+
 class Noritake_VFD_GU7000;
 
 struct DigitImages {
@@ -36,11 +38,12 @@ class Renderer {
   static constexpr uint8_t HumidityXPos = TemperatureXPos + (3 * Image2xWidth) +
                                           CharacterWidth1x + CharacterWidth1x;
 
-  void DrawPositive2DigitNumber(uint8_t xPos,
-                                const Image2x& tens,
-                                const Image2x& ones,
-                                char suffix);
+  void DrawPositiveTwoDigitNumber(uint8_t xPos,
+                                  const Image2x& tens,
+                                  const Image2x& ones,
+                                  char suffix);
 
+  void Draw2xImage(uint8_t x, const Image2x& image);
   void Draw1xImage(uint8_t xPositionDots, bool bottom, Image1xId imageId);
 
   uint8_t status_image_idx_{0};

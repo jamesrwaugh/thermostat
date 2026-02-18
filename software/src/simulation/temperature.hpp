@@ -97,6 +97,7 @@ class Temperature {
   static_assert(MaxMibiValue > MinMibiValue, "Error setting values");
 
   typedef int16_t WholeType;
+  typedef int16_t MibiType;
 
   [[nodiscard]] static Temperature FromCelcius(WholeType celcius) {
     Temperature t;

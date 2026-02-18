@@ -37,19 +37,17 @@ void Renderer::InitializeDigitImages(Temperature::WholeType temperature,
 void Renderer::DrawTemperature(TemperatureUnitT unit) {
   AutoTwi t;
 
-  screen_.GU7000_drawImage(TemperatureXPos, BigDigitYPos, Image2xWidth,
-                           Image2xHeight,
-                           images_.temperature_hundreds_or_minus_);
+  Draw2xImage(TemperatureXPos, images_.temperature_hundreds_or_minus_);
 
-  DrawPositive2DigitNumber(TemperatureXPos + Image2xWidth,
-                           images_.temperature_tens_, images_.temperature_ones_,
-                           unit == TemperatureUnitT::Celsius ? 'C' : 'F');
+  DrawPositiveTwoDigitNumber(
+      TemperatureXPos + Image2xWidth, images_.temperature_tens_,
+      images_.temperature_ones_, unit == TemperatureUnitT::Celsius ? 'C' : 'F');
 }
 
 void Renderer::DrawHumidity() {
   AutoTwi t;
-  DrawPositive2DigitNumber(HumidityXPos, images_.humidity_tens_,
-                           images_.humidity_ones_, '%');
+  DrawPositiveTwoDigitNumber(HumidityXPos, images_.humidity_tens_,
+                             images_.humidity_ones_, '%');
 }
 
 void Renderer::DrawSetPoint(Temperature::WholeType setPoint) {
@@ -108,21 +106,22 @@ void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
   }
 }
 
-void Renderer::DrawPositive2DigitNumber(uint8_t xPos,
-                                        const Image2x& tens,
-                                        const Image2x& ones,
-                                        char suffix) {
+void Renderer::DrawPositiveTwoDigitNumber(uint8_t xPos,
+                                          const Image2x& tens,
+                                          const Image2x& ones,
+                                          char suffix) {
   const uint8_t tensSpot = xPos;
   const uint8_t onesSpot = tensSpot + Image2xWidth + 1;
   const uint8_t suffixSpot = onesSpot + Image2xWidth + 1;
 
-  screen_.GU7000_drawImage(tensSpot, BigDigitYPos, Image2xWidth, Image2xHeight,
-                           tens);
-
-  screen_.GU7000_drawImage(onesSpot, BigDigitYPos, Image2xWidth, Image2xHeight,
-                           ones);
+  Draw2xImage(tensSpot, tens);
+  Draw2xImage(onesSpot, ones);
 
   screen_.print(suffixSpot, 1, suffix);
+}
+
+void Renderer::Draw2xImage(uint8_t x, const Image2x& image) {
+  screen_.GU7000_drawImage(x, BigDigitYPos, Image2xWidth, Image2xHeight, image);
 }
 
 void Renderer::Draw1xImage(uint8_t xPositionDots,

@@ -255,10 +255,12 @@ void Machine::SaveProgrammingSettings() {
                     nowUnit == TemperatureUnitT::Celsius;
 
   if (cToF) {
-    auto t = Temperature::FromFahrenheit(nowSetpoint.GetFahrenheitWhole());
+    auto t = Temperature::FromFahrenheit(
+        nowSetpoint.GetRoundedUnitWhole(TemperatureUnitT::Freedom));
     SaveData.SetSetPoint(t);
   } else if (fToC) {
-    auto t = Temperature::FromCelcius(nowSetpoint.GetCelciusWhole());
+    auto t = Temperature::FromCelcius(
+        nowSetpoint.GetRoundedUnitWhole(TemperatureUnitT::Celsius));
     SaveData.SetSetPoint(t);
   }
 

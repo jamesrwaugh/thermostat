@@ -239,9 +239,10 @@ bool FrictionScrollManager::AttemptScroll() {
 void FrictionScrollManager::GetAddedFriction(uint8_t& out) const {
   const auto left = s_.ScrollLinesLeft();
   if (left < (Image2xHeight / 2)) {
-    out = 12;
+    out = 10;
   } else if (left < (3 * Image2xHeight)) {
     out = 1;
+  } else {
+    out = 0;
   }
-  out = 0;
 }

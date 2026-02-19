@@ -51,10 +51,6 @@ void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
   return ButtonData;
 }
 
-void Machine::ResetAutoTimeData() {
-  ::new (&ProgData) ProgramData();
-}
-
 ProgramData& Machine::AutoTimeData() {
   return ProgData;
 }
@@ -204,10 +200,10 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
       ::new (address) TempScreen(SaveData.MutableRaw(), lastEventWasDown);
       break;
     case State::Type::ProgramDate:
-      ::new (address) DateScreen(ProgData.ChangedTime_, lastEventWasDown);
+      ::new (address) DateScreen(ProgData.changed_time, lastEventWasDown);
       break;
     case State::Type::ProgramTime:
-      ::new (address) TimeScreen(ProgData.ChangedTime_, lastEventWasDown);
+      ::new (address) TimeScreen(ProgData.changed_time, lastEventWasDown);
       break;
     case State::Type::Started:    // Should never happen
     case State::Type::NO_CHANGE:  // Should never happen
@@ -226,7 +222,7 @@ void Machine::InitialRender() {
   const auto unit = SaveData.TemperatureUnit();
   const auto currentTemp = CurrentTemp.GetRoundedUnitWhole(unit);
   const auto currentHumid = CurrentHumid.ToWholePercent();
-  const auto setPoint = SaveData.SetPoint().GetUnitWhole(unit);
+  const auto setPoint = SaveData.SetPoint().GetRoundedUnitWhole(unit);
 
   DriverDisplayClearScreen();
 
@@ -241,15 +237,35 @@ void Machine::InitialRender() {
 
 void Machine::SetupProgramming() {
   ::new (&ProgData) ProgramData();
-  DriverGetTime(ProgData.StartTime_);
-  memcpy(&ProgData.ChangedTime_, &ProgData.StartTime_, sizeof(ds1307_time_s));
+
+  ProgData.original_temp_unit = SaveData.TemperatureUnit();
+  DriverGetTime(ProgData.original_time);
+  memcpy(&ProgData.changed_time, &ProgData.original_time,
+         sizeof(ds1307_time_s));
 }
 
 void Machine::SaveProgrammingSettings() {
-  const auto& saveData = SaveData.Raw();
-  DriverSaveData(saveData);
+  const auto nowSetpoint = SaveData.SetPoint();
+  const auto& nowUnit = SaveData.TemperatureUnit();
+
+  const bool cToF = ProgData.original_temp_unit == TemperatureUnitT::Celsius &&
+                    nowUnit == TemperatureUnitT::Freedom;
+
+  const bool fToC = ProgData.original_temp_unit == TemperatureUnitT::Freedom &&
+                    nowUnit == TemperatureUnitT::Celsius;
+
+  if (cToF) {
+    auto t = Temperature::FromFahrenheit(nowSetpoint.GetFahrenheitWhole());
+    SaveData.SetSetPoint(t);
+  } else if (fToC) {
+    auto t = Temperature::FromCelcius(nowSetpoint.GetCelciusWhole());
+    SaveData.SetSetPoint(t);
+  }
+
+  DriverSaveData(SaveData.Raw());
+
   if (ProgData.WasTimeChanged()) {
-    DriverSetTime(ProgData.ChangedTime_);
+    DriverSetTime(ProgData.changed_time);
   }
 }
 
@@ -314,4 +330,16 @@ void Machine::WriteHaSerialResponse(HaOutTopicKey topic,
   EncodeHaCommand(&c, b);
   b[0] = checksum(b + 1, sizeof(b) - 1);
   DriverWriteSerialPortRaw(b, sizeof(b));
+}
+
+// ===================================================================== //
+
+void ProgramData::Init(SafeThermoSaveData& data) {
+  original_temp_unit = data.TemperatureUnit();
+  DriverGetTime(original_time);
+  memcpy(&changed_time, &original_time, sizeof(ds1307_time_s));
+}
+
+bool ProgramData::WasTimeChanged() const {
+  return memcmp(&original_time, &changed_time, sizeof(original_time)) != 0;
 }

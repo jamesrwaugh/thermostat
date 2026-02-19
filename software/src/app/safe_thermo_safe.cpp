@@ -52,7 +52,7 @@ FanModeT& SafeThermoSaveData::FanMode() {
   return reinterpret_cast<FanModeT&>(Data.fan_mode);
 }
 
-void SafeThermoSaveData::SetSetPoint(Temperature t) {
+void SafeThermoSaveData::SetSetPoint(const Temperature& t) {
   Data.set_point_mibicelcius = t.GetMibiCelcius();
 }
 

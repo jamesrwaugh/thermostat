@@ -97,7 +97,7 @@ void CoolableParent::Render() {
 
   if (last_set_point_ != setPoint) {
     last_set_point_ = setPoint;
-    rctx_.renderer_.DrawSetPoint(setPoint.GetUnitWhole(tempUnit));
+    rctx_.renderer_.DrawSetPoint(setPoint.GetRoundedUnitWhole(tempUnit));
   }
 }
 
@@ -174,6 +174,17 @@ void CoolableParent::ExitHeatingOrCooling() {
       .SetFromTemperature(setPoint)
       .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, false);
 
+  // if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
+  //   volatile int16_t x = setPoint.GetMibiCelcius();
+  //   uint8_t b[1] = {static_cast<uint8_t>(x & 0xFF)};
+  //   DriverWriteSerialPortRaw(b, 1);
+  // }
+
+  // if (temp <= lowerLimit && heatMode == HeatModeT::Cooling) {
+  //   uint8_t b[2] = {22, 99};
+  //   DriverWriteSerialPortRaw(b, 2);
+  // }
+
   if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
     return State::Type::Idle;
   } else if (temp <= lowerLimit && heatMode == HeatModeT::Heating) {
@@ -210,8 +221,12 @@ bool FrictionScrollManager::AttemptScroll() {
     if (scroll_attempts_ >= current_friction_) {
       scroll_attempts_ = 0;
       s_.ScrollOnce();
-      bool addAggressive = s_.ScrollLinesLeft() < (Image2xHeight / 2);
-      current_friction_ = max(20, current_friction_ + (addAggressive ? 12 : 1));
+
+      uint8_t addedFriction;
+      GetAddedFriction(addedFriction);
+
+      current_friction_ = max(20, current_friction_ + addedFriction);
+
       return true;
     }
   } else {
@@ -219,4 +234,14 @@ bool FrictionScrollManager::AttemptScroll() {
     current_friction_ = 0;
   }
   return false;
+}
+
+void FrictionScrollManager::GetAddedFriction(uint8_t& out) const {
+  const auto left = s_.ScrollLinesLeft();
+  if (left < (Image2xHeight / 2)) {
+    out = 12;
+  } else if (left < (3 * Image2xHeight)) {
+    out = 1;
+  }
+  out = 0;
 }

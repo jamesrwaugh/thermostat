@@ -82,6 +82,8 @@ class Temperature {
        MibiOneTwentyEightDegree);  //  0.5546875 - Approximates 5/9  static
   static constexpr int8_t MinCelciusValue = -63;
   static constexpr int8_t MaxCelciusValue = 63;
+  static constexpr int8_t MinFahrenheitValue = -81;
+  static constexpr int16_t MaxFahrenheitValue = 145;
   static constexpr int16_t MaxMibiValue = (MaxCelciusValue * MibiFactor);
   static constexpr int16_t MinMibiValue = (MinCelciusValue * MibiFactor);
 
@@ -106,6 +108,12 @@ class Temperature {
     return t;
   }
 
+  [[nodiscard]] static Temperature FromFahrenheit(WholeType fahrenheit) {
+    Temperature t;
+    t.SetFromFahrenheit(fahrenheit);
+    return t;
+  }
+
   [[nodiscard]] static Temperature FromMibiCelcius(MibiType mibicelcius) {
     Temperature t;
     t.SetFromMibiCelcius(mibicelcius);
@@ -127,6 +135,12 @@ class Temperature {
   Temperature& SetFromCelcius(WholeType celcius) {
     ::Clamp(celcius, MinCelciusValue, MaxCelciusValue);
     mibi_celcius_ = celcius * MibiFactor;
+    return *this;
+  }
+
+  Temperature& SetFromFahrenheit(WholeType fahrenheit) {
+    ::Clamp(fahrenheit, MinFahrenheitValue, MaxFahrenheitValue);
+    mibi_celcius_ = WholeFtoMibiC(fahrenheit);
     return *this;
   }
 
@@ -162,30 +176,19 @@ class Temperature {
                                              : GetFahrenheitWhole();
   }
 
-  Temperature& Floored() {
-    mibi_celcius_ = (mibi_celcius_ & 0xFE00);
-    return *this;
-  }
-
   WholeType GetRoundedUnitWhole(TemperatureUnitT unit) const {
-    if (unit == TemperatureUnitT::Celsius) {
-      return GetRoundedMibi(mibi_celcius_) / MibiFactor;
-    } else {
-      auto mif = GetMibiFahrenheit(mibi_celcius_);
-      return GetRoundedMibi(mif) / MibiFactor;
-    }
+    auto mibi = (unit == TemperatureUnitT::Celsius) ? mibi_celcius_
+                                                    : MibiCToF(mibi_celcius_);
+    return GetRoundedMibi(mibi) / MibiFactor;
   }
 
   static MibiType GetRoundedMibi(const MibiType& mibi) {
-    if (mibi & MibiOneHalfDegree) {
-      MibiType sum = 0;
-      if (__builtin_add_overflow(mibi, MibiFactor, &sum)) {
-        return MaxMibiValue;
-      } else {
-        return sum;
-      }
+    MibiType sum = 0;
+    if (__builtin_add_overflow(mibi, mibi & MibiOneHalfDegree ? MibiFactor : 0,
+                               &sum)) {
+      return MaxMibiValue;
     } else {
-      return mibi;
+      return sum;
     }
   }
 
@@ -194,19 +197,27 @@ class Temperature {
   }
 
   WholeType GetFahrenheitWhole() const {
-    return GetMibiFahrenheit(mibi_celcius_) / MibiFactor;
+    return MibiCToF(mibi_celcius_) / MibiFactor;
   }
 
-  static MibiType GetMibiFahrenheit(const MibiType& value) {
-    int32_t mibi_fahrenheit = value;
-    mibi_fahrenheit <<= 3;
-    mibi_fahrenheit += value;
+  static MibiType MibiCToF(const MibiType& celcius) {
+    int32_t mibi_fahrenheit = celcius;
+    mibi_fahrenheit *= 9;
     mibi_fahrenheit /= 5;
     mibi_fahrenheit += (32u * MibiFactor);
     return mibi_fahrenheit;
   }
 
-  WholeType GetMibiCelcius() const {
+  static MibiType WholeFtoMibiC(const WholeType& fahrenheit) {
+    int32_t mibi_celcius = fahrenheit;
+    mibi_celcius *= MibiFactor;
+    mibi_celcius -= (32u * MibiFactor);
+    mibi_celcius *= 5;
+    mibi_celcius /= 9;
+    return mibi_celcius;
+  }
+
+  MibiType GetMibiCelcius() const {
     return mibi_celcius_;
   }
 

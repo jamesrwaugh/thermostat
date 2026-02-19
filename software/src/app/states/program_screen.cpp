@@ -13,7 +13,8 @@
 
 Noritake_VFD_GU7000* ProgramScreenState::Screen_ = nullptr;
 
-ProgramScreenState::ProgramScreenState(State::Type stateId, const char* title,
+ProgramScreenState::ProgramScreenState(State::Type stateId,
+                                       const char* title,
                                        uint8_t boxesCount,
                                        State::Type prevState,
                                        State::Type nextState)
@@ -151,12 +152,15 @@ constexpr const char* FCCharSet = "FC";
 constexpr uint8_t FCCharSetLen = 2;
 
 TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTemp, "Temp Unit", 1,
-                         State::Type::Idle, State::Type::ProgramDate),
+    : ProgramScreenState(State::Type::ProgramTemp,
+                         "Temp Unit",
+                         1,
+                         State::Type::Idle,
+                         State::Type::ProgramDate),
       S_{s} {
   // Temp Unit C or F
   ::new (GetBoxP(0))
-    CharSetScreenBox(15, &s.temp_display_unit, FCCharSet, FCCharSetLen, 1);
+      CharSetScreenBox(15, &s.temp_display_unit, FCCharSet, FCCharSetLen, 1);
 
   // Init
   InitDisplay(startOnEndBox);
@@ -168,8 +172,11 @@ constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
 
 DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramDate, "Date", 4,
-                         State::Type::ProgramTemp, State::Type::ProgramTime),
+    : ProgramScreenState(State::Type::ProgramDate,
+                         "Date",
+                         4,
+                         State::Type::ProgramTemp,
+                         State::Type::ProgramTime),
       time_{s} {
   // Copy
   year_ = s.year - 2000;
@@ -181,7 +188,7 @@ DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
 
   // Day of Week
   ::new (GetBoxP(3))
-    CharSetScreenBox(14, &s.week, DaysOfWeek, DaysOfWeekSetLen, 2);
+      CharSetScreenBox(14, &s.week, DaysOfWeek, DaysOfWeekSetLen, 2);
 
   // Separators
   AddStatic(7, '/');
@@ -201,8 +208,11 @@ constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;
 
 TimeScreen::TimeScreen(ds1307_time_s& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTime, "Time", 4,
-                         State::Type::ProgramDate, State::Type::Idle),
+    : ProgramScreenState(State::Type::ProgramTime,
+                         "Time",
+                         4,
+                         State::Type::ProgramDate,
+                         State::Type::Idle),
       time_{s} {
   // Copy
   am_pm_ = s.am_pm == ds1307_am_pm_t::DS1307_AM ? 0 : 1;
@@ -225,7 +235,7 @@ TimeScreen::TimeScreen(ds1307_time_s& s, bool startOnEndBox)
 
 TimeScreen::~TimeScreen() {
   time_.am_pm =
-    am_pm_ == 0 ? ds1307_am_pm_t::DS1307_AM : ds1307_am_pm_t::DS1307_PM;
+      am_pm_ == 0 ? ds1307_am_pm_t::DS1307_AM : ds1307_am_pm_t::DS1307_PM;
 }
 
 /*

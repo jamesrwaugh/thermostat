@@ -20,15 +20,14 @@
 #include "temperature.hpp"
 
 struct ProgramData {
-  uint8_t Selection_{0};
-  ds1307_time_s StartTime_;
-  ds1307_time_s ChangedTime_;
+  ds1307_time_s original_time;
+  ds1307_time_s changed_time;
+  TemperatureUnitT original_temp_unit;
 
-  bool WasTimeChanged() const {
-    return memcmp(&StartTime_, &ChangedTime_, sizeof(StartTime_)) != 0;
-  }
+  void Init(SafeThermoSaveData& data);
+  bool WasTimeChanged() const;
 
-  static_assert(sizeof(StartTime_) == sizeof(ChangedTime_),
+  static_assert(sizeof(original_time) == sizeof(changed_time),
                 "Time sizes are messed up for memcmp");
 };
 
@@ -65,7 +64,6 @@ class Machine {
   [[nodiscard]] const SafeThermoSaveData& SaveState() const;
   [[nodiscard]] SafeThermoSaveData& SaveState();
   void ReadAndApplySettings();
-  void ResetAutoTimeData();
   ProgramData& AutoTimeData();
   void ReadTemperature();
   void ReadTemperatureAndReportIfChanged();

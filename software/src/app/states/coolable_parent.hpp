@@ -15,6 +15,7 @@ struct FrictionScrollManager {
   bool AttemptScroll();
 
  private:
+  void GetAddedFriction(uint8_t& out) const;
   uint8_t scroll_attempts_{0};
   uint8_t current_friction_{0};
   ScrollManager& s_;

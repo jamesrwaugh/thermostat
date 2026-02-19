@@ -19,7 +19,7 @@ class SafeThermoSaveData {
   TemperatureUnitT& TemperatureUnit();
   HeatModeT& HeatMode();
   FanModeT& FanMode();
-  void SetSetPoint(Temperature t);
+  void SetSetPoint(const Temperature& t);
 
   const ThermoSaveData& Raw() const;
   ThermoSaveData& MutableRaw();

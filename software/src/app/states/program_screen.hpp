@@ -9,11 +9,11 @@
 #include "state.hpp"
 
 struct ScreenConfig {
-  State::Type stateId;
-  const char* title;
-  uint8_t boxesCount;
-  State::Type prevState;
-  State::Type nextState;
+  const State::Type stateId;
+  const char* const title;
+  const uint8_t boxesCount;
+  const State::Type prevState;
+  const State::Type nextState;
 };
 
 class ProgramScreenState : public State::Base {

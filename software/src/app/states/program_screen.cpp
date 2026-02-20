@@ -13,34 +13,6 @@
 
 Noritake_VFD_GU7000* ProgramScreenState::Screen_ = nullptr;
 
-namespace {
-
-static constexpr ScreenConfig kTempScreenConfig{
-    .stateId = State::Type::ProgramTemp,
-    .title = "Temp Unit",
-    .boxesCount = 1,
-    .prevState = State::Type::Idle,
-    .nextState = State::Type::ProgramDate,
-};
-
-static constexpr ScreenConfig kDateScreenConfig{
-    .stateId = State::Type::ProgramDate,
-    .title = "Date",
-    .boxesCount = 4,
-    .prevState = State::Type::ProgramTemp,
-    .nextState = State::Type::ProgramTime,
-};
-
-static constexpr ScreenConfig kTimeScreenConfig{
-    .stateId = State::Type::ProgramTime,
-    .title = "Time",
-    .boxesCount = 4,
-    .prevState = State::Type::ProgramDate,
-    .nextState = State::Type::Idle,
-};
-
-}  // namespace
-
 ProgramScreenState::ProgramScreenState(const ScreenConfig& s)
     : State::Base(s.stateId), Config_{s} {}
 
@@ -168,6 +140,14 @@ void ProgramScreenState::AddStatic(uint8_t xPosChars, char character) {
 
 // ================================================================ //
 
+static constexpr ScreenConfig kTempScreenConfig{
+    .stateId = State::Type::ProgramTemp,
+    .title = "Temp Unit",
+    .boxesCount = 1,
+    .prevState = State::Type::Idle,
+    .nextState = State::Type::ProgramDate,
+};
+
 constexpr const char* FCCharSet = "FC";
 constexpr uint8_t FCCharSetLen = 2;
 
@@ -182,6 +162,14 @@ TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
 }
 
 // ================================================================ //
+
+static constexpr ScreenConfig kDateScreenConfig{
+    .stateId = State::Type::ProgramDate,
+    .title = "Date",
+    .boxesCount = 4,
+    .prevState = State::Type::ProgramTemp,
+    .nextState = State::Type::ProgramTime,
+};
 
 constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
@@ -213,6 +201,14 @@ DateScreen::~DateScreen() {
 }
 
 // ================================================================ //
+
+static constexpr ScreenConfig kTimeScreenConfig{
+    .stateId = State::Type::ProgramTime,
+    .title = "Time",
+    .boxesCount = 4,
+    .prevState = State::Type::ProgramDate,
+    .nextState = State::Type::Idle,
+};
 
 constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;

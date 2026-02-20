@@ -13,23 +13,43 @@
 
 Noritake_VFD_GU7000* ProgramScreenState::Screen_ = nullptr;
 
-ProgramScreenState::ProgramScreenState(State::Type stateId,
-                                       const char* title,
-                                       uint8_t boxesCount,
-                                       State::Type prevState,
-                                       State::Type nextState)
-    : State::Base(stateId),
-      BoxesCount_{boxesCount},
-      Title{title},
-      PrevState_{prevState},
-      NextState_{nextState} {}
+namespace {
+
+static constexpr ScreenConfig kTempScreenConfig{
+    .stateId = State::Type::ProgramTemp,
+    .title = "Temp Unit",
+    .boxesCount = 1,
+    .prevState = State::Type::Idle,
+    .nextState = State::Type::ProgramDate,
+};
+
+static constexpr ScreenConfig kDateScreenConfig{
+    .stateId = State::Type::ProgramDate,
+    .title = "Date",
+    .boxesCount = 4,
+    .prevState = State::Type::ProgramTemp,
+    .nextState = State::Type::ProgramTime,
+};
+
+static constexpr ScreenConfig kTimeScreenConfig{
+    .stateId = State::Type::ProgramTime,
+    .title = "Time",
+    .boxesCount = 4,
+    .prevState = State::Type::ProgramDate,
+    .nextState = State::Type::Idle,
+};
+
+}  // namespace
+
+ProgramScreenState::ProgramScreenState(const ScreenConfig& s)
+    : State::Base(s.stateId), Config_{s} {}
 
 void ProgramScreenState::InitDisplay(bool startOnEndBox) {
   AutoTwi t;
   Screen_->GU7000_clearScreen();
   Screen_->GU7000_setCursor(0, 0);
-  Screen_->print(Title);
-  for (uint8_t i = 0; i < BoxesCount_; ++i) {
+  Screen_->print(Config_.title);
+  for (uint8_t i = 0; i < Config_.boxesCount; ++i) {
     GetBox(i).Draw();
   }
   for (uint8_t i = 0; i < StaticsCount_; ++i) {
@@ -37,7 +57,7 @@ void ProgramScreenState::InitDisplay(bool startOnEndBox) {
     Screen_->print(s.xPosChars * CharDotWidth, 0, s.Character);
   }
   if (startOnEndBox) {
-    CursorPosition = BoxesCount_ - 1;
+    CursorPosition = Config_.boxesCount - 1;
   }
   CurrentBox().DrawIndicator();
 }
@@ -66,13 +86,13 @@ State::Type ProgramScreenState::OnUpPressed() {
     CurrentBox().Up();
     HasEditedCurrentBox_ = true;
   } else {
-    if (CursorPosition < BoxesCount_ - 1) {
+    if (CursorPosition < Config_.boxesCount - 1) {
       CurrentBox().DrawIndicator(false);
       CursorPosition += 1;
       CurrentBox().DrawIndicator();
       HasEditedCurrentBox_ = false;
     } else {
-      return NextState_;
+      return Config_.nextState;
     }
   }
 
@@ -90,7 +110,7 @@ State::Type ProgramScreenState::OnDownPressed() {
       CurrentBox().DrawIndicator();
       HasEditedCurrentBox_ = false;
     } else {
-      return PrevState_;
+      return Config_.prevState;
     }
   }
 
@@ -152,12 +172,7 @@ constexpr const char* FCCharSet = "FC";
 constexpr uint8_t FCCharSetLen = 2;
 
 TempScreen::TempScreen(ThermoSaveData& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTemp,
-                         "Temp Unit",
-                         1,
-                         State::Type::Idle,
-                         State::Type::ProgramDate),
-      S_{s} {
+    : ProgramScreenState(kTempScreenConfig), S_{s} {
   // Temp Unit C or F
   ::new (GetBoxP(0))
       CharSetScreenBox(15, &s.temp_display_unit, FCCharSet, FCCharSetLen, 1);
@@ -172,12 +187,7 @@ constexpr const char* DaysOfWeek = "SuMoTuWdThFrSa";
 constexpr uint8_t DaysOfWeekSetLen = 14;
 
 DateScreen::DateScreen(ds1307_time_s& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramDate,
-                         "Date",
-                         4,
-                         State::Type::ProgramTemp,
-                         State::Type::ProgramTime),
-      time_{s} {
+    : ProgramScreenState(kDateScreenConfig), time_{s} {
   // Copy
   year_ = s.year - 2000;
 
@@ -208,12 +218,7 @@ constexpr const char* AmPm = "AMPM";
 constexpr uint8_t AmPmLen = 4;
 
 TimeScreen::TimeScreen(ds1307_time_s& s, bool startOnEndBox)
-    : ProgramScreenState(State::Type::ProgramTime,
-                         "Time",
-                         4,
-                         State::Type::ProgramDate,
-                         State::Type::Idle),
-      time_{s} {
+    : ProgramScreenState(kTimeScreenConfig), time_{s} {
   // Copy
   am_pm_ = s.am_pm == ds1307_am_pm_t::DS1307_AM ? 0 : 1;
 

@@ -19,7 +19,7 @@ enum class Type : uint8_t {
   ProgramAutoTimeStart,
   ProgramAutoTimeEnd,
   ProgramAutoTimeTemps,
-  NO_CHANGE = 0xFF,
+  NO_CHANGE,
 };
 
 struct Base {

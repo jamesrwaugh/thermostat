@@ -171,12 +171,14 @@ class Temperature {
     return *this;
   }
 
-  WholeType GetUnitWhole(TemperatureUnitT unit) const {
+  __attribute__((noinline)) WholeType
+  GetUnitWhole(TemperatureUnitT unit) const {
     return unit == TemperatureUnitT::Celsius ? GetCelciusWhole()
                                              : GetFahrenheitWhole();
   }
 
-  WholeType GetRoundedUnitWhole(TemperatureUnitT unit) const {
+  __attribute__((noinline)) WholeType
+  GetRoundedUnitWhole(TemperatureUnitT unit) const {
     auto mibi = (unit == TemperatureUnitT::Celsius) ? mibi_celcius_
                                                     : MibiCToF(mibi_celcius_);
     return GetRoundedMibi(mibi) / MibiFactor;

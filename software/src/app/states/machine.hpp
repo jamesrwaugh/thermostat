@@ -33,14 +33,7 @@ struct ProgramData {
 
 class RenderContext {
  public:
-  RenderContext()
-      : renderer_(DriverGetScreenHandle(), images_),
-        temperature_manager_(images_.temperature_hundreds_or_minus_,
-                             images_.temperature_tens_,
-                             images_.temperature_ones_),
-        humidity_manager_(dummy_humidity_hundreds_,
-                          images_.humidity_tens_,
-                          images_.humidity_ones_) {}
+  RenderContext();
 
   Renderer renderer_;
   ScrollManager temperature_manager_;
@@ -83,6 +76,8 @@ class Machine {
 
  private:
   void SwitchState(State::Type new_state, Event::Type lastEvent);
+  void HandleProgrammingTransition(State::Type prevState,
+                                   State::Type new_state);
   void InitialRender();
   void SetupProgramming();
   void SaveProgrammingSettings();

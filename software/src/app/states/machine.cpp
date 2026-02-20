@@ -69,9 +69,6 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   const auto prevTemp = PreviousTemp.GetUnitWhole(unit);
   const auto nowTemp = CurrentTemp.GetUnitWhole(unit);
 
-  const auto prevHumid = PreviousHumidity.ToWholePercent();
-  const auto nowHumid = CurrentHumid.ToWholePercent();
-
   if (nowTemp != prevTemp) {
     rctx_.temperature_manager_.Calculate(PreviousTemp.GetRoundedUnitWhole(unit),
                                          CurrentTemp.GetRoundedUnitWhole(unit));
@@ -79,10 +76,12 @@ void Machine::ReadTemperatureAndReportIfChanged() {
     PreviousTemp = CurrentTemp;
   }
 
+  const auto prevHumid = PreviousHumidity.ToWholePercent();
+  const auto nowHumid = CurrentHumid.ToWholePercent();
+
   if (nowHumid != prevHumid) {
     WriteHaHumidityStateTopicResponse();
-    rctx_.humidity_manager_.Calculate(PreviousHumidity.ToWholePercent(),
-                                      CurrentHumid.ToWholePercent());
+    rctx_.humidity_manager_.Calculate(prevHumid, nowHumid);
     PreviousHumidity = CurrentHumid;
   }
 }
@@ -159,30 +158,12 @@ State::Type Machine::get_state_id() const {
   return CurrentState.get_reference<State::Base>().StateId;
 }
 
-bool IsProgrammingState(State::Type s) {
-  return s == State::Type::ProgramTemp || s == State::Type::ProgramDate ||
-         s == State::Type::ProgramTime;
-}
-
 void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
   State::Base* address = CurrentState.get_address<State::Base>();
 
-  const auto prevState = address->StateId;
-
-  const bool enteringProgramming =
-      !IsProgrammingState(prevState) && IsProgrammingState(new_state);
-
-  const bool exitingProgramming =
-      IsProgrammingState(prevState) && !IsProgrammingState(new_state);
-
-  if (enteringProgramming) {
-    SetupProgramming();
-  } else if (exitingProgramming) {
-    SaveProgrammingSettings();
-    InitialRender();
-  }
-
   const bool lastEventWasDown = lastEvent == Event::Type::DownButtonPressed;
+
+  HandleProgrammingTransition(address->StateId, new_state);
 
   address->~Base();
 
@@ -215,6 +196,27 @@ void Machine::SwitchState(State::Type new_state, Event::Type lastEvent) {
     case State::Type::ProgramAutoTimeEnd:
     case State::Type::ProgramAutoTimeTemps:
       break;
+  }
+}
+
+bool IsProgrammingState(State::Type s) {
+  return s == State::Type::ProgramTemp || s == State::Type::ProgramDate ||
+         s == State::Type::ProgramTime;
+}
+
+void Machine::HandleProgrammingTransition(State::Type prevState,
+                                          State::Type new_state) {
+  const bool wasProgramming = IsProgrammingState(prevState);
+  const bool isNewProgramming = IsProgrammingState(new_state);
+
+  const bool enteringProgramming = !wasProgramming && isNewProgramming;
+  const bool exitingProgramming = wasProgramming && !isNewProgramming;
+
+  if (enteringProgramming) {
+    SetupProgramming();
+  } else if (exitingProgramming) {
+    SaveProgrammingSettings();
+    InitialRender();
   }
 }
 
@@ -333,6 +335,17 @@ void Machine::WriteHaSerialResponse(HaOutTopicKey topic,
   b[0] = checksum(b + 1, sizeof(b) - 1);
   DriverWriteSerialPortRaw(b, sizeof(b));
 }
+
+// ===================================================================== //
+
+RenderContext::RenderContext()
+    : renderer_(DriverGetScreenHandle(), images_),
+      temperature_manager_(images_.temperature_hundreds_or_minus_,
+                           images_.temperature_tens_,
+                           images_.temperature_ones_),
+      humidity_manager_(dummy_humidity_hundreds_,
+                        images_.humidity_tens_,
+                        images_.humidity_ones_) {}
 
 // ===================================================================== //
 

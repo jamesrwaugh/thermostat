@@ -8,10 +8,17 @@
 #include "program_types.hpp"
 #include "state.hpp"
 
+struct ScreenConfig {
+  State::Type stateId;
+  const char* title;
+  uint8_t boxesCount;
+  State::Type prevState;
+  State::Type nextState;
+};
+
 class ProgramScreenState : public State::Base {
  public:
-  ProgramScreenState(State::Type stateId, const char* title, uint8_t boxesCount,
-                     State::Type prevState, State::Type nextState);
+  ProgramScreenState(const ScreenConfig& s);
 
   void InitDisplay(bool startOnEndBox);
   State::Type handle_event(const Event::Base& event) override;
@@ -25,7 +32,6 @@ class ProgramScreenState : public State::Base {
 
  protected:
   ScreenBoxStorage Boxes_[5];
-  uint8_t BoxesCount_{0};
   StaticScreenBoxStorage Statics_[5];
   uint8_t StaticsCount_{0};
 
@@ -39,13 +45,11 @@ class ProgramScreenState : public State::Base {
   void AddStatic(uint8_t xPosChars, char Character);
 
  private:
-  const char* const Title;
   bool ShowIndicator_{false};
   uint8_t CursorPosition{0};
   bool Locked_{false};
   bool HasEditedCurrentBox_{false};
-  const State::Type PrevState_;
-  const State::Type NextState_;
+  const ScreenConfig Config_;
 };
 
 // ================================================================ //

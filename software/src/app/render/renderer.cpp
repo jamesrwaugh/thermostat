@@ -86,24 +86,25 @@ void Renderer::DrawHeatingStatus(HeatModeT heatMode, bool active) {
   const uint8_t onPositionX = imagePosition - (CharacterWidth1x * 2) - 2;
   const uint8_t onPositionY = 9;
 
+  Image1xId img;
+
   if (active) {
-    const Image1xId startIndex =
+    const Image1xId startImg =
         heatMode == HeatModeT::Heating ? Image1xId::Fire0 : Image1xId::Cold0;
-    screen_.print(onPositionX, onPositionY, "ON");
     status_image_idx_ = (status_image_idx_ + 1) % 9;
-    Draw1xImage(imagePosition, true,
-                static_cast<Image1xId>(startIndex + status_image_idx_));
+    img = static_cast<Image1xId>(startImg + status_image_idx_);
   } else {
-    auto img = Image1xId::Idle0;
     if (heatMode == HeatModeT::Heating) {
       img = Image1xId::Fire3;
     } else if (heatMode == HeatModeT::Cooling) {
       img = Image1xId::Cold0;
+    } else {
+      img = Image1xId::Idle0;
     }
-
-    Draw1xImage(imagePosition, true, img);
-    screen_.print(onPositionX, onPositionY, "  ");
   }
+
+  screen_.print(onPositionX, onPositionY, active ? "ON" : "  ");
+  Draw1xImage(imagePosition, true, img);
 }
 
 void Renderer::DrawPositiveTwoDigitNumber(uint8_t xPos,

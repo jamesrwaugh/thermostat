@@ -532,6 +532,9 @@
       "GND": [
         "MegaPower"
       ],
+      "Net-(BT1-+)": [
+        "Power"
+      ],
       "Net-(D5-A)": [
         "MegaPower"
       ],

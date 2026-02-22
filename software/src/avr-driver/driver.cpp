@@ -271,13 +271,15 @@ bool AvrDrivers::LoadData(ThermoSaveData& data) const {
          data.magic == SAVEDATA_MAGIC;
 }
 
-bool AvrDrivers::WriteFlash(uint16_t address, const uint8_t* data,
+bool AvrDrivers::WriteFlash(uint16_t address,
+                            const uint8_t* data,
                             uint8_t length) const {
   uint8_t err = ram_.write(address, data, static_cast<uint16_t>(length));
   return err == 0;
 }
 
-bool AvrDrivers::ReadFlash(uint16_t address, uint8_t* buffer,
+bool AvrDrivers::ReadFlash(uint16_t address,
+                           uint8_t* buffer,
                            uint8_t maxLength) const {
   ram_.read(address, buffer, maxLength);
   return true;

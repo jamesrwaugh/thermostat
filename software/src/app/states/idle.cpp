@@ -5,5 +5,9 @@
 #include "machine.hpp"
 
 Idle::Idle(Machine& machine) : CoolableParent(machine, State::Type::Idle) {
-  machine.WriteHaActionStateTopicResponse(HaActionKey::Idle);
+  if (machine_.SaveState().FanMode() == FanModeT::Auto) {
+    machine_.WriteHaActionStateTopicResponse(HaActionKey::Idle);
+  } else {
+    machine_.WriteHaActionStateTopicResponse(HaActionKey::Fan);
+  }
 }

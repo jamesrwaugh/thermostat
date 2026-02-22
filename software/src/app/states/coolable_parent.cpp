@@ -53,6 +53,8 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
         machine_.WriteHaActionStateTopicResponse(HaActionKey::Idle);
       }
 
+      machine_.WriteHaFanModeTopicResponse();
+
       return State::Type::NO_CHANGE;
     }
     case Event::Type::HeatButtonPushed: {
@@ -137,9 +139,6 @@ void CoolableParent::ExitHeatingOrCooling() {
 
   if (machine_.SaveState().FanMode() == FanModeT::Auto) {
     DriverRelayOff(Relay::Fan);
-    machine_.WriteHaActionStateTopicResponse(HaActionKey::Idle);
-  } else {
-    machine_.WriteHaActionStateTopicResponse(HaActionKey::Fan);
   }
 }
 

@@ -72,7 +72,7 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   if (nowTemp != prevTemp) {
     rctx_.temperature_manager_.Calculate(PreviousTemp.GetRoundedUnitWhole(unit),
                                          CurrentTemp.GetRoundedUnitWhole(unit));
-    WriteHaTempStateTopicResponse();
+    WriteHaCurrentTopicResponse();
     PreviousTemp = CurrentTemp;
   }
 
@@ -80,7 +80,7 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   const auto nowHumid = CurrentHumid.ToWholePercent();
 
   if (nowHumid != prevHumid) {
-    WriteHaHumidityStateTopicResponse();
+    WriteHaCurrentHumidityResponse();
     rctx_.humidity_manager_.Calculate(prevHumid, nowHumid);
     PreviousHumidity = CurrentHumid;
   }
@@ -142,8 +142,6 @@ void Machine::receive(const HaCommand& c) {
       ApplySaveState();
       break;
     case HaInTopicKey::PowerCommandTopic:
-      break;
-    case HaInTopicKey::PresetModeCommandTopic:
       break;
     case HaInTopicKey::TempCommandTopic:
       SaveData.SetSetPoint(Temperature::FromCelcius(c.payload_byte_one));
@@ -293,13 +291,14 @@ void Machine::ApplySaveState() {
   }
 }
 
-void Machine::WriteHaTempStateTopicResponse() const {
-  WriteHaSerialResponse(HaOutTopicKey::TempStateTopic,
-                        CurrentTemp.GetUnitWhole(TemperatureUnitT::Celsius), 0);
+void Machine::WriteHaCurrentTopicResponse() const {
+  WriteHaSerialResponse(
+      HaOutTopicKey::CurrentTempTopic,
+      CurrentTemp.GetRoundedUnitWhole(TemperatureUnitT::Celsius), 0);
 }
 
-void Machine::WriteHaHumidityStateTopicResponse() const {
-  WriteHaSerialResponse(HaOutTopicKey::HumidityStateTopic,
+void Machine::WriteHaCurrentHumidityResponse() const {
+  WriteHaSerialResponse(HaOutTopicKey::CurrentHumidityTopic,
                         CurrentHumid.ToWholePercent(), 0);
 }
 

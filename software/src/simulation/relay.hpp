@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-enum class Relay : uint8_t {
+enum class RelayType : uint8_t {
   Fan = 0,
   Compressor = 1,
   Heat = 2,

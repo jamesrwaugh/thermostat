@@ -64,8 +64,8 @@ class Machine {
   const Humidity& CurrentHumidity() const;
 
   // Home Assist integration
-  void WriteHaTempStateTopicResponse() const;
-  void WriteHaHumidityStateTopicResponse() const;
+  void WriteHaCurrentTopicResponse() const;
+  void WriteHaCurrentHumidityResponse() const;
   void WriteHaActionStateTopicResponse(HaActionKey key) const;
   void WriteHaModeStateTopicResponse() const;
   void WriteHaFanModeTopicResponse() const;

@@ -25,6 +25,6 @@ class SimSHT4x final : public SimAvrI2CComponent {
   std::array<uint8_t, 6> reading_buffer_;
   uint8_t current_i2c_byte_{0};
   double celcius_{23.0};
-  double percent_humidity_{98};
+  double percent_humidity_{10};
   std::chrono::steady_clock::time_point last_temp_update_;
 };

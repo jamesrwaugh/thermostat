@@ -22,7 +22,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
  public:
   SimAvrThermostat(std::string_view filename, bool gdb, TaskReceiver& receiver);
 
-  using RelayCb = std::function<void(Relay r, bool value)>;
+  using RelayCb = std::function<void(RelayType r, bool value)>;
 
   void PushUpButton();
   void PushDownButton();
@@ -40,7 +40,7 @@ class SimAvrThermostat : public FtxUiSimulatedAvr {
   virtual void OnUartByteReceived(int uartNumber, uint8_t byte) override;
 
  private:
-  void OnRelayChange(Relay r, bool value);
+  void OnRelayChange(RelayType r, bool value);
 
   TaskSender S_;
   std::unique_ptr<SimFtdiGu7000> Screen;

@@ -93,6 +93,7 @@ class Machine {
   MqttState MqttData;
 
   Temperature CurrentTemp;
+  Temperature LastSentTemp;
   Temperature PreviousTemp;
   Humidity CurrentHumid;
   Humidity PreviousHumidity;

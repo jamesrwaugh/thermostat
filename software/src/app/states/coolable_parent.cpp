@@ -173,17 +173,6 @@ void CoolableParent::ExitHeatingOrCooling() {
       .SetFromTemperature(setPoint)
       .ChangeByMibiCelcius(Temperature::MibiThreeEighthsDegrees, false);
 
-  // if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
-  //   volatile int16_t x = setPoint.GetMibiCelcius();
-  //   uint8_t b[1] = {static_cast<uint8_t>(x & 0xFF)};
-  //   DriverWriteSerialPortRaw(b, 1);
-  // }
-
-  // if (temp <= lowerLimit && heatMode == HeatModeT::Cooling) {
-  //   uint8_t b[2] = {22, 99};
-  //   DriverWriteSerialPortRaw(b, 2);
-  // }
-
   if (temp >= upperLimit && heatMode == HeatModeT::Heating) {
     return State::Type::Idle;
   } else if (temp <= lowerLimit && heatMode == HeatModeT::Heating) {

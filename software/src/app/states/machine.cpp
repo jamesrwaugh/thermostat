@@ -66,12 +66,11 @@ void Machine::ReadTemperatureAndReportIfChanged() {
   ReadTemperature();
 
   const auto unit = SaveData.TemperatureUnit();
-  const auto prevTemp = PreviousTemp.GetUnitWhole(unit);
-  const auto nowTemp = CurrentTemp.GetUnitWhole(unit);
+  const auto prevTemp = PreviousTemp.GetRoundedUnitWhole(unit);
+  const auto nowTemp = CurrentTemp.GetRoundedUnitWhole(unit);
 
   if (nowTemp != prevTemp) {
-    rctx_.temperature_manager_.Calculate(PreviousTemp.GetRoundedUnitWhole(unit),
-                                         CurrentTemp.GetRoundedUnitWhole(unit));
+    rctx_.temperature_manager_.Calculate(prevTemp, nowTemp);
     WriteHaCurrentTopicResponse();
     PreviousTemp = CurrentTemp;
   }

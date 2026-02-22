@@ -32,20 +32,19 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
   auto topLabel = Renderer([] { return text("Buttons") | bold; });
   auto fan_label = Renderer([] { return text("Fan Mode:") | bold; });
   auto heat_label = Renderer([] { return text("Heat Mode:") | bold; });
-  auto separator0 = Renderer([] { return separator(); });
-  auto separator1 = Renderer([] { return separator(); });
+  auto separator_ = Renderer([] { return separator(); });
   auto separator2 = Renderer([] { return separator(); });
 
   auto left_panel = Container::Vertical({
                         topLabel,
-                        separator0,
+                        separator2,
                         up,
                         down,
                         select,
-                        separator1,
+                        separator_,
                         fan_label,
                         fan_button,
-                        separator2,
+                        separator_,
                         heat_label,
                         heat_button,
                     }) |
@@ -112,7 +111,11 @@ Ui::Ui(SimAvrThermostat& thermostat, LockedDequeue& logs)
       }) |
       size(ftxui::WIDTH, EQUAL, 32);
 
-  auto logs_panel = LogsRenderer(logs);
+  auto logs_panel = Container::Vertical({
+      Renderer([] { return text("Home Assist UART0") | bold; }),
+      separator_,
+      LogsRenderer(logs),
+  });
 
   // I2C Listener Panel
   //   auto i2c_listener_panel = I2CListenerRenderer(Thermostat_.GetAvr()) |

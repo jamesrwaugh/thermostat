@@ -197,7 +197,7 @@ bool CoolableParent::IsIdle() const {
 
 // ===================================================================== //
 
-uint16_t max(uint16_t a, uint16_t b) {
+uint8_t max(uint8_t a, uint8_t b) {
   return a > b ? a : b;
 }
 
@@ -224,13 +224,13 @@ bool FrictionScrollManager::AttemptScroll() {
   return false;
 }
 
-void FrictionScrollManager::GetAddedFriction(uint8_t& out) const {
+void FrictionScrollManager::GetAddedFriction(uint8_t& out_friction) const {
   const auto left = s_.ScrollLinesLeft();
   if (left < (Image2xHeight / 2)) {
-    out = 10;
+    out_friction = 10;
   } else if (left < (3 * Image2xHeight)) {
-    out = 1;
+    out_friction = 1;
   } else {
-    out = 0;
+    out_friction = 0;
   }
 }

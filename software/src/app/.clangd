@@ -11,5 +11,6 @@ CompileFlags:
       -DINT8_MAXU=255,
       -Wno-unknown-warning-option
     ]
+  CompilationDatabase: ../../builddir
   Remove: [-mcall-prologues]
   BuiltinHeaders: QueryDriver

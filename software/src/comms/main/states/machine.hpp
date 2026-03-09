@@ -2,7 +2,7 @@
 
 class Machine {
  public:
-  void SwitchState(State s) {}
+  void SwitchState(State::Type s) {}
 
  private:
 };

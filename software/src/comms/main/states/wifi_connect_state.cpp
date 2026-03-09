@@ -4,22 +4,14 @@
 #include <string.h>
 
 #include "machine.hpp"
+#include "state.hpp"
 
 WifiConnectState::WifiConnectState(Machine& m,
                                    const char* ssid,
                                    const char* password)
-    : machine_{m} {
-  auto handler_lambda = [](void* event_handler_arg, esp_event_base_t event_base,
-                           int32_t event_id, void* event_data) {
-    WifiConnectState* that = (WifiConnectState*)event_handler_arg;
-    that->ConnectEventHandler(event_base, event_id, event_data);
-  };
-
-  ESP_ERROR_CHECK(esp_event_handler_instance_register(
-      *WifiEventType, WifiEventId, handler_lambda, this, &instance_any_id));
-
-  ESP_ERROR_CHECK(esp_event_handler_instance_register(
-      *IpEventType, IpEventId, handler_lambda, this, &instance_got_ip));
+    : State::Base(State::Type::WifiConnect), machine_{m} {
+  RegisterEspEvent(WIFI_EVENT, ESP_EVENT_ANY_ID);
+  RegisterEspEvent(IP_EVENT, IP_EVENT_STA_GOT_IP);
 
   memset(&wifi_config, 0, sizeof(wifi_config));
 
@@ -41,16 +33,9 @@ WifiConnectState::WifiConnectState(Machine& m,
   ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-WifiConnectState::~WifiConnectState() {
-  esp_event_handler_instance_unregister(*WifiEventType, WifiEventId,
-                                        instance_any_id);
-  esp_event_handler_instance_unregister(*IpEventType, IpEventId,
-                                        instance_got_ip);
-}
-
-void WifiConnectState::ConnectEventHandler(esp_event_base_t event_base,
-                                           int32_t event_id,
-                                           void* event_data) {
+void WifiConnectState::HandleEspEvent(esp_event_base_t event_base,
+                                      int32_t event_id,
+                                      void* event_data) {
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
     esp_wifi_connect();
   } else if (event_base == WIFI_EVENT &&
@@ -60,13 +45,13 @@ void WifiConnectState::ConnectEventHandler(esp_event_base_t event_base,
       retry_num_++;
       ESP_LOGI(wifi_tag_, "retry to connect to the AP");
     } else {
-      machine_.SwitchState(State::WifiConnectFailed);
+      machine_.SwitchState(State::Type::WifiConnectFailed);
     }
     ESP_LOGI(wifi_tag_, "connect to the AP fail");
   } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
     ESP_LOGI(wifi_tag_, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
     retry_num_ = 0;
-    machine_.SwitchState(State::WifiConnectted);
+    machine_.SwitchState(State::Type::WifiConnectted);
   }
 }

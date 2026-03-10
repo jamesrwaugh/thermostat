@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <HomeAssistantSerial.hpp>
+
 namespace State {
 
 enum class Type : uint8_t {
@@ -27,6 +29,19 @@ class Base {
   virtual void HandleEspEvent(esp_event_base_t event_base,
                               int32_t event_id,
                               void* event_data);
+  virtual void HandleSerialEvent(const SerialCommand& c);
+
+  void WriteHaSerialResponse(HaInTopicKey topic,
+                             uint8_t byte_one,
+                             uint8_t byte_two) const;
+
+  void WriteSerialResponse(SerialInTopicKey topic,
+                           uint8_t byte_one,
+                           uint8_t byte_two) const;
+
+  void WriteSerialResponse(SerialInTopicKey topic,
+                           const uint8_t* data,
+                           uint8_t dataLen) const;
 
  private:
   struct EventRegisterInfo {

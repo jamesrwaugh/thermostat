@@ -11,7 +11,6 @@ enum HaTopicKey : uint8 {
     POWER_COMMAND_TOPIC = 7
     TEMP_COMMAND_TOPIC = 10
     TEMP_STATE_TOPIC = 11
-    MQTT_PING_TOPIC = 12
 
     // Not supported from MQTT Climate:
     // PRESET_MODE_COMMAND_TOPIC = 8
@@ -41,4 +40,21 @@ message HaCommand {
     HaTopicKey topic_key = 2
     uint8 payload_byte_one = 3
     uint8 payload_byte_two = 4
+}
+
+const SERIAL_PAYLOAD_LEN = 32
+const SERIAL_PAYLOAD_LEN_W_NULL = 33
+
+enum SerialTopicKey : uint8 {
+    MQTT_PING_TOPIC = 0
+    WIFI_SCAN_DONE = 1
+    WIFI_REQUEST_SSID_NAME = 2
+    WIFI_SEND_SSID_NAME = 3
+}
+
+message SerialCommand {
+    uint8 checksum = 1
+    SerialTopicKey topic_key = 2
+    uint8 payload_len = 3
+    byte[SERIAL_PAYLOAD_LEN_W_NULL] payload = 4
 }

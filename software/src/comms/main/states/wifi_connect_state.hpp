@@ -5,7 +5,7 @@
 
 class Machine;
 
-class WifiConnectState : public State::Base {
+class WifiConnectState final : public State::Base {
  public:
   WifiConnectState(Machine& m, const char* ssid, const char* password);
 

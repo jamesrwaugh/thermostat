@@ -9,7 +9,6 @@ enum class HaInTopicKey : uint8_t {
   ModeCommandTopic = MODE_COMMAND_TOPIC,
   PowerCommandTopic = POWER_COMMAND_TOPIC,
   TempCommandTopic = TEMP_COMMAND_TOPIC,
-  MqttPing = MQTT_PING_TOPIC
 };
 
 enum class HaOutTopicKey : uint8_t {
@@ -27,4 +26,14 @@ enum class HaActionKey : uint8_t {
   Cooling = HA_ACTION_COOLING,
   Idle = HA_ACTION_IDLE,
   Fan = HA_ACTION_FAN,
+};
+
+enum class SerialInTopicKey : uint8_t {
+  MqttPing = MQTT_PING_TOPIC,
+  WifiScanDone = WIFI_SCAN_DONE,
+  WifiSentSsidName = WIFI_SEND_SSID_NAME,
+};
+
+enum class SerialOutTopicKey : uint8_t {
+  WifiRequestSsid = WIFI_REQUEST_SSID_NAME,
 };

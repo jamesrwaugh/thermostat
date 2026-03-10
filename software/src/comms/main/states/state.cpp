@@ -1,5 +1,11 @@
 #include "state.hpp"
 
+#include <stdint.h>
+#include <string.h>
+
+#include <HomeAssistantSerial.hpp>
+#include <checksum.hpp>
+
 namespace State {
 
 Base::Base(Type s) : state_id_{s} {}
@@ -33,6 +39,44 @@ void Base::RegisterEspEvent(esp_event_base_t event_base, int32_t event_id) {
 
 void Base::HandleEspEvent(esp_event_base_t event_base,
                           int32_t event_id,
-                          void* event_data) {};
+                          void* event_data) {}
+
+void Base::HandleSerialEvent(const HaCommand& c) {}
+
+void Base::WriteHaSerialResponse(HaInTopicKey topic,
+                                 uint8_t byte_one,
+                                 uint8_t byte_two) const {
+  HaCommand c;
+  c.checksum = 0;
+  c.topic_key = static_cast<uint8_t>(topic);
+  c.payload_byte_one = byte_one;
+  c.payload_byte_two = byte_two;
+  uint8_t b[BYTES_LENGTH_HA_COMMAND];  // 0 0 0 0
+  memset(b, 0, sizeof(b));
+  EncodeHaCommand(&c, b);
+  b[0] = checksum(b + 1, sizeof(b) - 1);
+  // DriverWriteSerialPortRaw(b, sizeof(b));
+}
+
+void Base::WriteSerialResponse(SerialInTopicKey topic,
+                               uint8_t byte_one,
+                               uint8_t byte_two) const {
+  uint8_t buffer[2] = {byte_one, byte_two};
+  WriteSerialResponse(topic, buffer, 2);
+}
+
+void Base::WriteSerialResponse(SerialInTopicKey topic,
+                               const uint8_t* data,
+                               uint8_t dataLen) const {
+  SerialCommand c;
+  c.checksum = 0;
+  c.topic_key = static_cast<uint8_t>(topic);
+  c.payload_len = dataLen;
+  memcpy(c.payload, data, dataLen);
+  uint8_t b[BYTES_LENGTH_SERIAL_COMMAND];  // 0 0 0 0
+  memset(b, 0, sizeof(b));
+  EncodeSerialCommand(&c, b);
+  b[0] = checksum(b + 1, sizeof(b) - 1);
+}
 
 }  // namespace State

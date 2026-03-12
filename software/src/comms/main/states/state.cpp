@@ -41,7 +41,7 @@ void Base::HandleEspEvent(esp_event_base_t event_base,
                           int32_t event_id,
                           void* event_data) {}
 
-void Base::HandleSerialEvent(const HaCommand& c) {}
+void Base::HandleSerialEvent(const SerialCommand& c) {}
 
 void Base::WriteHaSerialResponse(HaInTopicKey topic,
                                  uint8_t byte_one,

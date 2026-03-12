@@ -26,9 +26,11 @@ class Base {
 
  protected:
   void RegisterEspEvent(esp_event_base_t event_base, int32_t event_id);
+
   virtual void HandleEspEvent(esp_event_base_t event_base,
                               int32_t event_id,
                               void* event_data);
+
   virtual void HandleSerialEvent(const SerialCommand& c);
 
   void WriteHaSerialResponse(HaInTopicKey topic,

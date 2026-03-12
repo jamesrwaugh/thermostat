@@ -9,13 +9,13 @@ meson setup --wipe --cross-file avr-cross-compile.txt builddir -Dbuild.pkg_confi
 ## Read Fuses
 
 ```
-avrdude -p atmega644p -c usbtiny -U hfuse:r:-:h -U lfuse:r:-:h
+avrdude -p atmega168p -c usbtiny -U hfuse:r:-:h -U lfuse:r:-:h
 ```
 
 ## Go
 
 ```
-avrdude -p atmega644p -c usbtiny -U flash:w:./builddir/src/app-screen/thermo-screen-app
+avrdude -p atmega168p -c usbtiny -U flash:w:./builddir/src/app-screen/thermo-screen-app
 ```
 
 # Simulator Bugs Hall of Fame

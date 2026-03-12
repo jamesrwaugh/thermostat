@@ -12,9 +12,7 @@
 #include <esp_wifi.h>
 #include <nvs_flash.h>
 
-#include "config.hpp"
 #include "states/machine.hpp"
-#include "states/wifi_connect_state.hpp"
 
 void wifi_init_sta(void) {
   ESP_ERROR_CHECK(esp_netif_init());
@@ -56,7 +54,7 @@ extern "C" void app_main(void) {
   wifi_init_sta();
 
   Machine m;
-  WifiConnectState ss(m, EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+  m.SwitchState(State::Type::WifiScan);
 
   while (true) {
     vTaskDelay(1000 /

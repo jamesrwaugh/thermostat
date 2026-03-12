@@ -1,3 +1,8 @@
-CompileFlags:
+CompileFlags:  
+  Add:
+    [
+      -D__STDC_LIMIT_MACROS,
+      -DETL_NO_STL
+    ]
   CompilationDatabase: build
   Remove: [-m*, -f*]

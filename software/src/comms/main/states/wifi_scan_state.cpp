@@ -4,15 +4,13 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <HomeAssistantSerial.hpp>
-
 WifiScanState::WifiScanState(Machine& m) : State::Base(State::Type::WifiScan) {
   RegisterEspEvent(WIFI_EVENT, WIFI_EVENT_SCAN_DONE);
   ESP_ERROR_CHECK(esp_wifi_scan_start(nullptr, false));
 }
 
 WifiScanState::~WifiScanState() {
-  esp_wifi_clear_ap_list();
+  ESP_ERROR_CHECK(esp_wifi_clear_ap_list());
 }
 
 void WifiScanState::HandleEspEvent(esp_event_base_t event_base,

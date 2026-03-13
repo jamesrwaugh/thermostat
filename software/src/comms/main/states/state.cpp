@@ -1,5 +1,7 @@
 #include "state.hpp"
 
+#include <driver/uart.h>
+#include <hal/uart_types.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -55,7 +57,7 @@ void Base::WriteHaSerialResponse(HaInTopicKey topic,
   memset(b, 0, sizeof(b));
   EncodeHaCommand(&c, b);
   b[0] = checksum(b + 1, sizeof(b) - 1);
-  // DriverWriteSerialPortRaw(b, sizeof(b));
+  uart_write_bytes(UART_NUM_0, b, sizeof(b));
 }
 
 void Base::WriteSerialResponse(SerialInTopicKey topic,
@@ -77,6 +79,7 @@ void Base::WriteSerialResponse(SerialInTopicKey topic,
   memset(b, 0, sizeof(b));
   EncodeSerialCommand(&c, b);
   b[0] = checksum(b + 1, sizeof(b) - 1);
+  uart_write_bytes(UART_NUM_0, b, sizeof(b));
 }
 
 }  // namespace State

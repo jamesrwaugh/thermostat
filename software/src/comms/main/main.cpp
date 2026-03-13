@@ -14,6 +14,8 @@
 #include <hal/uart_types.h>
 #include <nvs_flash.h>
 
+#include <cstdint>
+
 #include "states/machine.hpp"
 
 void wifi_init(void) {
@@ -67,9 +69,20 @@ void serial_init(QueueHandle_t& uart_queue) {
   ESP_ERROR_CHECK(uart_set_pin(uart_num, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE,
                                UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
-  const int uart_buffer_size = (128);
+  const int uart_buffer_size = 256;
   ESP_ERROR_CHECK(uart_driver_install(uart_num, uart_buffer_size,
                                       uart_buffer_size, 10, &uart_queue, 0));
+
+  uint8_t data[uart_buffer_size];
+
+  while (1) {
+    // Read data from the UART
+    int len = uart_read_bytes(UART_NUM_1, data, uart_buffer_size,
+                              20 / portTICK_PERIOD_MS);
+
+    // Write data back to the UART
+    uart_write_bytes(UART_NUM_1, (const char*)data, len);
+  }
 }
 
 extern "C" void app_main(void) {

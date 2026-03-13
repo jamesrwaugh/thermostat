@@ -6,6 +6,6 @@ idf_component_register(
     "states/state.cpp"
     "states/machine.cpp"
     "states/idle.cpp"
-    PRIV_REQUIRES esp_wifi nvs_flash protos etl
+    PRIV_REQUIRES esp_wifi esp_driver_uart nvs_flash protos etl
     INCLUDE_DIRS ""
 )

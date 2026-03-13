@@ -50,6 +50,9 @@ enum SerialTopicKey : uint8 {
     WIFI_SCAN_DONE = 1
     WIFI_REQUEST_SSID_NAME = 2
     WIFI_SEND_SSID_NAME = 3
+    WIFI_SELECT_SSID_NUMBER = 4
+    WIFI_SEND_PASSWORD_PARTS = 5
+    WIFI_FINISH_PASSWORD = 6
 }
 
 message SerialCommand {

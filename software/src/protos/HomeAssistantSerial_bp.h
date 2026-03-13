@@ -57,6 +57,9 @@ typedef uint8_t SerialTopicKey; // 8bit
 #define WIFI_SCAN_DONE 1
 #define WIFI_REQUEST_SSID_NAME 2
 #define WIFI_SEND_SSID_NAME 3
+#define WIFI_SELECT_SSID_NUMBER 4
+#define WIFI_SEND_PASSWORD_PARTS 5
+#define WIFI_FINISH_PASSWORD 6
 
 // Number of bytes to encode struct SerialCommand
 #define BYTES_LENGTH_SERIAL_COMMAND 36

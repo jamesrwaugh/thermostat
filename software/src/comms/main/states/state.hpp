@@ -10,7 +10,8 @@
 namespace State {
 
 enum class Type : uint8_t {
-  WifiScan = 0,
+  Idle = 0,
+  WifiScan,
   WifiConnect,
   WifiConnectFailed,
   WifiConnectted,
@@ -21,7 +22,7 @@ enum class Type : uint8_t {
 class Base {
  public:
   Base(Type s);
-  ~Base();
+  virtual ~Base();
   State::Type StateId() const;
 
  protected:

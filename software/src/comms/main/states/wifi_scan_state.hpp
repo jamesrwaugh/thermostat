@@ -21,6 +21,8 @@ class WifiScanState final : public State::Base {
 
  private:
   static constexpr uint8_t MAX_SCAN_RESULTS = 4;
+  Machine& m_;
+  uint8_t ssid_selection_{0};
   uint16_t scan_results_count_{0};
   wifi_ap_record_t scan_results_[MAX_SCAN_RESULTS];
 };

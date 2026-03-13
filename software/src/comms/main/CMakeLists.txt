@@ -5,6 +5,7 @@ idf_component_register(
     "states/wifi_scan_state.cpp" 
     "states/state.cpp"
     "states/machine.cpp"
+    "states/idle.cpp"
     PRIV_REQUIRES esp_wifi nvs_flash protos etl
     INCLUDE_DIRS ""
 )

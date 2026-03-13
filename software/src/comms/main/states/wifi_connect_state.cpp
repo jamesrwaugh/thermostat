@@ -6,9 +6,7 @@
 #include "machine.hpp"
 #include "state.hpp"
 
-WifiConnectState::WifiConnectState(Machine& m,
-                                   const char* ssid,
-                                   const char* password)
+WifiConnectState::WifiConnectState(Machine& m)
     : State::Base(State::Type::WifiConnect), machine_{m} {
   RegisterEspEvent(WIFI_EVENT, ESP_EVENT_ANY_ID);
   RegisterEspEvent(IP_EVENT, IP_EVENT_STA_GOT_IP);
@@ -23,9 +21,11 @@ WifiConnectState::WifiConnectState(Machine& m,
    * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
    */
 
-  strncpy((char*)wifi_config.sta.ssid, ssid, sizeof(wifi_config.sta.ssid));
-  strncpy((char*)wifi_config.sta.password, password,
-          sizeof(wifi_config.sta.password));
+  const auto& config = m.GetWifiConfig();
+
+  config.ssid.copy((char*)wifi_config.sta.ssid, config.ssid.size());
+  config.ssid.copy((char*)wifi_config.sta.password, config.password.size());
+
   wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));

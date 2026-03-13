@@ -36,4 +36,7 @@ enum class SerialInTopicKey : uint8_t {
 
 enum class SerialOutTopicKey : uint8_t {
   WifiRequestSsid = WIFI_REQUEST_SSID_NAME,
+  WifiSelectSsidNumber = WIFI_SELECT_SSID_NUMBER,
+  WifiSendPasswordParts = WIFI_SEND_PASSWORD_PARTS,
+  WifiFinishPassword = WIFI_FINISH_PASSWORD
 };

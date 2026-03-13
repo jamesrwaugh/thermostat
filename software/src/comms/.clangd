@@ -3,6 +3,8 @@ CompileFlags:
     [
       -D__STDC_LIMIT_MACROS,
       -DETL_NO_STL
+      -DETL_DISABLE_STRING_CLEAR_AFTER_USE
+      -DETL_DISABLE_STRING_TRUNCATION_CHECKS
     ]
   CompilationDatabase: build
   Remove: [-m*, -f*]

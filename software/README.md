@@ -1,5 +1,10 @@
 # Software Start
 
+- Install ETL
+- Install FTXUI
+- Install FTDI libraries, libft222, libftd2xx
+- (Arch) Install lib32-glibc
+
 ```
 meson setup --wipe --cross-file avr-cross-compile.txt builddir -Dbuild.pkg_config_path=/usr/local/lib/pkgconfig
 ```

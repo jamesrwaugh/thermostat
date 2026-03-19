@@ -15,4 +15,4 @@ James' interest in making a thermostat
 - ISP header for firmware flashing and updates
 - Objectively gorgeous vacuum-florescent display
 - Runs on a familiar, lovable AVR
-- All this and more, in a small & tiny 10Kb firmware piece
+- All this and more, in a small & tiny 16Kb firmware binary

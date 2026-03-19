@@ -145,9 +145,6 @@ void Machine::receive(const HaCommand& c) {
     case HaInTopicKey::TempCommandTopic:
       SaveData.SetSetPoint(Temperature::FromCelcius(c.payload_byte_one));
       break;
-    case HaInTopicKey::MqttPing:
-      MqttData.ResetTimeout();
-      break;
   }
 }
 

@@ -489,8 +489,8 @@
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.5,
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
+        "via_diameter": 0.75,
+        "via_drill": 0.5,
         "wire_width": 6
       },
       {
@@ -516,8 +516,8 @@
         "priority": 1,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.6,
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
+        "via_diameter": 0.75,
+        "via_drill": 0.5,
         "wire_width": 6
       }
     ],
@@ -534,6 +534,9 @@
       ],
       "Net-(BT1-+)": [
         "Power"
+      ],
+      "Net-(D1-A)": [
+        "MegaPower"
       ],
       "Net-(D5-A)": [
         "MegaPower"
@@ -560,6 +563,9 @@
         "MegaPower"
       ],
       "Net-(J4-Pin_5)": [
+        "MegaPower"
+      ],
+      "unconnected-(J1-Pad1)": [
         "MegaPower"
       ]
     },

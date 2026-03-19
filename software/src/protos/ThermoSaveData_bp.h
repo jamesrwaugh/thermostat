@@ -42,6 +42,11 @@ typedef uint8_t HeatMode; // 2bit
 #define HEATMODE_COOL 1
 #define HEATMODE_NONE 2
 
+typedef uint8_t ReverseValveMode; // 1bit
+
+#define REVERSEVALVE_ON_HEAT 0
+#define REVERSEVALVE_ON_COOL 1
+
 // Number of bytes to encode struct MqttConfig
 #define BYTES_LENGTH_MQTT_CONFIG 98
 
@@ -61,7 +66,8 @@ struct ThermoSaveData {
     FanMode fan_mode; // 1bit
     HeatMode heat_mode; // 2bit
     uint8_t have_mqtt; // 8bit
-    uint8_t pad; // 4bit
+    ReverseValveMode reverse_valve_mode; // 1bit
+    uint8_t pad; // 3bit
     struct MqttConfig mqtt; // 784bit
 };
 

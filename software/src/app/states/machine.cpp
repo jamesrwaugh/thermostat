@@ -35,20 +35,12 @@ void Machine::start() {
   InitialRender();
 }
 
-void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
-  ButtonData = raw;
-}
-
 [[nodiscard]] const SafeThermoSaveData& Machine::SaveState() const {
   return SaveData;
 }
 
 [[nodiscard]] SafeThermoSaveData& Machine::SaveState() {
   return SaveData;
-}
-
-[[nodiscard]] ThermoButtonState& Machine::ButtonState() {
-  return ButtonData;
 }
 
 ProgramData& Machine::AutoTimeData() {
@@ -97,13 +89,10 @@ void Machine::ReadAndApplySettings() {
   const bool loadSuccess = DriverLoadData(SaveData.MutableRaw());
 
   // If something went wrong, save data is now corrupted. Reset it.
+  // TODO: Setup screen if nothing is there
   if (!loadSuccess) {
     ::new (&SaveData) SafeThermoSaveData();
   }
-
-  ThermoButtonState buttons;
-  DriverGetButtonStateNow(&buttons);
-  SetThermoButtonState(buttons);
 
   ApplySaveState();
 }

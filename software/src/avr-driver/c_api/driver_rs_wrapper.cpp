@@ -16,10 +16,6 @@ void DriverInit() {
   gDriver->Setup();
 }
 
-void DriverGetButtonStateNow(ThermoButtonState* data) {
-  gDriver->ReadStateNow(data);
-}
-
 void DriverWriteSerialPort(const uint8_t* bytes, uint8_t numBytes) {
   gDriver->Serial_.write(bytes, numBytes);
   gDriver->Serial_.write("\r\n");

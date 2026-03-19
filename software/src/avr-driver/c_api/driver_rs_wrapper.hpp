@@ -11,12 +11,7 @@ class Noritake_VFD_GU7000;
 
 extern "C" {
 
-struct ThermoButtonState {
-  ReverseValveModeT ReverseValveState{ReverseValveModeT::OnForCooling};
-};
-
 void DriverInit();
-void DriverGetButtonStateNow(ThermoButtonState* data);
 void DriverDisplayClearScreen();
 void DriverReadRawTemp(uint16_t& outTempTicks, uint16_t& outHumidityTicks);
 void DriverRelayOn(Relay r);

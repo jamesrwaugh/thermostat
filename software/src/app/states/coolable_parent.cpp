@@ -62,12 +62,6 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       machine_.WriteHaModeStateTopicResponse();
       return DetermineNextState();
     }
-    case Event::Type::ReverseValveModeChanged: {
-      const auto& valveEvent =
-          static_cast<const Event::ReverseValveModeChanged&>(event);
-      machine_.ButtonState().ReverseValveState = valveEvent.Mode;
-      return State::Type::Idle;
-    }
     default:
       return State::Type::NO_CHANGE;
   }
@@ -106,7 +100,7 @@ void CoolableParent::Render() {
 void CoolableParent::ActivateCoolingRelays(Relay onRelay,
                                            Relay offRelay,
                                            ReverseValveModeT onIfType) {
-  if (machine_.ButtonState().ReverseValveState == onIfType) {
+  if (machine_.SaveState().ReverseValveMode() == onIfType) {
     DriverRelayOn(Relay::ReversingValve);
   } else {
     DriverRelayOff(Relay::ReversingValve);

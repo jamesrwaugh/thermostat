@@ -15,8 +15,8 @@ enum class HeatModeT : uint8_t {
 };
 
 enum class ReverseValveModeT : uint8_t {
-  OnForHeating = 0,
-  OnForCooling = 1,
+  OnForHeating = REVERSEVALVE_ON_HEAT,
+  OnForCooling = REVERSEVALVE_ON_COOL,
 };
 
 enum class TemperatureUnitT : uint8_t {
@@ -37,6 +37,4 @@ enum class Button : uint8_t {
   Select,
   Fan,
   Heat,
-  ReverseValveOnHeat,
-  ReverseValveOnCool,
 };

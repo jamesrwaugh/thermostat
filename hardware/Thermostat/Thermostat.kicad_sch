@@ -5002,6 +5002,10 @@
 		(uuid "c1671972-50f4-49d2-86f2-48c13f393364")
 	)
 	(no_connect
+		(at 50.8 140.97)
+		(uuid "c6fdca1e-7553-40ac-a6dd-5b7d40559cb8")
+	)
+	(no_connect
 		(at 113.03 87.63)
 		(uuid "e1924159-bde4-496c-ae19-5adcb8ae1679")
 	)
@@ -5653,16 +5657,6 @@
 	)
 	(wire
 		(pts
-			(xy 62.23 140.97) (xy 62.23 146.05)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "708ca5ac-81f4-4f9b-a7c3-bc1e02d8922b")
-	)
-	(wire
-		(pts
 			(xy 137.16 39.37) (xy 137.16 40.64)
 		)
 		(stroke
@@ -5730,16 +5724,6 @@
 			(type default)
 		)
 		(uuid "785adc74-b9fe-4805-9ad6-35dca4b6f818")
-	)
-	(wire
-		(pts
-			(xy 62.23 146.05) (xy 66.04 146.05)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7c6e0fd6-025d-4586-abcd-99f77772fc43")
 	)
 	(wire
 		(pts
@@ -6370,16 +6354,6 @@
 			(type default)
 		)
 		(uuid "ce8ed0f1-d8f8-461c-bdc0-832b2d44e887")
-	)
-	(wire
-		(pts
-			(xy 50.8 140.97) (xy 62.23 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cfdf9393-b74c-4821-a608-04c9dc7f0da6")
 	)
 	(wire
 		(pts
@@ -9655,74 +9629,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 71.12 146.05 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "5d14f32a-0c76-4805-9f1c-619cd5f0a9d0")
-		(property "Reference" "SW4"
-			(at 71.12 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "DIP-1"
-			(at 71.12 140.97 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Button_Switch_SMD:SW_DIP_SPSTx01_Slide_6.7x4.1mm_W6.73mm_P2.54mm_LowProfile_JPin"
-			(at 71.12 140.97 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 71.12 140.97 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Push button switch, generic, two pins"
-			(at 71.12 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "754ddfee-88c8-43ef-b03c-d87a83105868")
-		)
-		(pin "1"
-			(uuid "b443910b-a6cc-4329-bcd9-0351ed34487f")
-		)
-		(instances
-			(project "Thermostat"
-				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
-					(reference "SW4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 207.01 123.19 0)
 		(unit 1)
@@ -12243,72 +12149,6 @@
 			(project "Thermostat"
 				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
 					(reference "#PWR01")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 76.2 146.05 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "cb6817ac-105d-47a9-818a-b2f7630bd3cd")
-		(property "Reference" "#PWR06"
-			(at 82.55 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 83.058 147.828 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" ""
-			(at 76.2 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 76.2 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 76.2 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "24f8203a-726e-4c58-8efd-264c80e60a59")
-		)
-		(instances
-			(project "Thermostat"
-				(path "/dae3c193-ffe6-4911-a810-cfe956c95f3b"
-					(reference "#PWR06")
 					(unit 1)
 				)
 			)

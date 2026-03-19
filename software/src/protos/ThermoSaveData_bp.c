@@ -26,7 +26,8 @@ int EncodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     s[5] |= (((unsigned char *)&((*m).heat_mode))[0] << 2) & 12;
     s[5] |= (((unsigned char *)&((*m).have_mqtt))[0] << 4) & 240;
     s[6] = (((unsigned char *)&((*m).have_mqtt))[0] >> 4) & 15;
-    s[6] |= (((unsigned char *)&((*m).pad))[0] << 4) & 240;
+    s[6] |= (((unsigned char *)&((*m).reverse_valve_mode))[0] << 4) & 16;
+    s[6] |= (((unsigned char *)&((*m).pad))[0] << 5) & 224;
     memcpy(&s[7], (*m).mqtt.wifi_name, 33);
     memcpy(&s[40], (*m).mqtt.wifi_password, 65);
     return 0;
@@ -43,7 +44,8 @@ int DecodeThermoSaveData(struct ThermoSaveData *m, unsigned char *s) {
     ((unsigned char *)&((*m).heat_mode))[0] = (s[5] >> 2) & 3;
     ((unsigned char *)&((*m).have_mqtt))[0] = (s[5] >> 4) & 15;
     ((unsigned char *)&((*m).have_mqtt))[0] |= (s[6] << 4) & 240;
-    ((unsigned char *)&((*m).pad))[0] = (s[6] >> 4) & 15;
+    ((unsigned char *)&((*m).reverse_valve_mode))[0] = (s[6] >> 4) & 1;
+    ((unsigned char *)&((*m).pad))[0] = (s[6] >> 5) & 7;
     memcpy((*m).mqtt.wifi_name, &s[7], 33);
     memcpy((*m).mqtt.wifi_password, &s[40], 65);
     return 0;

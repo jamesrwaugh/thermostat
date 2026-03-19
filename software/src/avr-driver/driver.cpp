@@ -216,12 +216,6 @@ int8_t AvrDrivers::ReadInput() {
   return button;
 }
 
-void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
-  bool reverseHeat = (PINC & _BV(PINC2)) != 0;
-  data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
-                                        : ReverseValveModeT::OnForCooling;
-}
-
 void AvrDrivers::RelayOn(Relay r) const {
   switch (r) {
     case Relay::Fan:

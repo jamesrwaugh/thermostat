@@ -70,29 +70,30 @@ static_assert(sizeof(Humidity) <= 2,
 
 class Temperature {
  public:
-  static constexpr uint16_t MibiFactor = 512;
+  static constexpr uint16_t MibiFactor = 256;
+  static constexpr uint16_t MibiWholePartMask = 0xFF00;
   static constexpr uint16_t MibiOneHalfDegree = (MibiFactor / 2);
   static constexpr uint16_t MibiOneForthDegree = (MibiFactor / 4);
   static constexpr uint16_t MibiOneEighthDegree = (MibiFactor / 8);
   static constexpr uint16_t MibiOneSixteenthDegree = (MibiFactor / 16);
-  static constexpr uint16_t MibiOneTwentyEightDegree = (MibiFactor / 128);
+  static constexpr uint16_t MibiOneTwentyEighthDegree = (MibiFactor / 128);
   static constexpr uint16_t MibiThreeEighthsDegrees = 3 * MibiOneEighthDegree;
   static constexpr uint16_t MibiCToFFactor =
       (MibiOneHalfDegree + MibiOneSixteenthDegree -
-       MibiOneTwentyEightDegree);  //  0.5546875 - Approximates 5/9  static
+       MibiOneTwentyEighthDegree);  //  0.5546875 - Approximates 5/9
   static constexpr int8_t MinCelciusValue = -63;
-  static constexpr int8_t MaxCelciusValue = 63;
+  static constexpr int8_t MaxCelciusValue = 127;
   static constexpr int8_t MinFahrenheitValue = -81;
-  static constexpr int16_t MaxFahrenheitValue = 145;
+  static constexpr int16_t MaxFahrenheitValue = 260;
   static constexpr int16_t MaxMibiValue = (MaxCelciusValue * MibiFactor);
   static constexpr int16_t MinMibiValue = (MinCelciusValue * MibiFactor);
 
   static_assert(
-      MinMibiValue - INT16_MIN >= 512,
+      MinMibiValue - INT16_MIN >= MibiFactor,
       "Leave some space around MinMibiValue to account for any off-by-ones");
 
   static_assert(
-      INT16_MAX - MaxMibiValue >= 511,
+      INT16_MAX - MaxMibiValue >= (MibiFactor - 1),
       "Leave some space around MaxMibiValue to account for any off-by-ones");
 
   static_assert(MaxMibiValue > 0, "Error setting max value");
@@ -101,6 +102,7 @@ class Temperature {
 
   typedef int16_t WholeType;
   typedef int16_t MibiType;
+  typedef int32_t MibiInConvertType;
 
   [[nodiscard]] static Temperature FromCelcius(WholeType celcius) {
     Temperature t;
@@ -141,17 +143,22 @@ class Temperature {
   Temperature& SetFromFahrenheit(WholeType fahrenheit) {
     ::Clamp(fahrenheit, MinFahrenheitValue, MaxFahrenheitValue);
     mibi_celcius_ = WholeFtoMibiC(fahrenheit);
+    if (fahrenheit > 0) {
+      mibi_celcius_ += MibiOneTwentyEighthDegree;
+    } else {
+      mibi_celcius_ -= MibiOneTwentyEighthDegree;
+    }
     return *this;
   }
 
   Temperature& SetFromSht4xSensor(uint16_t device_ticks) {
-    int32_t value = ((11200 * (int32_t)device_ticks) >> 13) - 23040;
-    ::Clamp(value, MinCelciusValue, MaxMibiValue);
+    int32_t value = ((((int32_t)device_ticks) << 13) / 11983) - 11520;
+    ::Clamp(value, MinMibiValue, MaxMibiValue);
     mibi_celcius_ = value;
     return *this;
   }
 
-  Temperature& ChangeByMibiCelcius(MibiType amount, bool increment) {
+  Temperature& ChangeByMibiCelcius(MibiInConvertType amount, bool increment) {
     if (increment) {
       MibiType sum = 0;
       if (__builtin_add_overflow(mibi_celcius_, amount, &sum)) {
@@ -184,26 +191,17 @@ class Temperature {
     return GetRoundedMibi(mibi) / MibiFactor;
   }
 
-  static MibiType GetRoundedMibi(const MibiType& mibi) {
-    MibiType sum = 0;
-    if (__builtin_add_overflow(mibi, mibi & MibiOneHalfDegree ? MibiFactor : 0,
-                               &sum)) {
-      return MaxMibiValue;
-    } else {
-      return sum;
-    }
-  }
-
   WholeType GetCelciusWhole() const {
     return mibi_celcius_ / MibiFactor;
   }
 
   WholeType GetFahrenheitWhole() const {
-    return MibiCToF(mibi_celcius_) / MibiFactor;
+    auto x = MibiCToF(mibi_celcius_);
+    return x / MibiFactor;
   }
 
-  static MibiType MibiCToF(const MibiType& celcius) {
-    int32_t mibi_fahrenheit = celcius;
+  static MibiInConvertType MibiCToF(const MibiType& celcius) {
+    MibiInConvertType mibi_fahrenheit = celcius;
     mibi_fahrenheit *= 9;
     mibi_fahrenheit /= 5;
     mibi_fahrenheit += (32u * MibiFactor);
@@ -224,8 +222,14 @@ class Temperature {
   }
 
   Temperature& ChangeBy1Unit(TemperatureUnitT unit, bool increment) {
-    unit == TemperatureUnitT::Celsius ? ChangeBy1C(increment)
-                                      : ChangeBy1F(increment);
+    return ChangeByUnit(unit, 1, increment);
+  }
+
+  Temperature& ChangeByUnit(TemperatureUnitT unit,
+                            uint8_t amount,
+                            bool increment) {
+    unit == TemperatureUnitT::Celsius ? ChangeByDegC(amount, increment)
+                                      : ChangeByDegF(amount, increment);
     return *this;
   }
 
@@ -240,21 +244,42 @@ class Temperature {
   }
 
  private:
+  static MibiInConvertType GetRoundedMibi(const MibiInConvertType& mibi) {
+    if (mibi >= 0) {
+      MibiInConvertType sum = 0;
+      if (__builtin_add_overflow(
+              mibi, mibi & MibiOneHalfDegree ? MibiFactor : 0, &sum)) {
+        return MaxMibiValue;
+      } else {
+        return sum;
+      }
+    } else {
+      MibiInConvertType whole =
+          mibi &
+          ((static_cast<MibiInConvertType>(0xFFFF) << 16) | MibiWholePartMask);
+      if (mibi & MibiOneHalfDegree) {
+        return whole + MibiFactor;
+      } else {
+        return whole;  // Chop off decimal
+      }
+    }
+  }
+
   void Clamp() {
     ::Clamp(mibi_celcius_, MinMibiValue, MaxMibiValue);
   }
 
-  void ChangeBy1C(bool increment) {
-    ChangeByMibiCelcius(MibiFactor, increment);
+  void ChangeByDegC(uint8_t amount, bool increment) {
+    ChangeByMibiCelcius(amount * MibiFactor, increment);
     Clamp();
   }
 
-  void ChangeBy1F(bool increment) {
-    ChangeByMibiCelcius(MibiCToFFactor, increment);
+  void ChangeByDegF(uint8_t amount, bool increment) {
+    ChangeByMibiCelcius(amount * MibiCToFFactor, increment);
     Clamp();
   }
 
-  // Degrees Celsius * 512.
+  // Degrees Celsius * 256.
   // This allows us to store fractional temperatures as well
   // as only require bitshifts to encode and decode whole values,
   // to save on flash size, instead of divide by 1000 for example.

@@ -11224,7 +11224,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical_SMD"
+		(property "Footprint" "ThermostatFootprints:PinHeader_2x03_P2.54mm_Vertical_SMD_2"
 			(at 71.12 83.82 90)
 			(hide yes)
 			(show_name no)

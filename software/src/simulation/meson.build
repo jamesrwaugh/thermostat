@@ -60,6 +60,7 @@ executable(
     ftxui_toolbox_dep,
     lodepng_dep,
     protos_dep_native,
+    ft4222_dep
   ],
   cpp_args: [
     '-std=c++20',

@@ -1,10 +1,13 @@
 #include "safe_thermo_safe.hpp"
 
+#include <assert.h>
+#include <etl/alignment.h>
 #include <string.h>
 
 #include <casts.hpp>
 
 #include "temperature.hpp"
+#include "thermo_data_types.hpp"
 
 // ===================================================================== //
 
@@ -17,6 +20,7 @@ SafeThermoSaveData::SafeThermoSaveData() {
   Data.temp_display_unit = TEMP_UNIT_CELSIUS;
   Data.fan_mode = FANMODE_AUTO;
   Data.heat_mode = HEATMODE_NONE;
+  Data.reverse_valve_mode = REVERSEVALVE_ON_COOL;
 
   // Empty MQTT data
   Data.have_mqtt = false;
@@ -50,6 +54,14 @@ HeatModeT& SafeThermoSaveData::HeatMode() {
 
 FanModeT& SafeThermoSaveData::FanMode() {
   return reinterpret_cast<FanModeT&>(Data.fan_mode);
+}
+
+void SafeThermoSaveData::SetReverseValveMode(ReverseValveModeT mode) {
+  Data.reverse_valve_mode = u8(mode);
+}
+
+ReverseValveModeT SafeThermoSaveData::ReverseValveMode() const {
+  return static_cast<ReverseValveModeT>(Data.reverse_valve_mode);
 }
 
 void SafeThermoSaveData::SetSetPoint(const Temperature& t) {

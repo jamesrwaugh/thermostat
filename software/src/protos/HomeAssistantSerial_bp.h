@@ -28,7 +28,6 @@ typedef uint8_t HaTopicKey; // 8bit
 #define POWER_COMMAND_TOPIC 7
 #define TEMP_COMMAND_TOPIC 10
 #define TEMP_STATE_TOPIC 11
-#define MQTT_PING_TOPIC 12
 
 typedef uint8_t HaActionTopicKey; // 3bit
 
@@ -48,10 +47,39 @@ struct HaCommand {
     uint8_t payload_byte_two; // 8bit
 };
 
+#define SERIAL_PAYLOAD_LEN 32
+
+#define SERIAL_PAYLOAD_LEN_W_NULL 33
+
+typedef uint8_t SerialTopicKey; // 8bit
+
+#define MQTT_PING_TOPIC 0
+#define WIFI_SCAN_DONE 1
+#define WIFI_REQUEST_SSID_NAME 2
+#define WIFI_SEND_SSID_NAME 3
+#define WIFI_SELECT_SSID_NUMBER 4
+#define WIFI_SEND_PASSWORD_PARTS 5
+#define WIFI_FINISH_PASSWORD 6
+
+// Number of bytes to encode struct SerialCommand
+#define BYTES_LENGTH_SERIAL_COMMAND 36
+
+struct SerialCommand {
+    uint8_t checksum; // 8bit
+    SerialTopicKey topic_key; // 8bit
+    uint8_t payload_len; // 8bit
+    unsigned char payload[33]; // 264bit
+};
+
 // Encode struct HaCommand to given buffer s.
 int EncodeHaCommand(struct HaCommand *m, unsigned char *s);
 // Decode struct HaCommand from given buffer s.
 int DecodeHaCommand(struct HaCommand *m, unsigned char *s);
+
+// Encode struct SerialCommand to given buffer s.
+int EncodeSerialCommand(struct SerialCommand *m, unsigned char *s);
+// Decode struct SerialCommand from given buffer s.
+int DecodeSerialCommand(struct SerialCommand *m, unsigned char *s);
 
 #if defined(__cplusplus)
 }

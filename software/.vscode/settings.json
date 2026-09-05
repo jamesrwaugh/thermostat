@@ -1,11 +1,6 @@
 {
   "mesonbuild.configureOnOpen": false,
-  "clangd.arguments": [
-    "--query-driver=/usr/local/avr/bin/avr-g++",
-    "--compile-commands-dir=builddir",
-    "--header-insertion=never"
-  ],
-  "clangd.path": "clangd_snapshot/bin/clangd",
   "testMate.cpp.test.executables": "builddir/**/test-*",
+  "clangd.path": "clangd_snapshot/bin/clangd",
   "cSpell.words": ["Coolable", "mibicelcius", "vect"]
 }

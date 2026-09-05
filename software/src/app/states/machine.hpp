@@ -11,7 +11,6 @@
 #include "event.hpp"
 #include "heating.hpp"
 #include "idle.hpp"
-#include "mqtt/mqtt_state.hpp"
 #include "program_screen.hpp"
 #include "render/renderer.hpp"
 #include "render/scroll_manager.hpp"
@@ -53,7 +52,6 @@ class Machine {
   [[nodiscard]] State::Type get_state_id() const;
 
   // Themostat operations
-  [[nodiscard]] ThermoButtonState& ButtonState();
   [[nodiscard]] const SafeThermoSaveData& SaveState() const;
   [[nodiscard]] SafeThermoSaveData& SaveState();
   void ReadAndApplySettings();
@@ -82,15 +80,12 @@ class Machine {
   void SetupProgramming();
   void SaveProgrammingSettings();
   void ApplySaveState();
-  void SetThermoButtonState(const ThermoButtonState& raw);
   void WriteHaSerialResponse(HaOutTopicKey topic,
                              uint8_t byte_one,
                              uint8_t byte_two) const;
 
   SafeThermoSaveData SaveData;
-  ThermoButtonState ButtonData;
   ProgramData ProgData;
-  MqttState MqttData;
 
   Temperature CurrentTemp;
   Temperature LastSentTemp;

@@ -7,6 +7,12 @@ subprojects/.wraplock
 clangd_snapshot/
 builddir/
 
+# Comms
+src/comms/build/
+src/comms/.cache/
+src/comms/sdkconfig.old
+
+
 *lck
 *.zip
 

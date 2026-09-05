@@ -19,6 +19,10 @@ class SafeThermoSaveData {
   TemperatureUnitT& TemperatureUnit();
   HeatModeT& HeatMode();
   FanModeT& FanMode();
+
+  void SetReverseValveMode(ReverseValveModeT mode);
+  ReverseValveModeT ReverseValveMode() const;
+
   void SetSetPoint(const Temperature& t);
 
   const ThermoSaveData& Raw() const;

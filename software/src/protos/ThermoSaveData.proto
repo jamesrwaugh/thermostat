@@ -23,6 +23,11 @@ enum HeatMode : uint2 {
     HEATMODE_NONE = 2
 }
 
+enum ReverseValveMode : uint1 {
+    REVERSEVALVE_ON_HEAT = 0
+    REVERSEVALVE_ON_COOL = 1
+}
+
 message MqttConfig {
     byte[WIFI_NAME_MAX_LEN_W_NULL] wifi_name = 1
     byte[WIFI_PASSWORD_MAX_LEN_W_NULL] wifi_password = 2
@@ -36,6 +41,7 @@ message ThermoSaveData {
     FanMode fan_mode = 5
     HeatMode heat_mode = 6
     uint8 have_mqtt = 7
-    uint4 pad = 8
-    MqttConfig mqtt = 9
+    ReverseValveMode reverse_valve_mode = 8
+    uint3 pad = 9
+    MqttConfig mqtt = 10
 }

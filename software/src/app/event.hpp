@@ -13,7 +13,6 @@ enum class Type : uint8_t {
   TenMillisecondsPassed,
   HalfSecondPassed,
   SecondPassed,
-  ReverseValveModeChanged,
   MqttConnected,
   MqttDisconnected,
 };
@@ -53,12 +52,6 @@ struct HalfSecondPassed : Base {
 
 struct SecondPassed : Base {
   SecondPassed() : Base(Event::Type::SecondPassed) {}
-};
-
-struct ReverseValveModeChanged : Base {
-  ReverseValveModeChanged(ReverseValveModeT mode)
-      : Base(Event::Type::ReverseValveModeChanged), Mode(mode) {}
-  const ReverseValveModeT Mode;
 };
 
 struct MqttConnected : Base {

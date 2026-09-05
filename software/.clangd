@@ -9,7 +9,9 @@ CompileFlags:
       -D__STDC_LIMIT_MACROS,
       -DETL_NO_STL,
       -DINT8_MAXU=255,
+      -DETL_COMPILER_GENERIC
       -Wno-unknown-warning-option
     ]
+  CompilationDatabase: builddir
   Remove: [-mcall-prologues]
   BuiltinHeaders: QueryDriver

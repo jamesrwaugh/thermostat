@@ -31,14 +31,6 @@ void OnButtonPressed(Button b) {
     case Button::Heat:
       machine.receive(Event::HeatButtonPressed());
       break;
-    case Button::ReverseValveOnHeat:
-      machine.receive(
-          Event::ReverseValveModeChanged(ReverseValveModeT::OnForHeating));
-      break;
-    case Button::ReverseValveOnCool:
-      machine.receive(
-          Event::ReverseValveModeChanged(ReverseValveModeT::OnForCooling));
-      break;
   }
 }
 

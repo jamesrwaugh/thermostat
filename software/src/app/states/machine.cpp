@@ -35,20 +35,12 @@ void Machine::start() {
   InitialRender();
 }
 
-void Machine::SetThermoButtonState(const ThermoButtonState& raw) {
-  ButtonData = raw;
-}
-
 [[nodiscard]] const SafeThermoSaveData& Machine::SaveState() const {
   return SaveData;
 }
 
 [[nodiscard]] SafeThermoSaveData& Machine::SaveState() {
   return SaveData;
-}
-
-[[nodiscard]] ThermoButtonState& Machine::ButtonState() {
-  return ButtonData;
 }
 
 ProgramData& Machine::AutoTimeData() {
@@ -97,30 +89,15 @@ void Machine::ReadAndApplySettings() {
   const bool loadSuccess = DriverLoadData(SaveData.MutableRaw());
 
   // If something went wrong, save data is now corrupted. Reset it.
+  // TODO: Setup screen if nothing is there
   if (!loadSuccess) {
     ::new (&SaveData) SafeThermoSaveData();
   }
 
-  ThermoButtonState buttons;
-  DriverGetButtonStateNow(&buttons);
-  SetThermoButtonState(buttons);
-
   ApplySaveState();
 }
 
-// Setting: MQTT Config
-
 void Machine::receive(const Event::Base& event) {
-  switch (event.id_) {
-    case Event::Type::SecondPassed:
-      MqttData.IncreaseTimeout();
-      if (MqttData.IsMqttConnected()) {
-      }
-      break;
-    default:
-      break;
-  }
-
   auto newState = CurrentState.get_reference<State::Base>().handle_event(event);
 
   if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {
@@ -144,9 +121,6 @@ void Machine::receive(const HaCommand& c) {
       break;
     case HaInTopicKey::TempCommandTopic:
       SaveData.SetSetPoint(Temperature::FromCelcius(c.payload_byte_one));
-      break;
-    case HaInTopicKey::MqttPing:
-      MqttData.ResetTimeout();
       break;
   }
 }

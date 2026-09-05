@@ -62,12 +62,6 @@ State::Type CoolableParent::handle_event(const Event::Base& event) {
       machine_.WriteHaModeStateTopicResponse();
       return DetermineNextState();
     }
-    case Event::Type::ReverseValveModeChanged: {
-      const auto& valveEvent =
-          static_cast<const Event::ReverseValveModeChanged&>(event);
-      machine_.ButtonState().ReverseValveState = valveEvent.Mode;
-      return State::Type::Idle;
-    }
     default:
       return State::Type::NO_CHANGE;
   }
@@ -106,7 +100,7 @@ void CoolableParent::Render() {
 void CoolableParent::ActivateCoolingRelays(Relay onRelay,
                                            Relay offRelay,
                                            ReverseValveModeT onIfType) {
-  if (machine_.ButtonState().ReverseValveState == onIfType) {
+  if (machine_.SaveState().ReverseValveMode() == onIfType) {
     DriverRelayOn(Relay::ReversingValve);
   } else {
     DriverRelayOff(Relay::ReversingValve);
@@ -197,7 +191,7 @@ bool CoolableParent::IsIdle() const {
 
 // ===================================================================== //
 
-uint16_t max(uint16_t a, uint16_t b) {
+uint8_t max(uint8_t a, uint8_t b) {
   return a > b ? a : b;
 }
 
@@ -224,13 +218,13 @@ bool FrictionScrollManager::AttemptScroll() {
   return false;
 }
 
-void FrictionScrollManager::GetAddedFriction(uint8_t& out) const {
+void FrictionScrollManager::GetAddedFriction(uint8_t& out_friction) const {
   const auto left = s_.ScrollLinesLeft();
   if (left < (Image2xHeight / 2)) {
-    out = 10;
+    out_friction = 10;
   } else if (left < (3 * Image2xHeight)) {
-    out = 1;
+    out_friction = 1;
   } else {
-    out = 0;
+    out_friction = 0;
   }
 }

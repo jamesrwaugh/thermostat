@@ -7,12 +7,6 @@ src = files(
   'scroller.cpp',
 )
 
-ft4222_dep = dependency(
-  'ft4222',
-  native: true,
-  required: false,
-)
-
 if ft4222_dep.found()
   executable(
     'ftdi-i2c',

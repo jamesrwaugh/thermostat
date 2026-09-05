@@ -59,10 +59,13 @@ void AvrDrivers::SetupPins() {
   DDRB &= ~_BV(DDB1);
   PORTB &= ~_BV(PORTB1);
 
+  // Screen Reset Output
+  DDRB |= _BV(DDB0);
+  PORTB &= ~_BV(PORTB0);
+
   // Relay putput pins, outputs
   DDRB |= _BV(DDB2);
   PORTB &= ~_BV(PORTB2);
-
   DDRC |= _BV(DDC0) | _BV(DDC1) | _BV(DDC2);
   PORTC &= ~_BV(PORTC0);
   PORTC &= ~_BV(PORTC1);
@@ -78,11 +81,21 @@ void writePort(const uint8_t data) {
   tw_write(data);
 }
 
-void hardReset() {}
+void hardReset() {
+  PORTB &= ~_BV(PORTB0);
+  _delay_ms(110);
+  PORTB |= _BV(PORTB0);
+}
 
 void AvrDrivers::SetupScreen() {
-  AutoTwi t;
-  Screen.GU7000_init();
+  {
+    AutoTwi t;
+    Screen.GU7000_init();
+  }
+  {
+    AutoTwi t;
+    Screen.GU7000_reset();
+  }
 }
 
 void AvrDrivers::SetupInputTimer() {
@@ -201,12 +214,6 @@ int8_t AvrDrivers::ReadInput() {
   }
 
   return button;
-}
-
-void AvrDrivers::ReadStateNow(ThermoButtonState* data) const {
-  bool reverseHeat = (PINC & _BV(PINC2)) != 0;
-  data->ReverseValveState = reverseHeat ? ReverseValveModeT::OnForHeating
-                                        : ReverseValveModeT::OnForCooling;
 }
 
 void AvrDrivers::RelayOn(Relay r) const {

@@ -10,7 +10,6 @@
 #include "c_api/thermo_data_types.hpp"
 
 struct AvrDriverCallbacks;
-struct ThermoButtonState;
 
 struct AvrDrivers {
   AvrDrivers();
@@ -23,7 +22,6 @@ struct AvrDrivers {
 
   void Setup();
   int8_t ReadInput();
-  void ReadStateNow(ThermoButtonState* out) const;
   void RelayOn(Relay r) const;
   void RelayOff(Relay r) const;
   bool SaveData(const ThermoSaveData& data) const;

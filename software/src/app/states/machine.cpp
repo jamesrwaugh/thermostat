@@ -97,19 +97,7 @@ void Machine::ReadAndApplySettings() {
   ApplySaveState();
 }
 
-// Setting: MQTT Config
-
 void Machine::receive(const Event::Base& event) {
-  switch (event.id_) {
-    case Event::Type::SecondPassed:
-      MqttData.IncreaseTimeout();
-      if (MqttData.IsMqttConnected()) {
-      }
-      break;
-    default:
-      break;
-  }
-
   auto newState = CurrentState.get_reference<State::Base>().handle_event(event);
 
   if (newState != get_state_id() && newState != State::Type::NO_CHANGE) {

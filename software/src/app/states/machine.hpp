@@ -11,7 +11,6 @@
 #include "event.hpp"
 #include "heating.hpp"
 #include "idle.hpp"
-#include "mqtt/mqtt_state.hpp"
 #include "program_screen.hpp"
 #include "render/renderer.hpp"
 #include "render/scroll_manager.hpp"
@@ -87,7 +86,6 @@ class Machine {
 
   SafeThermoSaveData SaveData;
   ProgramData ProgData;
-  MqttState MqttData;
 
   Temperature CurrentTemp;
   Temperature LastSentTemp;

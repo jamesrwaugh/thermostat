@@ -1,8 +1,0 @@
-#ifndef __ETL_PROFILE_H__
-#define __ETL_PROFILE_H__
-
-#define ETL_NO_STL
-#define ETL_DISABLE_STRING_CLEAR_AFTER_USE
-#define ETL_DISABLE_STRING_TRUNCATION_CHECKS
-
-#endif

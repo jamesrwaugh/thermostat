@@ -16,6 +16,7 @@ add_project_arguments(
     '-mmcu=atmega168p',
     '-DF_CPU=7372800',
     '-Wimplicit-fallthrough',
+    '-D__STDC_LIMIT_MACROS', #ETL compatibility with AVR GCC 16+
   ],
   language: ['cpp', 'c'],
 )

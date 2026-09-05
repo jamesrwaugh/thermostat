@@ -50,13 +50,13 @@ int main(int argc, char** argv) {
   auto rec = ftxui::MakeReceiver<ftxui::Closure>();
 
   std::string_view firmware_path =
-    "/home/james/Desktop/Git/squaredel/thermostat/software/builddir/src/app/"
-    "thermo-app";
+      "/home/james/Desktop/Git/squaredel/thermostat/software/builddir/src/app/"
+      "thermo-app";
 
   SimAvrThermostat thermo(firmware_path, argc > 1, rec);
 
   auto ui_thread =
-    std::thread(UiThread, std::ref(thermo), std::ref(refresh_ui_continue));
+      std::thread(UiThread, std::ref(thermo), std::ref(refresh_ui_continue));
 
   thermo.BlockingLoop(refresh_ui_continue, rec);
 

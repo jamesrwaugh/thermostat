@@ -12,6 +12,6 @@ CompileFlags:
       -DETL_COMPILER_GENERIC
       -Wno-unknown-warning-option
     ]
-  CompilationDatabase: ../../builddir
+  CompilationDatabase: builddir
   Remove: [-mcall-prologues]
   BuiltinHeaders: QueryDriver
